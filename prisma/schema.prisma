@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Client {
+  id              Int      @id @default(autoincrement())
+  name            String
+  gender          String
+  birthDate       String?
+  phone           String?
+  email           String?
+  job             String?
+  startDate       String?
+  goal            String?
+
+  // 운동 경험
+  exerciseLevel   String?
+  exerciseHistory String?
+
+  // 병력/통증
+  medicalHistory  String?
+  painAreas       String?
+  medications     String?
+
+  // 생활 습관
+  mealCount       Int?
+  mealPattern     String?
+  sleepHours      Float?
+
+  // 메모
+  memo            String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sessions        Session[]
+  menstrualCycle  MenstrualCycle?
+}
+
+model Session {
+  id           Int        @id @default(autoincrement())
+  clientId     Int
+  client       Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  date         String
+  sessionType  String     @default("individual")
+  duration     Int?
+  memo         String?
+  notionPageId String?
+  notionUrl    String?
+  exercises    Exercise[]
+  createdAt    DateTime   @default(now())
+}
+
+model GroupSession {
+  id           Int             @id @default(autoincrement())
+  date         String
+  title        String?
+  memo         String?
+  participants String[]        @default([])
+  notionPageId String?
+  notionUrl    String?
+  exercises    GroupExercise[]
+  createdAt    DateTime        @default(now())
+}
+
+model Exercise {
+  id        Int     @id @default(autoincrement())
+  sessionId Int
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  name      String
+  sets      Int?
+  reps      String?
+  weight    Float?
+  unit      String  @default("kg")
+  memo      String?
+  videoUrl  String?
+  order     Int     @default(0)
+}
+
+model GroupExercise {
+  id             Int          @id @default(autoincrement())
+  groupSessionId Int
+  groupSession   GroupSession @relation(fields: [groupSessionId], references: [id], onDelete: Cascade)
+  name           String
+  sets           Int?
+  reps           String?
+  weight         Float?
+  unit           String       @default("kg")
+  memo           String?
+  videoUrl       String?
+  order          Int          @default(0)
+}
+
+model MenstrualCycle {
+  id            Int      @id @default(autoincrement())
+  clientId      Int      @unique
+  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  lastStartDate String
+  cycleLength   Int      @default(28)
+  periodLength  Int      @default(5)
+  memo          String?
+  updatedAt     DateTime @updatedAt
+}
