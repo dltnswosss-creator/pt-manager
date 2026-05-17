@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { getMenstrualPhase, PHASE_LABELS, PHASE_COLORS, EXERCISE_LEVEL_LABELS } from "@/lib/types";
 import { calcAge } from "@/lib/utils";
-import { Plus } from "lucide-react";
+import { Plus, ChevronRight } from "lucide-react";
 
 export default async function ClientsPage() {
   const clients = await prisma.client.findMany({
@@ -33,61 +33,37 @@ export default async function ClientsPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="text-left text-xs font-medium text-gray-500 px-5 py-3">이름</th>
-                <th className="text-left text-xs font-medium text-gray-500 px-4 py-3">성별 / 나이</th>
-                <th className="text-left text-xs font-medium text-gray-500 px-4 py-3">운동 경험</th>
-                <th className="text-left text-xs font-medium text-gray-500 px-4 py-3">마지막 수업</th>
-                <th className="text-left text-xs font-medium text-gray-500 px-4 py-3">생리 주기</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.map((c) => {
-                const phase = c.menstrualCycle
-                  ? getMenstrualPhase(c.menstrualCycle.lastStartDate, c.menstrualCycle.cycleLength, c.menstrualCycle.periodLength)
-                  : null;
-                const lastSession = c.sessions[0];
-                return (
-                  <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3.5">
-                      <Link href={`/clients/${c.id}`} className="flex items-center gap-3 group">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-semibold text-sm shrink-0">
-                          {c.name[0]}
-                        </div>
-                        <span className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
-                          {c.name}
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3.5 text-sm text-gray-600">
-                      {c.gender === "female" ? "여성" : "남성"}
-                      {c.birthDate && ` · ${calcAge(c.birthDate)}세`}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm text-gray-600">
-                      {c.exerciseLevel ? EXERCISE_LEVEL_LABELS[c.exerciseLevel] : "-"}
-                    </td>
-                    <td className="px-4 py-3.5 text-sm text-gray-500">
-                      {lastSession
-                        ? new Date(lastSession.date).toLocaleDateString("ko-KR", { month: "short", day: "numeric" })
-                        : "-"}
-                    </td>
-                    <td className="px-4 py-3.5">
-                      {phase ? (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PHASE_COLORS[phase]}`}>
-                          {PHASE_LABELS[phase]}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-300">-</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
+          {clients.map((c) => {
+            const phase = c.menstrualCycle
+              ? getMenstrualPhase(c.menstrualCycle.lastStartDate, c.menstrualCycle.cycleLength, c.menstrualCycle.periodLength)
+              : null;
+            const lastSession = c.sessions[0];
+            return (
+              <Link key={c.id} href={`/clients/${c.id}`} className="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
+                <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-semibold text-sm shrink-0">
+                  {c.name[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium text-gray-900 truncate">{c.name}</p>
+                    {phase && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${PHASE_COLORS[phase]}`}>
+                        {PHASE_LABELS[phase]}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {c.gender === "female" ? "여성" : "남성"}
+                    {c.birthDate && ` · ${calcAge(c.birthDate)}세`}
+                    {c.exerciseLevel && ` · ${EXERCISE_LEVEL_LABELS[c.exerciseLevel]}`}
+                    {lastSession && ` · 마지막 ${new Date(lastSession.date).toLocaleDateString("ko-KR", { month: "short", day: "numeric" })}`}
+                  </p>
+                </div>
+                <ChevronRight size={16} className="text-gray-300 shrink-0" />
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

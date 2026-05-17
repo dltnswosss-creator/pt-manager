@@ -34,36 +34,36 @@ export default function GroupSessionList({ sessions }: { sessions: GroupSession[
       {sessions.map((s) => (
         <div key={s.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
           <div
-            className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors"
+            className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
             onClick={() => setExpanded(expanded === s.id ? null : s.id)}
           >
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-sm font-medium text-gray-900">{formatDate(s.date)}</span>
-              {s.title && <span className="text-sm text-gray-500">· {s.title}</span>}
-              <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 font-medium">그룹</span>
-              {s.participants?.map((name) => (
-                <span key={name} className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 font-medium">{name}</span>
-              ))}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                <span className="text-sm font-semibold text-gray-900 shrink-0">{formatDate(s.date)}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 font-medium shrink-0">그룹</span>
+                {s.title && <span className="text-sm text-gray-500 truncate">· {s.title}</span>}
+                {s.participants?.map((name) => (
+                  <span key={name} className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 font-medium shrink-0">{name}</span>
+                ))}
+              </div>
+              {expanded === s.id ? <ChevronUp size={16} className="text-gray-400 shrink-0" /> : <ChevronDown size={16} className="text-gray-400 shrink-0" />}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between mt-2">
               <span className="text-xs text-gray-400">{s.exercises.length}개 운동</span>
-              <div onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
                 <GroupSessionExportButton session={s} />
-              </div>
-              <div onClick={(e) => e.stopPropagation()}>
                 <NotionShareButton sessionId={s.id} type="group" existingUrl={s.notionUrl} />
+                <Link
+                  href={`/group-sessions/${s.id}/edit`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="p-1.5 text-gray-300 hover:text-indigo-600 transition-colors"
+                >
+                  <Pencil size={14} />
+                </Link>
+                <button onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors">
+                  <Trash2 size={14} />
+                </button>
               </div>
-              <Link
-                href={`/group-sessions/${s.id}/edit`}
-                onClick={(e) => e.stopPropagation()}
-                className="p-1.5 text-gray-300 hover:text-indigo-600 transition-colors"
-              >
-                <Pencil size={14} />
-              </Link>
-              <button onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }} className="p-1.5 text-gray-300 hover:text-red-400 transition-colors">
-                <Trash2 size={14} />
-              </button>
-              {expanded === s.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
             </div>
           </div>
 

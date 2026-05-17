@@ -118,7 +118,7 @@ export default function ClientDetail({ client }: { client: Client }) {
 
       {/* 인적사항 탭 */}
       {tab === "인적사항" && (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="flex flex-col gap-5 lg:grid lg:grid-cols-2">
           <InfoCard title="기본 정보">
             <InfoRow label="이름" value={client.name} />
             <InfoRow label="성별" value={client.gender === "female" ? "여성" : "남성"} />
@@ -158,7 +158,7 @@ export default function ClientDetail({ client }: { client: Client }) {
           </InfoCard>
 
           {client.memo && (
-            <div className="col-span-2">
+            <div className="lg:col-span-2">
               <InfoCard title="메모">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{client.memo}</p>
               </InfoCard>
@@ -189,41 +189,41 @@ export default function ClientDetail({ client }: { client: Client }) {
               {client.sessions.map((s) => (
                 <div key={s.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
                   <div
-                    className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => setExpandedSession(expandedSession === s.id ? null : s.id)}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="text-sm font-medium text-gray-900">{formatDate(s.date)}</div>
-                      <span className={cn(
-                        "text-xs px-2 py-0.5 rounded-full",
-                        s.sessionType === "individual" ? "bg-indigo-50 text-indigo-600" : "bg-violet-50 text-violet-600"
-                      )}>
-                        {s.sessionType === "individual" ? "1:1" : "그룹"}
-                      </span>
-                      {s.duration && <span className="text-xs text-gray-400">{s.duration}분</span>}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-sm font-semibold text-gray-900 shrink-0">{formatDate(s.date)}</span>
+                        <span className={cn(
+                          "text-xs px-2 py-0.5 rounded-full shrink-0",
+                          s.sessionType === "individual" ? "bg-indigo-50 text-indigo-600" : "bg-violet-50 text-violet-600"
+                        )}>
+                          {s.sessionType === "individual" ? "1:1" : "그룹"}
+                        </span>
+                        {s.duration && <span className="text-xs text-gray-400 shrink-0">{s.duration}분</span>}
+                      </div>
+                      {expandedSession === s.id ? <ChevronUp size={16} className="text-gray-400 shrink-0" /> : <ChevronDown size={16} className="text-gray-400 shrink-0" />}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between mt-2">
                       <span className="text-xs text-gray-400">{s.exercises.length}개 운동</span>
-                      <div onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
                         <SessionExportButton session={s} clientName={client.name} />
-                      </div>
-                      <div onClick={(e) => e.stopPropagation()}>
                         <NotionShareButton sessionId={s.id} type="session" existingUrl={s.notionUrl} />
+                        <Link
+                          href={`/sessions/${s.id}/edit`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-1.5 hover:text-indigo-600 text-gray-300 transition-colors"
+                        >
+                          <Pencil size={14} />
+                        </Link>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }}
+                          className="p-1.5 hover:text-red-500 text-gray-300 transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
-                      <Link
-                        href={`/sessions/${s.id}/edit`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-1.5 hover:text-indigo-600 text-gray-300 transition-colors"
-                      >
-                        <Pencil size={14} />
-                      </Link>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); deleteSession(s.id); }}
-                        className="p-1.5 hover:text-red-500 text-gray-300 transition-colors"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                      {expandedSession === s.id ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
                     </div>
                   </div>
 
@@ -274,9 +274,9 @@ export default function ClientDetail({ client }: { client: Client }) {
 
       {/* 생리주기 탭 */}
       {tab === "생리주기" && (
-        <div className="grid grid-cols-2 gap-5">
+        <div className="flex flex-col gap-5 lg:grid lg:grid-cols-2">
           {phase && (
-            <div className={cn("col-span-2 rounded-xl p-5 space-y-3", {
+            <div className={cn("lg:col-span-2 rounded-xl p-5 space-y-3", {
               "bg-rose-50": phase === "menstrual",
               "bg-emerald-50": phase === "follicular",
               "bg-violet-50": phase === "ovulation",
@@ -297,9 +297,9 @@ export default function ClientDetail({ client }: { client: Client }) {
             </div>
           )}
 
-          <div className="col-span-2 bg-white rounded-xl border border-gray-100 p-5 space-y-4">
+          <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 p-5 space-y-4">
             <h3 className="text-sm font-semibold text-gray-700">생리주기 설정</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-gray-500">마지막 생리 시작일</label>
                 <input
