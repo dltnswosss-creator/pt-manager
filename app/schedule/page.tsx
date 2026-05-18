@@ -58,6 +58,7 @@ export default function SchedulePage() {
         onWeekChange={(d) => setWeekStart(d)}
         onComplete={handleComplete}
         onCancel={handleCancel}
+        onScheduleUpdate={() => fetchSchedules(weekStart)}
       />
     </div>
   );
