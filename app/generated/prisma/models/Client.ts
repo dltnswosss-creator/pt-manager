@@ -346,6 +346,7 @@ export type ClientWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Client"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   menstrualCycle?: Prisma.XOR<Prisma.MenstrualCycleNullableScalarRelationFilter, Prisma.MenstrualCycleWhereInput> | null
+  schedules?: Prisma.ScheduleListRelationFilter
 }
 
 export type ClientOrderByWithRelationInput = {
@@ -371,6 +372,7 @@ export type ClientOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   menstrualCycle?: Prisma.MenstrualCycleOrderByWithRelationInput
+  schedules?: Prisma.ScheduleOrderByRelationAggregateInput
 }
 
 export type ClientWhereUniqueInput = Prisma.AtLeast<{
@@ -399,6 +401,7 @@ export type ClientWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Client"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   menstrualCycle?: Prisma.XOR<Prisma.MenstrualCycleNullableScalarRelationFilter, Prisma.MenstrualCycleWhereInput> | null
+  schedules?: Prisma.ScheduleListRelationFilter
 }, "id">
 
 export type ClientOrderByWithAggregationInput = {
@@ -477,6 +480,7 @@ export type ClientCreateInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutClientInput
   menstrualCycle?: Prisma.MenstrualCycleCreateNestedOneWithoutClientInput
+  schedules?: Prisma.ScheduleCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateInput = {
@@ -502,6 +506,7 @@ export type ClientUncheckedCreateInput = {
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutClientInput
   menstrualCycle?: Prisma.MenstrualCycleUncheckedCreateNestedOneWithoutClientInput
+  schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientUpdateInput = {
@@ -526,6 +531,7 @@ export type ClientUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutClientNestedInput
   menstrualCycle?: Prisma.MenstrualCycleUpdateOneWithoutClientNestedInput
+  schedules?: Prisma.ScheduleUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateInput = {
@@ -551,6 +557,7 @@ export type ClientUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutClientNestedInput
   menstrualCycle?: Prisma.MenstrualCycleUncheckedUpdateOneWithoutClientNestedInput
+  schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateManyInput = {
@@ -707,6 +714,11 @@ export type ClientScalarRelationFilter = {
   isNot?: Prisma.ClientWhereInput
 }
 
+export type ClientNullableScalarRelationFilter = {
+  is?: Prisma.ClientWhereInput | null
+  isNot?: Prisma.ClientWhereInput | null
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
 }
@@ -771,6 +783,22 @@ export type ClientUpdateOneRequiredWithoutMenstrualCycleNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ClientUpdateToOneWithWhereWithoutMenstrualCycleInput, Prisma.ClientUpdateWithoutMenstrualCycleInput>, Prisma.ClientUncheckedUpdateWithoutMenstrualCycleInput>
 }
 
+export type ClientCreateNestedOneWithoutSchedulesInput = {
+  create?: Prisma.XOR<Prisma.ClientCreateWithoutSchedulesInput, Prisma.ClientUncheckedCreateWithoutSchedulesInput>
+  connectOrCreate?: Prisma.ClientCreateOrConnectWithoutSchedulesInput
+  connect?: Prisma.ClientWhereUniqueInput
+}
+
+export type ClientUpdateOneWithoutSchedulesNestedInput = {
+  create?: Prisma.XOR<Prisma.ClientCreateWithoutSchedulesInput, Prisma.ClientUncheckedCreateWithoutSchedulesInput>
+  connectOrCreate?: Prisma.ClientCreateOrConnectWithoutSchedulesInput
+  upsert?: Prisma.ClientUpsertWithoutSchedulesInput
+  disconnect?: Prisma.ClientWhereInput | boolean
+  delete?: Prisma.ClientWhereInput | boolean
+  connect?: Prisma.ClientWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ClientUpdateToOneWithWhereWithoutSchedulesInput, Prisma.ClientUpdateWithoutSchedulesInput>, Prisma.ClientUncheckedUpdateWithoutSchedulesInput>
+}
+
 export type ClientCreateWithoutSessionsInput = {
   name: string
   gender: string
@@ -792,6 +820,7 @@ export type ClientCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   menstrualCycle?: Prisma.MenstrualCycleCreateNestedOneWithoutClientInput
+  schedules?: Prisma.ScheduleCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutSessionsInput = {
@@ -816,6 +845,7 @@ export type ClientUncheckedCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   menstrualCycle?: Prisma.MenstrualCycleUncheckedCreateNestedOneWithoutClientInput
+  schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutSessionsInput = {
@@ -855,6 +885,7 @@ export type ClientUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   menstrualCycle?: Prisma.MenstrualCycleUpdateOneWithoutClientNestedInput
+  schedules?: Prisma.ScheduleUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutSessionsInput = {
@@ -879,6 +910,7 @@ export type ClientUncheckedUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   menstrualCycle?: Prisma.MenstrualCycleUncheckedUpdateOneWithoutClientNestedInput
+  schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateWithoutMenstrualCycleInput = {
@@ -902,6 +934,7 @@ export type ClientCreateWithoutMenstrualCycleInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutClientInput
+  schedules?: Prisma.ScheduleCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutMenstrualCycleInput = {
@@ -926,6 +959,7 @@ export type ClientUncheckedCreateWithoutMenstrualCycleInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutClientInput
+  schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutMenstrualCycleInput = {
@@ -965,6 +999,7 @@ export type ClientUpdateWithoutMenstrualCycleInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutClientNestedInput
+  schedules?: Prisma.ScheduleUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutMenstrualCycleInput = {
@@ -989,6 +1024,121 @@ export type ClientUncheckedUpdateWithoutMenstrualCycleInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutClientNestedInput
+  schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutClientNestedInput
+}
+
+export type ClientCreateWithoutSchedulesInput = {
+  name: string
+  gender: string
+  birthDate?: string | null
+  phone?: string | null
+  email?: string | null
+  job?: string | null
+  startDate?: string | null
+  goal?: string | null
+  exerciseLevel?: string | null
+  exerciseHistory?: string | null
+  medicalHistory?: string | null
+  painAreas?: string | null
+  medications?: string | null
+  mealCount?: number | null
+  mealPattern?: string | null
+  sleepHours?: number | null
+  memo?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutClientInput
+  menstrualCycle?: Prisma.MenstrualCycleCreateNestedOneWithoutClientInput
+}
+
+export type ClientUncheckedCreateWithoutSchedulesInput = {
+  id?: number
+  name: string
+  gender: string
+  birthDate?: string | null
+  phone?: string | null
+  email?: string | null
+  job?: string | null
+  startDate?: string | null
+  goal?: string | null
+  exerciseLevel?: string | null
+  exerciseHistory?: string | null
+  medicalHistory?: string | null
+  painAreas?: string | null
+  medications?: string | null
+  mealCount?: number | null
+  mealPattern?: string | null
+  sleepHours?: number | null
+  memo?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutClientInput
+  menstrualCycle?: Prisma.MenstrualCycleUncheckedCreateNestedOneWithoutClientInput
+}
+
+export type ClientCreateOrConnectWithoutSchedulesInput = {
+  where: Prisma.ClientWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClientCreateWithoutSchedulesInput, Prisma.ClientUncheckedCreateWithoutSchedulesInput>
+}
+
+export type ClientUpsertWithoutSchedulesInput = {
+  update: Prisma.XOR<Prisma.ClientUpdateWithoutSchedulesInput, Prisma.ClientUncheckedUpdateWithoutSchedulesInput>
+  create: Prisma.XOR<Prisma.ClientCreateWithoutSchedulesInput, Prisma.ClientUncheckedCreateWithoutSchedulesInput>
+  where?: Prisma.ClientWhereInput
+}
+
+export type ClientUpdateToOneWithWhereWithoutSchedulesInput = {
+  where?: Prisma.ClientWhereInput
+  data: Prisma.XOR<Prisma.ClientUpdateWithoutSchedulesInput, Prisma.ClientUncheckedUpdateWithoutSchedulesInput>
+}
+
+export type ClientUpdateWithoutSchedulesInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  job?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exerciseLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exerciseHistory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalHistory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  painAreas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medications?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mealCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mealPattern?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sleepHours?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutClientNestedInput
+  menstrualCycle?: Prisma.MenstrualCycleUpdateOneWithoutClientNestedInput
+}
+
+export type ClientUncheckedUpdateWithoutSchedulesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  job?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exerciseLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exerciseHistory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalHistory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  painAreas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medications?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mealCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mealPattern?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sleepHours?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutClientNestedInput
+  menstrualCycle?: Prisma.MenstrualCycleUncheckedUpdateOneWithoutClientNestedInput
 }
 
 
@@ -998,10 +1148,12 @@ export type ClientUncheckedUpdateWithoutMenstrualCycleInput = {
 
 export type ClientCountOutputType = {
   sessions: number
+  schedules: number
 }
 
 export type ClientCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | ClientCountOutputTypeCountSessionsArgs
+  schedules?: boolean | ClientCountOutputTypeCountSchedulesArgs
 }
 
 /**
@@ -1019,6 +1171,13 @@ export type ClientCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exten
  */
 export type ClientCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SessionWhereInput
+}
+
+/**
+ * ClientCountOutputType without action
+ */
+export type ClientCountOutputTypeCountSchedulesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ScheduleWhereInput
 }
 
 
@@ -1045,6 +1204,7 @@ export type ClientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   updatedAt?: boolean
   sessions?: boolean | Prisma.Client$sessionsArgs<ExtArgs>
   menstrualCycle?: boolean | Prisma.Client$menstrualCycleArgs<ExtArgs>
+  schedules?: boolean | Prisma.Client$schedulesArgs<ExtArgs>
   _count?: boolean | Prisma.ClientCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["client"]>
 
@@ -1121,6 +1281,7 @@ export type ClientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type ClientInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.Client$sessionsArgs<ExtArgs>
   menstrualCycle?: boolean | Prisma.Client$menstrualCycleArgs<ExtArgs>
+  schedules?: boolean | Prisma.Client$schedulesArgs<ExtArgs>
   _count?: boolean | Prisma.ClientCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ClientIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1131,6 +1292,7 @@ export type $ClientPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   objects: {
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     menstrualCycle: Prisma.$MenstrualCyclePayload<ExtArgs> | null
+    schedules: Prisma.$SchedulePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1549,6 +1711,7 @@ export interface Prisma__ClientClient<T, Null = never, ExtArgs extends runtime.T
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.Client$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   menstrualCycle<T extends Prisma.Client$menstrualCycleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$menstrualCycleArgs<ExtArgs>>): Prisma.Prisma__MenstrualCycleClient<runtime.Types.Result.GetResult<Prisma.$MenstrualCyclePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  schedules<T extends Prisma.Client$schedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2031,6 +2194,30 @@ export type Client$menstrualCycleArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.MenstrualCycleInclude<ExtArgs> | null
   where?: Prisma.MenstrualCycleWhereInput
+}
+
+/**
+ * Client.schedules
+ */
+export type Client$schedulesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Schedule
+   */
+  select?: Prisma.ScheduleSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Schedule
+   */
+  omit?: Prisma.ScheduleOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ScheduleInclude<ExtArgs> | null
+  where?: Prisma.ScheduleWhereInput
+  orderBy?: Prisma.ScheduleOrderByWithRelationInput | Prisma.ScheduleOrderByWithRelationInput[]
+  cursor?: Prisma.ScheduleWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ScheduleScalarFieldEnum | Prisma.ScheduleScalarFieldEnum[]
 }
 
 /**

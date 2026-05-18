@@ -56,7 +56,9 @@ export const ModelName = {
   GroupSession: 'GroupSession',
   Exercise: 'Exercise',
   GroupExercise: 'GroupExercise',
-  MenstrualCycle: 'MenstrualCycle'
+  MenstrualCycle: 'MenstrualCycle',
+  Location: 'Location',
+  Schedule: 'Schedule'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -173,6 +175,35 @@ export const MenstrualCycleScalarFieldEnum = {
 } as const
 
 export type MenstrualCycleScalarFieldEnum = (typeof MenstrualCycleScalarFieldEnum)[keyof typeof MenstrualCycleScalarFieldEnum]
+
+
+export const LocationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  address: 'address',
+  color: 'color',
+  memo: 'memo',
+  createdAt: 'createdAt'
+} as const
+
+export type LocationScalarFieldEnum = (typeof LocationScalarFieldEnum)[keyof typeof LocationScalarFieldEnum]
+
+
+export const ScheduleScalarFieldEnum = {
+  id: 'id',
+  date: 'date',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  type: 'type',
+  status: 'status',
+  clientId: 'clientId',
+  participants: 'participants',
+  locationId: 'locationId',
+  memo: 'memo',
+  createdAt: 'createdAt'
+} as const
+
+export type ScheduleScalarFieldEnum = (typeof ScheduleScalarFieldEnum)[keyof typeof ScheduleScalarFieldEnum]
 
 
 export const SortOrder = {

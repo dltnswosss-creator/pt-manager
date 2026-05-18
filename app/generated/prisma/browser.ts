@@ -47,3 +47,13 @@ export type GroupExercise = Prisma.GroupExerciseModel
  * 
  */
 export type MenstrualCycle = Prisma.MenstrualCycleModel
+/**
+ * Model Location
+ * 
+ */
+export type Location = Prisma.LocationModel
+/**
+ * Model Schedule
+ * 
+ */
+export type Schedule = Prisma.ScheduleModel
