@@ -15,10 +15,10 @@ export default async function DashboardPage() {
     },
   });
 
-  const today = new Date().toISOString().split("T")[0];
-  const thisMonthStart = new Date();
-  thisMonthStart.setDate(1);
-  const thisMonthStr = thisMonthStart.toISOString().split("T")[0];
+  const _now = new Date();
+  const today = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, "0")}-${String(_now.getDate()).padStart(2, "0")}`;
+  const thisMonthStart = new Date(_now.getFullYear(), _now.getMonth(), 1);
+  const thisMonthStr = `${thisMonthStart.getFullYear()}-${String(thisMonthStart.getMonth() + 1).padStart(2, "0")}-01`;
 
   const todaySessions = await prisma.session.findMany({ where: { date: today } });
   const todayGroupSessions = await prisma.groupSession.findMany({ where: { date: today } });
