@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { getMenstrualPhase, PHASE_LABELS, PHASE_COLORS } from "@/lib/types";
 import { calcAge, formatDate } from "@/lib/utils";
-import { Users, CalendarDays, ClipboardList, Plus } from "lucide-react";
+import { Users, CalendarDays, ClipboardList, Plus, Clock, MapPin } from "lucide-react";
 
 export default async function DashboardPage() {
   const clients = await prisma.client.findMany({
@@ -22,6 +22,12 @@ export default async function DashboardPage() {
 
   const todaySessions = await prisma.session.findMany({ where: { date: today } });
   const todayGroupSessions = await prisma.groupSession.findMany({ where: { date: today } });
+
+  const todaySchedules = await prisma.schedule.findMany({
+    where: { date: today, status: { not: "cancelled" } },
+    include: { client: { select: { name: true } }, location: true },
+    orderBy: { startTime: "asc" },
+  });
 
   const monthSessionCount = await prisma.session.count({ where: { date: { gte: thisMonthStr } } });
   const monthGroupCount = await prisma.groupSession.count({ where: { date: { gte: thisMonthStr } } });
@@ -55,6 +61,57 @@ export default async function DashboardPage() {
         <StatCard icon={<CalendarDays size={18} className="text-emerald-600" />} label="오늘 수업" value={todaySessions.length + todayGroupSessions.length} bg="bg-emerald-50" />
         <StatCard icon={<ClipboardList size={18} className="text-amber-600" />} label="이번달 수업" value={monthSessionCount + monthGroupCount} bg="bg-amber-50" />
       </div>
+
+      {/* 오늘의 일정 */}
+      {todaySchedules.length > 0 && (
+        <section className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-900">오늘의 일정</h3>
+            <Link href="/schedule" className="text-xs text-indigo-600 hover:underline">
+              전체 보기
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {todaySchedules.map((s) => {
+              const color = s.location?.color ?? "#6366f1";
+              const label =
+                s.type === "individual"
+                  ? (s.client?.name ?? "회원 미지정")
+                  : `그룹 (${s.participants.length}인)`;
+              return (
+                <Link
+                  key={s.id}
+                  href={`/schedule/${s.id}/edit`}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div
+                    className="w-1 h-10 rounded-full shrink-0"
+                    style={{ backgroundColor: color }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900">{label}</p>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <span className="flex items-center gap-1 text-xs text-gray-400">
+                        <Clock size={11} />
+                        {s.startTime}{s.endTime ? `–${s.endTime}` : ""}
+                      </span>
+                      {s.location && (
+                        <span className="flex items-center gap-1 text-xs text-gray-400">
+                          <MapPin size={11} />
+                          {s.location.name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {s.status === "completed" && (
+                    <span className="text-xs text-emerald-600 font-medium shrink-0">완료</span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4">
         <section className="bg-white rounded-xl border border-gray-100 p-5">

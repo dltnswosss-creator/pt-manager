@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, ClipboardList, Dumbbell } from "lucide-react";
+import { LayoutDashboard, Users, ClipboardList, Dumbbell, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/", label: "대시보드", icon: LayoutDashboard },
+  { href: "/schedule", label: "일정", icon: CalendarDays },
   { href: "/clients", label: "회원 관리", icon: Users },
   { href: "/sessions/new", label: "수업 기록", icon: ClipboardList },
   { href: "/group-sessions", label: "그룹 수업", icon: Dumbbell },

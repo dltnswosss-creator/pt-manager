@@ -40,6 +40,7 @@ model Client {
 
   sessions        Session[]
   menstrualCycle  MenstrualCycle?
+  schedules       Schedule[]
 }
 
 model Session {
@@ -105,4 +106,30 @@ model MenstrualCycle {
   periodLength  Int      @default(5)
   memo          String?
   updatedAt     DateTime @updatedAt
+}
+
+model Location {
+  id        Int        @id @default(autoincrement())
+  name      String
+  address   String?
+  color     String     @default("#6366f1")
+  memo      String?
+  schedules Schedule[]
+  createdAt DateTime   @default(now())
+}
+
+model Schedule {
+  id           Int       @id @default(autoincrement())
+  date         String
+  startTime    String
+  endTime      String?
+  type         String    @default("individual")
+  status       String    @default("scheduled")
+  clientId     Int?
+  client       Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  participants String[]  @default([])
+  locationId   Int?
+  location     Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  memo         String?
+  createdAt    DateTime  @default(now())
 }
