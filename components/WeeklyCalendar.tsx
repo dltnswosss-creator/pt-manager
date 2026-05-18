@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -114,6 +114,7 @@ export default function WeeklyCalendar({
   const [showExport, setShowExport] = useState(false);
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [clients, setClients] = useState<ClientItem[]>([]);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
 
   const dragRef = useRef<DragState | null>(null);
   const wasDraggingRef = useRef(false); // 드래그 발생 여부 (onClick 억제용)
@@ -136,8 +137,25 @@ export default function WeeklyCalendar({
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
+  const scheduleColors = useMemo(() => {
+    const seen = new Set<string>();
+    const result: Array<{ color: string; name: string }> = [];
+    for (const s of schedules) {
+      const color = s.location?.color ?? "#6366f1";
+      if (!seen.has(color)) {
+        seen.add(color);
+        result.push({ color, name: s.location?.name ?? "기타" });
+      }
+    }
+    return result;
+  }, [schedules]);
+
+  const filteredSchedules = selectedColor
+    ? schedules.filter((s) => (s.location?.color ?? "#6366f1") === selectedColor)
+    : schedules;
+
   const byDate = new Map<string, ScheduleItem[]>();
-  for (const s of schedules) {
+  for (const s of filteredSchedules) {
     byDate.set(s.date, [...(byDate.get(s.date) ?? []), s]);
   }
 
@@ -283,6 +301,36 @@ export default function WeeklyCalendar({
           </Link>
         </div>
       </div>
+
+      {/* 색상 필터 */}
+      {scheduleColors.length > 0 && (
+        <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-100 shrink-0 flex-wrap">
+          <span className="text-[11px] text-gray-400 font-medium">색상 필터</span>
+          <button
+            onClick={() => setSelectedColor(null)}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+              selectedColor === null ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+            }`}
+          >
+            전체
+          </button>
+          {scheduleColors.map(({ color, name }) => (
+            <button
+              key={color}
+              onClick={() => setSelectedColor(selectedColor === color ? null : color)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all"
+              style={
+                selectedColor === color
+                  ? { backgroundColor: color, borderColor: color, color: "white" }
+                  : { backgroundColor: "white", borderColor: "#e5e7eb", color: "#374151" }
+              }
+            >
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 달력 그리드 */}
       <div className="flex-1 overflow-auto">
