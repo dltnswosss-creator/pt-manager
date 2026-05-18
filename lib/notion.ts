@@ -3,6 +3,36 @@ import { formatDate } from "@/lib/utils";
 
 export const notion = new Client({ auth: process.env.NOTION_API_KEY });
 
+function sessionDateTitle(date: string): string {
+  // "2026-05-12" → "2026.05.12"
+  return date.replace(/-/g, ".");
+}
+
+async function getOrCreateChildPage(parentId: string, title: string, emoji: string): Promise<string> {
+  let cursor: string | undefined;
+  do {
+    const res = await notion.blocks.children.list({
+      block_id: parentId,
+      start_cursor: cursor,
+    });
+    for (const block of res.results) {
+      if ("type" in block && block.type === "child_page" && block.child_page.title === title) {
+        return block.id;
+      }
+    }
+    cursor = res.has_more ? (res.next_cursor ?? undefined) : undefined;
+  } while (cursor);
+
+  const page = await notion.pages.create({
+    parent: { page_id: parentId },
+    icon: { type: "emoji", emoji: emoji as Parameters<typeof notion.pages.create>[0]["icon"] extends { emoji: infer E } ? E : never },
+    properties: {
+      title: { title: [{ type: "text", text: { content: title } }] },
+    },
+  });
+  return page.id;
+}
+
 type Exercise = {
   name: string;
   sets: number | null;
@@ -104,10 +134,12 @@ function buildExerciseBlocks(exercises: Exercise[]) {
 }
 
 export async function createSessionNotionPage(data: SessionData): Promise<string> {
-  const parentId = process.env.NOTION_PARENT_PAGE_ID!;
+  const rootId = process.env.NOTION_PARENT_PAGE_ID!;
   const typeLabel = data.sessionType === "individual" ? "1:1 PT" : "그룹 PT";
   const durationText = data.duration ? `  ⏱ ${data.duration}분` : "";
-  const title = `${data.clientName} 수업 일지 — ${formatDate(data.date)}`;
+
+  // PT 수업일지 → 회원명님 → 날짜
+  const clientPageId = await getOrCreateChildPage(rootId, `${data.clientName}님`, "👤");
 
   const children: object[] = [
     callout(`📅 ${formatDate(data.date)}   ${typeLabel}${durationText}`, "📋"),
@@ -122,25 +154,26 @@ export async function createSessionNotionPage(data: SessionData): Promise<string
   }
 
   const response = await notion.pages.create({
-    parent: { page_id: parentId },
+    parent: { page_id: clientPageId },
     icon: { type: "emoji", emoji: "🏋️" },
     properties: {
       title: {
-        title: [{ type: "text", text: { content: title } }],
+        title: [{ type: "text", text: { content: sessionDateTitle(data.date) } }],
       },
     },
     children: children as Parameters<typeof notion.pages.create>[0]["children"],
   });
 
-  // 공개 공유 설정은 Notion에서 페이지를 직접 "웹에 공개"로 설정해야 합니다.
-  // API로는 공유 설정 변경 불가 → 부모 페이지를 공개로 설정해두면 하위 페이지도 공개됩니다.
   return `https://notion.so/${response.id.replace(/-/g, "")}`;
 }
 
 export async function createGroupSessionNotionPage(data: GroupSessionData): Promise<string> {
-  const parentId = process.env.NOTION_PARENT_PAGE_ID!;
+  const rootId = process.env.NOTION_PARENT_PAGE_ID!;
   const participantsText = data.participants.length > 0 ? data.participants.join(", ") : "미기록";
-  const title = `그룹 수업 일지 — ${formatDate(data.date)}${data.title ? ` (${data.title})` : ""}`;
+  const sessionTitle = `${sessionDateTitle(data.date)}${data.title ? ` ${data.title}` : ""}`;
+
+  // PT 수업일지 → 그룹 수업 → 날짜
+  const groupPageId = await getOrCreateChildPage(rootId, "그룹 수업", "👥");
 
   const children: object[] = [
     callout(`📅 ${formatDate(data.date)}   참여 회원: ${participantsText}`, "👥"),
@@ -155,11 +188,11 @@ export async function createGroupSessionNotionPage(data: GroupSessionData): Prom
   }
 
   const response = await notion.pages.create({
-    parent: { page_id: parentId },
+    parent: { page_id: groupPageId },
     icon: { type: "emoji", emoji: "👥" },
     properties: {
       title: {
-        title: [{ type: "text", text: { content: title } }],
+        title: [{ type: "text", text: { content: sessionTitle } }],
       },
     },
     children: children as Parameters<typeof notion.pages.create>[0]["children"],
