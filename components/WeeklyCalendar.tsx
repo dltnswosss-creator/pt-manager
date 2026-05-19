@@ -11,6 +11,7 @@ import {
 const START_HOUR = 6;
 const END_HOUR = 23;
 const HOUR_HEIGHT = 64;
+const MOBILE_HOUR_HEIGHT = 36;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
 const DAYS_KR = ["월", "화", "수", "목", "금", "토", "일"];
 const DRAG_THRESHOLD = 6; // px
@@ -115,6 +116,7 @@ export default function WeeklyCalendar({
   const [locations, setLocations] = useState<LocationItem[]>([]);
   const [clients, setClients] = useState<ClientItem[]>([]);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [mobileView, setMobileView] = useState<"agenda" | "grid">("agenda");
 
   const dragRef = useRef<DragState | null>(null);
   const wasDraggingRef = useRef(false); // 드래그 발생 여부 (onClick 억제용)
@@ -267,36 +269,36 @@ export default function WeeklyCalendar({
   return (
     <div className="flex flex-col h-full bg-white" style={{ userSelect: drag ? "none" : undefined }}>
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0">
-        <div className="flex items-center gap-2">
-          <button onClick={() => onWeekChange(addDays(weekStart, -7))} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+      <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-100 shrink-0 gap-2">
+        <div className="flex items-center gap-1 min-w-0">
+          <button onClick={() => onWeekChange(addDays(weekStart, -7))} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors shrink-0">
             <ChevronLeft size={18} />
           </button>
-          <span className="text-sm font-semibold text-gray-900 min-w-[160px] text-center">
+          <span className="text-sm font-semibold text-gray-900 text-center whitespace-nowrap px-1">
             {weekLabel(weekDays)}
           </span>
-          <button onClick={() => onWeekChange(addDays(weekStart, 7))} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+          <button onClick={() => onWeekChange(addDays(weekStart, 7))} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors shrink-0">
             <ChevronRight size={18} />
           </button>
-          <button onClick={() => onWeekChange(getMondayOf(new Date()))} className="text-xs text-indigo-600 font-medium px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors">
+          <button onClick={() => onWeekChange(getMondayOf(new Date()))} className="text-xs text-indigo-600 font-medium px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors shrink-0">
             오늘
           </button>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => setShowExport(true)}
-            className="flex items-center gap-1 text-xs text-gray-500 px-2.5 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1 text-xs text-gray-500 px-2 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
             title="이미지로 저장"
           >
             <ImageIcon size={13} />
-            이미지 저장
+            <span className="hidden sm:inline">이미지 저장</span>
           </button>
-          <Link href="/schedule/locations" className="flex items-center gap-1 text-xs text-gray-500 px-2.5 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+          <Link href="/schedule/locations" className="flex items-center gap-1 text-xs text-gray-500 px-2 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap">
             <MapPin size={13} />
-            장소 관리
+            <span className="hidden sm:inline">장소 관리</span>
           </Link>
-          <Link href="/schedule/new" className="flex items-center gap-1.5 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
-            <Plus size={15} />
+          <Link href="/schedule/new" className="flex items-center gap-1 bg-indigo-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap">
+            <Plus size={14} />
             일정 추가
           </Link>
         </div>
@@ -332,8 +334,24 @@ export default function WeeklyCalendar({
         </div>
       )}
 
+      {/* 모바일: 뷰 전환 토글 */}
+      <div className="flex gap-1 px-3 py-2 border-b border-gray-100 shrink-0 md:hidden">
+        <button
+          onClick={() => setMobileView("agenda")}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors ${mobileView === "agenda" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500"}`}
+        >
+          리스트
+        </button>
+        <button
+          onClick={() => setMobileView("grid")}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors ${mobileView === "grid" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500"}`}
+        >
+          캘린더
+        </button>
+      </div>
+
       {/* 모바일: 주간 아젠다 리스트 */}
-      <div className="flex-1 overflow-auto md:hidden">
+      {mobileView === "agenda" && <div className="flex-1 overflow-auto md:hidden">
         <div className="divide-y divide-gray-100">
           {weekDays.map((day, i) => {
             const dateStr = toDateStr(day);
@@ -394,7 +412,90 @@ export default function WeeklyCalendar({
             );
           })}
         </div>
-      </div>
+      </div>}
+
+      {/* 모바일: 컴팩트 캘린더 그리드 뷰 */}
+      {mobileView === "grid" && (
+        <div className="flex-1 overflow-auto md:hidden">
+          <div className="flex">
+            {/* 시간 컬럼 */}
+            <div className="w-7 shrink-0 bg-white sticky left-0 z-10">
+              <div className="h-10 border-b border-r border-gray-100" />
+              <div className="relative border-r border-gray-100" style={{ height: (END_HOUR - START_HOUR) * MOBILE_HOUR_HEIGHT }}>
+                {HOURS.filter((h) => h % 3 === 0).map((h) => (
+                  <div key={h} className="absolute w-full" style={{ top: (h - START_HOUR) * MOBILE_HOUR_HEIGHT - 6 }}>
+                    <span className="block text-right pr-1 text-[9px] text-gray-400 leading-none">{h}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* 요일 컬럼 */}
+            {weekDays.map((day, i) => {
+              const dateStr = toDateStr(day);
+              const daySchedules = byDate.get(dateStr) ?? [];
+              const isToday = dateStr === todayStr;
+              const isWeekend = i >= 5;
+              return (
+                <div key={dateStr} className="flex-1 min-w-0 border-l border-gray-100">
+                  <div className={`h-10 flex flex-col items-center justify-center border-b border-gray-100 sticky top-0 z-10 ${isToday ? "bg-indigo-50" : "bg-white"}`}>
+                    <span className={`text-[9px] font-medium ${isToday ? "text-indigo-500" : isWeekend ? "text-rose-400" : "text-gray-400"}`}>
+                      {DAYS_KR[i]}
+                    </span>
+                    <span className={`text-[11px] font-bold leading-tight ${isToday ? "text-white bg-indigo-600 w-5 h-5 rounded-full flex items-center justify-center text-[10px]" : isWeekend ? "text-rose-500" : "text-gray-800"}`}>
+                      {day.getDate()}
+                    </span>
+                  </div>
+                  <div
+                    className="relative"
+                    style={{ height: (END_HOUR - START_HOUR) * MOBILE_HOUR_HEIGHT }}
+                    onClick={(e) => {
+                      if ((e.target as HTMLElement).closest("[data-schedule]")) return;
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const clamped = Math.max(0, Math.min(Math.round(((e.clientY - rect.top) / MOBILE_HOUR_HEIGHT) * 60 / 30) * 30, (END_HOUR - START_HOUR - 1) * 60));
+                      const startMins = START_HOUR * 60 + clamped;
+                      router.push(`/schedule/new?${new URLSearchParams({ date: dateStr, startTime: minsToTime(startMins), endTime: minsToTime(Math.min(startMins + 60, END_HOUR * 60)) })}`);
+                    }}
+                  >
+                    {HOURS.map((h) => (
+                      <div key={h} className="absolute w-full border-b border-gray-50" style={{ top: (h - START_HOUR) * MOBILE_HOUR_HEIGHT, height: MOBILE_HOUR_HEIGHT }} />
+                    ))}
+                    {HOURS.filter((h) => h % 3 === 0).map((h) => (
+                      <div key={`${h}l`} className="absolute w-full border-b border-gray-100" style={{ top: (h - START_HOUR) * MOBILE_HOUR_HEIGHT }} />
+                    ))}
+                    {daySchedules.map((s) => {
+                      const color = s.location?.color ?? "#6366f1";
+                      const isCancelled = s.status === "cancelled";
+                      const [sh, sm] = parseTime(s.startTime);
+                      const [eh, em] = s.endTime ? parseTime(s.endTime) : [sh + 1, sm];
+                      const top = (sh - START_HOUR) * MOBILE_HOUR_HEIGHT + (sm / 60) * MOBILE_HOUR_HEIGHT;
+                      const height = Math.max(((eh - sh) * 60 + (em - sm)) / 60 * MOBILE_HOUR_HEIGHT, 14);
+                      return (
+                        <div
+                          key={s.id}
+                          data-schedule="true"
+                          className="absolute left-px right-px rounded overflow-hidden"
+                          style={{
+                            top: top + 1,
+                            height: height - 2,
+                            backgroundColor: isCancelled ? "#f3f4f6" : `${color}22`,
+                            borderLeft: `2px solid ${isCancelled ? "#d1d5db" : color}`,
+                            opacity: isCancelled ? 0.6 : 1,
+                          }}
+                          onClick={(e) => { e.stopPropagation(); router.push(`/schedule/${s.id}/edit`); }}
+                        >
+                          <p className="px-0.5 pt-0.5 text-[8px] font-semibold leading-none truncate" style={{ color: isCancelled ? "#9ca3af" : color }}>
+                            {s.type === "individual" ? (s.client?.name ?? "미지정") : "그룹"}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 데스크탑: 달력 그리드 */}
       <div className="flex-1 overflow-auto hidden md:block">
