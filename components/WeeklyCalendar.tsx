@@ -332,8 +332,72 @@ export default function WeeklyCalendar({
         </div>
       )}
 
-      {/* 달력 그리드 */}
-      <div className="flex-1 overflow-auto">
+      {/* 모바일: 주간 아젠다 리스트 */}
+      <div className="flex-1 overflow-auto md:hidden">
+        <div className="divide-y divide-gray-100">
+          {weekDays.map((day, i) => {
+            const dateStr = toDateStr(day);
+            const daySchedules = byDate.get(dateStr) ?? [];
+            const isToday = dateStr === todayStr;
+            const isWeekend = i >= 5;
+            return (
+              <div key={dateStr}>
+                <div className={`flex items-center gap-2 px-4 py-2.5 sticky top-0 z-10 border-b border-gray-100 ${isToday ? "bg-indigo-50" : "bg-gray-50"}`}>
+                  <span className={`text-xs font-semibold w-5 ${isToday ? "text-indigo-600" : isWeekend ? "text-rose-400" : "text-gray-500"}`}>
+                    {DAYS_KR[i]}
+                  </span>
+                  <span className={`text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? "bg-indigo-600 text-white" : isWeekend ? "text-rose-500" : "text-gray-700"}`}>
+                    {day.getDate()}
+                  </span>
+                  {daySchedules.length > 0 && (
+                    <span className="text-[10px] text-gray-400 ml-1">{daySchedules.length}건</span>
+                  )}
+                </div>
+                {daySchedules.length === 0 ? (
+                  <div className="px-4 py-3 text-xs text-gray-300 text-center">일정 없음</div>
+                ) : (
+                  <div className="divide-y divide-gray-50">
+                    {daySchedules.map((s) => {
+                      const color = s.location?.color ?? "#6366f1";
+                      const isCancelled = s.status === "cancelled";
+                      const isCompleted = s.status === "completed";
+                      const isScheduled = s.status === "scheduled";
+                      const label = s.type === "individual" ? (s.client?.name ?? "회원 미지정") : `그룹${s.participants.length > 0 ? ` (${s.participants.length}인)` : ""}`;
+                      return (
+                        <div
+                          key={s.id}
+                          className="flex items-center gap-3 px-4 py-3 active:bg-gray-50"
+                          onClick={() => router.push(`/schedule/${s.id}/edit`)}
+                        >
+                          <div className="w-0.5 self-stretch rounded-full shrink-0" style={{ backgroundColor: isCancelled ? "#d1d5db" : color }} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] text-gray-400 leading-tight">{s.startTime}{s.endTime ? `–${s.endTime}` : ""}</p>
+                            <p className={`text-sm font-medium truncate leading-snug ${isCancelled ? "text-gray-400 line-through" : "text-gray-800"}`}>{label}</p>
+                            {s.location && <p className="text-[11px] text-gray-400 truncate">{s.location.name}</p>}
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                            {isCompleted && <span className="text-[10px] text-emerald-600 font-semibold">완료</span>}
+                            {isCancelled && <span className="text-[10px] text-gray-400 font-semibold">취소</span>}
+                            {isScheduled && (
+                              <>
+                                <button className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600" onClick={() => onComplete(s.id)}><CheckCircle size={15} /></button>
+                                <button className="p-1.5 rounded-lg bg-red-50 text-red-400" onClick={() => onCancel(s.id)}><XCircle size={15} /></button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 데스크탑: 달력 그리드 */}
+      <div className="flex-1 overflow-auto hidden md:block">
         <div className="flex" style={{ minWidth: 560 }} ref={gridInnerRef}>
           {/* 시간 컬럼 */}
           <div className="w-14 shrink-0 bg-white sticky left-0 z-10">
