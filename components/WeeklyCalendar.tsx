@@ -419,12 +419,12 @@ export default function WeeklyCalendar({
         <div className="flex-1 overflow-auto md:hidden">
           <div className="flex">
             {/* 시간 컬럼 */}
-            <div className="w-7 shrink-0 bg-white sticky left-0 z-10">
+            <div className="w-8 shrink-0 bg-white sticky left-0 z-10">
               <div className="h-10 border-b border-r border-gray-100" />
               <div className="relative border-r border-gray-100" style={{ height: (END_HOUR - START_HOUR) * MOBILE_HOUR_HEIGHT }}>
-                {HOURS.filter((h) => h % 3 === 0).map((h) => (
+                {HOURS.map((h) => (
                   <div key={h} className="absolute w-full" style={{ top: (h - START_HOUR) * MOBILE_HOUR_HEIGHT - 6 }}>
-                    <span className="block text-right pr-1 text-[9px] text-gray-400 leading-none">{h}</span>
+                    <span className="block text-right pr-1 text-[8px] text-gray-400 leading-none">{h}시</span>
                   </div>
                 ))}
               </div>
@@ -457,10 +457,7 @@ export default function WeeklyCalendar({
                     }}
                   >
                     {HOURS.map((h) => (
-                      <div key={h} className="absolute w-full border-b border-gray-50" style={{ top: (h - START_HOUR) * MOBILE_HOUR_HEIGHT, height: MOBILE_HOUR_HEIGHT }} />
-                    ))}
-                    {HOURS.filter((h) => h % 3 === 0).map((h) => (
-                      <div key={`${h}l`} className="absolute w-full border-b border-gray-100" style={{ top: (h - START_HOUR) * MOBILE_HOUR_HEIGHT }} />
+                      <div key={h} className="absolute w-full border-b border-gray-100" style={{ top: (h - START_HOUR) * MOBILE_HOUR_HEIGHT, height: MOBILE_HOUR_HEIGHT }} />
                     ))}
                     {daySchedules.map((s) => {
                       const color = s.location?.color ?? "#6366f1";
@@ -469,6 +466,7 @@ export default function WeeklyCalendar({
                       const [eh, em] = s.endTime ? parseTime(s.endTime) : [sh + 1, sm];
                       const top = (sh - START_HOUR) * MOBILE_HOUR_HEIGHT + (sm / 60) * MOBILE_HOUR_HEIGHT;
                       const height = Math.max(((eh - sh) * 60 + (em - sm)) / 60 * MOBILE_HOUR_HEIGHT, 14);
+                      const isShort = height < 28;
                       return (
                         <div
                           key={s.id}
@@ -477,15 +475,22 @@ export default function WeeklyCalendar({
                           style={{
                             top: top + 1,
                             height: height - 2,
-                            backgroundColor: isCancelled ? "#f3f4f6" : `${color}22`,
+                            backgroundColor: isCancelled ? "#f3f4f6" : `${color}1a`,
                             borderLeft: `2px solid ${isCancelled ? "#d1d5db" : color}`,
                             opacity: isCancelled ? 0.6 : 1,
                           }}
                           onClick={(e) => { e.stopPropagation(); router.push(`/schedule/${s.id}/edit`); }}
                         >
-                          <p className="px-0.5 pt-0.5 text-[8px] font-semibold leading-none truncate" style={{ color: isCancelled ? "#9ca3af" : color }}>
-                            {s.type === "individual" ? (s.client?.name ?? "미지정") : "그룹"}
-                          </p>
+                          <div className="px-0.5 pt-0.5 overflow-hidden h-full">
+                            <p className="text-[8px] font-semibold leading-none truncate" style={{ color: isCancelled ? "#9ca3af" : color }}>
+                              {s.startTime}{s.endTime ? `–${s.endTime}` : ""}
+                            </p>
+                            {!isShort && (
+                              <p className="text-[8px] font-medium leading-none truncate mt-0.5 text-gray-700">
+                                {s.type === "individual" ? (s.client?.name ?? "미지정") : "그룹"}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
