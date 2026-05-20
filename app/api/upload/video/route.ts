@@ -10,30 +10,27 @@ const BUCKET = "exercise-videos";
 const MAX_SIZE_MB = 200;
 
 export async function POST(req: NextRequest) {
-  const formData = await req.formData();
-  const file = formData.get("file") as File | null;
+  const { fileName, fileSize } = await req.json();
 
-  if (!file) {
-    return Response.json({ error: "파일이 없습니다" }, { status: 400 });
+  if (!fileName) {
+    return Response.json({ error: "파일 정보가 없습니다" }, { status: 400 });
   }
-
-  if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+  if (fileSize > MAX_SIZE_MB * 1024 * 1024) {
     return Response.json({ error: `파일은 ${MAX_SIZE_MB}MB 이하만 업로드 가능합니다` }, { status: 400 });
   }
 
-  const ext = file.name.split(".").pop() ?? "mp4";
-  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const ext = fileName.split(".").pop() ?? "mp4";
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-  const arrayBuffer = await file.arrayBuffer();
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(fileName, arrayBuffer, { contentType: file.type, upsert: false });
-
+  const { data, error } = await supabase.storage.from(BUCKET).createSignedUploadUrl(path);
   if (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(fileName);
+  const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
 
-  return Response.json({ url: data.publicUrl }, { status: 201 });
+  return Response.json({
+    signedUrl: data.signedUrl,
+    publicUrl: pub.publicUrl,
+  });
 }

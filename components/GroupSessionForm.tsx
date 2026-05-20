@@ -53,17 +53,20 @@ export default function GroupSessionForm() {
   };
 
   const handleVideoSelect = async (i: number, file: File) => {
-    if (file.size > 50 * 1024 * 1024) {
-      alert("영상은 50MB 이하만 업로드 가능합니다.");
+    if (file.size > 200 * 1024 * 1024) {
+      alert("영상은 200MB 이하만 업로드 가능합니다.");
       return;
     }
     setExercises((prev) => prev.map((e, idx) =>
       idx === i ? { ...e, videoUploading: true, videoFileName: file.name } : e
     ));
-    const formData = new FormData();
-    formData.append("file", file);
     try {
-      const res = await fetch("/api/upload/video", { method: "POST", body: formData });
+      // 1. 서버에서 signed upload URL 발급
+      const res = await fetch("/api/upload/video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: file.name, fileSize: file.size }),
+      });
       const data = await res.json();
       if (!res.ok) {
         alert(data.error || "영상 업로드에 실패했습니다. 다시 시도해주세요.");
@@ -72,8 +75,18 @@ export default function GroupSessionForm() {
         ));
         return;
       }
+
+      // 2. 브라우저에서 Supabase로 직접 업로드 (Next.js 경유 없음)
+      const uploadForm = new FormData();
+      uploadForm.append("cacheControl", "3600");
+      uploadForm.append("file", file);
+      const uploadRes = await fetch(data.signedUrl, { method: "PUT", body: uploadForm });
+      if (!uploadRes.ok) {
+        throw new Error(`upload ${uploadRes.status}`);
+      }
+
       setExercises((prev) => prev.map((e, idx) =>
-        idx === i ? { ...e, videoUploading: false, videoUrl: data.url ?? null } : e
+        idx === i ? { ...e, videoUploading: false, videoUrl: data.publicUrl } : e
       ));
     } catch {
       alert("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
