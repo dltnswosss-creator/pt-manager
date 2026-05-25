@@ -192,7 +192,18 @@ export default function SessionForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 max-w-2xl mx-auto lg:p-6">
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={(e) => {
+        // 모바일 키보드 "완료/이동"(Enter)으로 인한 의도치 않은 저장 방지
+        // textarea와 button은 그대로 동작, 나머지 input에서 Enter 차단
+        const tag = (e.target as HTMLElement).tagName;
+        if (e.key === "Enter" && tag !== "BUTTON" && tag !== "TEXTAREA") {
+          e.preventDefault();
+        }
+      }}
+      className="space-y-4 p-4 max-w-2xl mx-auto lg:p-6"
+    >
       {/* 기본 정보 */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-4">
         <h3 className="text-sm font-semibold text-gray-700">기본 정보</h3>

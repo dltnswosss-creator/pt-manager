@@ -816,10 +816,27 @@ function ExportModal({ gridRef, weekLabel, onClose }: {
     try {
       const blob = await getBlob();
       if (!blob) return;
+      const fileName = `일정표_${weekLabel.replace(/\s/g, "")}.png`;
+
+      // 모바일(iOS/Android): Web Share API로 사진 앱에 저장
+      const file = new File([blob], fileName, { type: "image/png" });
+      if (typeof navigator.canShare === "function" && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: `일정표 ${weekLabel}` });
+          onClose();
+          return;
+        } catch (err) {
+          // AbortError = 사용자가 취소 → 그냥 닫기
+          if ((err as Error).name === "AbortError") return;
+          // 그 외 에러 → 아래 fallback 진행
+        }
+      }
+
+      // 데스크톱 fallback: <a download>
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `일정표_${weekLabel.replace(/\s/g, "")}.png`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
