@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { updateGroupSessionNotionPage } from "@/lib/notion";
 
 export async function GET(_req: NextRequest, ctx: RouteContext<"/api/group-sessions/[id]">) {
   const { id } = await ctx.params;
@@ -28,6 +29,29 @@ export async function PUT(req: NextRequest, ctx: RouteContext<"/api/group-sessio
     },
     include: { exercises: true },
   });
+
+  if (process.env.NOTION_API_KEY && session.notionUrl) {
+    try {
+      await updateGroupSessionNotionPage(session.notionUrl, {
+        title: session.title,
+        date: session.date,
+        participants: session.participants,
+        memo: session.memo,
+        exercises: session.exercises.map((e) => ({
+          name: e.name,
+          sets: e.sets,
+          reps: e.reps,
+          weight: e.weight,
+          unit: e.unit,
+          memo: e.memo,
+          videoUrl: e.videoUrl ?? null,
+        })),
+      });
+    } catch (e) {
+      console.error("Notion 업데이트 실패:", e);
+    }
+  }
+
   return Response.json(session);
 }
 

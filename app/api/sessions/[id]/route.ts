@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { updateSessionNotionPage } from "@/lib/notion";
 
 export async function GET(_req: NextRequest, ctx: RouteContext<"/api/sessions/[id]">) {
   const { id } = await ctx.params;
@@ -16,7 +17,6 @@ export async function PUT(req: NextRequest, ctx: RouteContext<"/api/sessions/[id
   const body = await req.json();
   const { exercises, ...sessionData } = body;
 
-  // 기존 exercises 삭제 후 재생성
   await prisma.exercise.deleteMany({ where: { sessionId: Number(id) } });
 
   const session = await prisma.session.update({
@@ -27,8 +27,32 @@ export async function PUT(req: NextRequest, ctx: RouteContext<"/api/sessions/[id
         ? { create: exercises.map((e: Record<string, unknown>, i: number) => ({ ...e, order: i })) }
         : undefined,
     },
-    include: { exercises: true },
+    include: { exercises: true, client: true },
   });
+
+  if (process.env.NOTION_API_KEY && session.notionUrl) {
+    try {
+      await updateSessionNotionPage(session.notionUrl, {
+        clientName: session.client.name,
+        date: session.date,
+        sessionType: session.sessionType,
+        duration: session.duration,
+        memo: session.memo,
+        exercises: session.exercises.map((e) => ({
+          name: e.name,
+          sets: e.sets,
+          reps: e.reps,
+          weight: e.weight,
+          unit: e.unit,
+          memo: e.memo,
+          videoUrl: e.videoUrl ?? null,
+        })),
+      });
+    } catch (e) {
+      console.error("Notion 업데이트 실패:", e);
+    }
+  }
+
   return Response.json(session);
 }
 

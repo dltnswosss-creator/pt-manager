@@ -167,6 +167,67 @@ export async function createSessionNotionPage(data: SessionData): Promise<string
   return `https://notion.so/${response.id.replace(/-/g, "")}`;
 }
 
+// ── Notion URL → page ID 변환 ────────────────────────────────
+function notionUrlToPageId(url: string): string {
+  const raw = url.split("/").pop()?.split("?")[0] ?? "";
+  if (raw.length === 32) {
+    return `${raw.slice(0, 8)}-${raw.slice(8, 12)}-${raw.slice(12, 16)}-${raw.slice(16, 20)}-${raw.slice(20)}`;
+  }
+  return raw;
+}
+
+async function clearPageBlocks(pageId: string): Promise<void> {
+  let cursor: string | undefined;
+  do {
+    const res = await notion.blocks.children.list({ block_id: pageId, start_cursor: cursor });
+    await Promise.all(res.results.map((block) => notion.blocks.delete({ block_id: block.id })));
+    cursor = res.has_more ? (res.next_cursor ?? undefined) : undefined;
+  } while (cursor);
+}
+
+export async function updateSessionNotionPage(notionUrl: string, data: SessionData): Promise<void> {
+  const pageId = notionUrlToPageId(notionUrl);
+  const typeLabel = data.sessionType === "individual" ? "1:1 PT" : "그룹 PT";
+  const durationText = data.duration ? `  ⏱ ${data.duration}분` : "";
+
+  await clearPageBlocks(pageId);
+
+  const children: object[] = [
+    callout(`📅 ${formatDate(data.date)}   ${typeLabel}${durationText}`, "📋"),
+    divider(),
+    heading3("운동 목록"),
+    ...buildExerciseBlocks(data.exercises),
+    divider(),
+  ];
+  if (data.memo) children.push(callout(data.memo, "💬"));
+
+  await notion.blocks.children.append({
+    block_id: pageId,
+    children: children as Parameters<typeof notion.blocks.children.append>[0]["children"],
+  });
+}
+
+export async function updateGroupSessionNotionPage(notionUrl: string, data: GroupSessionData): Promise<void> {
+  const pageId = notionUrlToPageId(notionUrl);
+  const participantsText = data.participants.length > 0 ? data.participants.join(", ") : "미기록";
+
+  await clearPageBlocks(pageId);
+
+  const children: object[] = [
+    callout(`📅 ${formatDate(data.date)}   참여 회원: ${participantsText}`, "👥"),
+    divider(),
+    heading3("운동 목록"),
+    ...buildExerciseBlocks(data.exercises),
+    divider(),
+  ];
+  if (data.memo) children.push(callout(data.memo, "💬"));
+
+  await notion.blocks.children.append({
+    block_id: pageId,
+    children: children as Parameters<typeof notion.blocks.children.append>[0]["children"],
+  });
+}
+
 export async function createGroupSessionNotionPage(data: GroupSessionData): Promise<string> {
   const rootId = process.env.NOTION_PARENT_PAGE_ID!;
   const participantsText = data.participants.length > 0 ? data.participants.join(", ") : "미기록";
