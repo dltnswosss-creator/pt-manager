@@ -1,19 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { COMMON_EXERCISES } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Plus, Trash2, Loader2, Video, CheckCircle, X } from "lucide-react";
 
-type ExerciseRow = { name: string; sets: string; reps: string; weight: string; unit: string; memo: string };
+type ExerciseRow = {
+  name: string; sets: string; reps: string; weight: string; unit: string; memo: string;
+  videoUrl: string | null; videoUploading: boolean; videoFileName: string | null;
+};
 type GroupSession = {
   id: number;
   date: string;
   title: string | null;
   memo: string | null;
   participants: string[];
-  exercises: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null }[];
+  exercises: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; videoUrl: string | null }[];
 };
 
 export default function GroupSessionEditForm({ session }: { session: GroupSession }) {
@@ -30,10 +33,12 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
           name: e.name, sets: e.sets?.toString() ?? "",
           reps: e.reps ?? "", weight: e.weight?.toString() ?? "",
           unit: e.unit, memo: e.memo ?? "",
+          videoUrl: e.videoUrl ?? null, videoUploading: false, videoFileName: null,
         }))
-      : [{ name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "" }]
+      : [{ name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrl: null, videoUploading: false, videoFileName: null }]
   );
   const [suggestion, setSuggestion] = useState<{ idx: number; results: string[] } | null>(null);
+  const videoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const addParticipant = (name: string) => {
     const t = name.trim();
@@ -50,6 +55,51 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
     }
   };
 
+  const handleVideoSelect = async (i: number, file: File) => {
+    if (file.size > 200 * 1024 * 1024) {
+      alert("영상은 200MB 이하만 업로드 가능합니다.");
+      return;
+    }
+    setExercises((prev) => prev.map((e, idx) =>
+      idx === i ? { ...e, videoUploading: true, videoFileName: file.name } : e
+    ));
+    try {
+      const res = await fetch("/api/upload/video", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileName: file.name, fileSize: file.size }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "영상 업로드에 실패했습니다. 다시 시도해주세요.");
+        setExercises((prev) => prev.map((e, idx) =>
+          idx === i ? { ...e, videoUploading: false, videoFileName: null } : e
+        ));
+        return;
+      }
+      const uploadForm = new FormData();
+      uploadForm.append("cacheControl", "3600");
+      uploadForm.append("file", file);
+      const uploadRes = await fetch(data.signedUrl, { method: "PUT", body: uploadForm });
+      if (!uploadRes.ok) throw new Error(`upload ${uploadRes.status}`);
+      setExercises((prev) => prev.map((e, idx) =>
+        idx === i ? { ...e, videoUploading: false, videoUrl: data.publicUrl } : e
+      ));
+    } catch {
+      alert("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+      setExercises((prev) => prev.map((e, idx) =>
+        idx === i ? { ...e, videoUploading: false, videoFileName: null } : e
+      ));
+    }
+  };
+
+  const clearVideo = (i: number) => {
+    setExercises((prev) => prev.map((e, idx) =>
+      idx === i ? { ...e, videoUrl: null, videoFileName: null } : e
+    ));
+    if (videoInputRefs.current[i]) videoInputRefs.current[i]!.value = "";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -59,6 +109,7 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
         name: e.name, sets: e.sets ? Number(e.sets) : null,
         reps: e.reps || null, weight: e.weight ? Number(e.weight) : null,
         unit: e.unit, memo: e.memo || null,
+        videoUrl: e.videoUrl || null,
       })),
     };
     const res = await fetch(`/api/group-sessions/${session.id}`, {
@@ -74,7 +125,14 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 max-w-2xl mx-auto lg:p-6">
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={(e) => {
+        const tag = (e.target as HTMLElement).tagName;
+        if (e.key === "Enter" && tag !== "BUTTON" && tag !== "TEXTAREA") e.preventDefault();
+      }}
+      className="space-y-4 p-4 max-w-2xl mx-auto lg:p-6"
+    >
       <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-4">
         <h3 className="text-sm font-semibold text-gray-700">기본 정보</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -108,8 +166,11 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
       <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-700">운동 목록</h3>
-          <button type="button" onClick={() => setExercises((p) => [...p, { name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "" }])}
-            className="flex items-center gap-1.5 text-xs text-indigo-600 font-medium py-1.5 px-3 rounded-lg hover:bg-indigo-50 transition-colors">
+          <button
+            type="button"
+            onClick={() => setExercises((p) => [...p, { name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrl: null, videoUploading: false, videoFileName: null }])}
+            className="flex items-center gap-1.5 text-xs text-indigo-600 font-medium py-1.5 px-3 rounded-lg hover:bg-indigo-50 transition-colors"
+          >
             <Plus size={14} /> 운동 추가
           </button>
         </div>
@@ -136,6 +197,7 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
                   <Trash2 size={16} />
                 </button>
               </div>
+
               <div className="grid grid-cols-4 gap-2">
                 {[
                   { label: "세트", key: "sets" as const, type: "number", placeholder: "3" },
@@ -158,8 +220,41 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
                   </select>
                 </div>
               </div>
+
               <input value={ex.memo} onChange={(e) => setEx(i, "memo", e.target.value)}
                 className={inputCls()} placeholder="메모 (선택)" />
+
+              {/* 영상 업로드 */}
+              <div>
+                <input
+                  ref={(el) => { videoInputRefs.current[i] = el; }}
+                  type="file" accept="video/*" className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleVideoSelect(i, f); }}
+                />
+                {ex.videoUrl ? (
+                  <div className="flex items-center gap-2 py-1">
+                    <CheckCircle size={15} className="text-emerald-500 shrink-0" />
+                    <span className="text-xs text-emerald-600 font-medium flex-1 truncate">영상 등록됨</span>
+                    <button type="button" onClick={() => clearVideo(i)} className="p-1 text-gray-300 hover:text-red-400 transition-colors">
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : ex.videoUploading ? (
+                  <div className="flex items-center gap-2 py-1">
+                    <Loader2 size={15} className="animate-spin text-indigo-500 shrink-0" />
+                    <span className="text-xs text-gray-400">영상 업로드 중...</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => videoInputRefs.current[i]?.click()}
+                    className="flex items-center gap-2 py-2 px-3 w-full border border-dashed border-gray-200 rounded-lg text-xs text-gray-400 hover:text-indigo-600 hover:border-indigo-300 active:bg-indigo-50 transition-colors"
+                  >
+                    <Video size={14} />
+                    영상 첨부 (카메라롤 또는 파일)
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
