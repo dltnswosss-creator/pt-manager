@@ -63,13 +63,19 @@ export default function GroupSessionForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 작성 중인 내용을 자동 저장
+  // 작성 중인 내용을 자동 저장 (입력된 내용이 없으면 저장하지 않음)
   useEffect(() => {
     if (!draftLoadedRef.current || saved) return;
+    const isEmpty = !title.trim() && !memo.trim() && participants.length === 0 &&
+      exercises.every((e) => !e.name.trim() && !e.sets && !e.reps && !e.weight && !e.memo.trim() && !e.videoUrl);
     try {
-      localStorage.setItem(draftKey, JSON.stringify({ date, title, memo, participants, exercises }));
+      if (isEmpty) {
+        localStorage.removeItem(draftKey);
+      } else {
+        localStorage.setItem(draftKey, JSON.stringify({ date, title, memo, participants, exercises }));
+      }
     } catch {}
-  }, [date, title, memo, participants, exercises, saved]);
+  }, [draftKey, date, title, memo, participants, exercises, saved]);
 
   // 저장 완료 시 임시 기록 삭제
   useEffect(() => {

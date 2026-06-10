@@ -70,11 +70,17 @@ export default function SessionForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 작성 중인 내용을 자동 저장
+  // 작성 중인 내용을 자동 저장 (입력된 내용이 없으면 저장하지 않음)
   useEffect(() => {
     if (!draftLoadedRef.current || saved) return;
+    const isEmpty = !clientId && !memo.trim() &&
+      exercises.every((e) => !e.name.trim() && !e.sets && !e.reps && !e.weight && !e.memo.trim() && !e.videoUrl);
     try {
-      localStorage.setItem(draftKey, JSON.stringify({ clientId, date, duration, memo, exercises }));
+      if (isEmpty) {
+        localStorage.removeItem(draftKey);
+      } else {
+        localStorage.setItem(draftKey, JSON.stringify({ clientId, date, duration, memo, exercises }));
+      }
     } catch {}
   }, [draftKey, clientId, date, duration, memo, exercises, saved]);
 
