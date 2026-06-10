@@ -6,7 +6,7 @@ import { COMMON_EXERCISES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
   Plus, Trash2, Video, CheckCircle, Loader2, X,
-  Copy, ExternalLink, Check,
+  Copy, ExternalLink, Check, ChevronUp, ChevronDown,
 } from "lucide-react";
 
 type ExerciseRow = {
@@ -98,6 +98,16 @@ export default function GroupSessionForm() {
     const t = name.trim();
     if (t && !participants.includes(t)) setParticipants((p) => [...p, t]);
     setParticipantInput("");
+  };
+
+  const moveExercise = (i: number, dir: -1 | 1) => {
+    setExercises((prev) => {
+      const j = i + dir;
+      if (j < 0 || j >= prev.length) return prev;
+      const copy = [...prev];
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+      return copy;
+    });
   };
 
   const setEx = (i: number, k: keyof ExerciseRow, v: string) => {
@@ -322,6 +332,24 @@ export default function GroupSessionForm() {
                       ))}
                     </div>
                   )}
+                </div>
+                <div className="flex flex-col shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => moveExercise(i, -1)}
+                    disabled={i === 0}
+                    className="p-0.5 text-gray-300 hover:text-indigo-500 active:text-indigo-600 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  >
+                    <ChevronUp size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveExercise(i, 1)}
+                    disabled={i === exercises.length - 1}
+                    className="p-0.5 text-gray-300 hover:text-indigo-500 active:text-indigo-600 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  >
+                    <ChevronDown size={16} />
+                  </button>
                 </div>
                 <button type="button" onClick={() => setExercises((p) => p.filter((_, idx) => idx !== i))}
                   className="p-2.5 text-gray-300 hover:text-red-400 transition-colors shrink-0">
