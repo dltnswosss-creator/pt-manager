@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { COMMON_EXERCISES } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -35,7 +35,58 @@ export default function GroupSessionForm() {
   const [saved, setSaved] = useState(false);
   const [notionUrl, setNotionUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
   const videoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const draftLoadedRef = useRef(false);
+
+  const draftKey = "pt-manager:group-session-draft";
+
+  // 임시 저장된 작성 중인 기록 복원
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw) {
+        const draft = JSON.parse(raw);
+        if (draft.date) setDate(draft.date);
+        if (draft.title !== undefined) setTitle(draft.title);
+        if (draft.memo !== undefined) setMemo(draft.memo);
+        if (Array.isArray(draft.participants)) setParticipants(draft.participants);
+        if (Array.isArray(draft.exercises) && draft.exercises.length) {
+          setExercises(draft.exercises.map((e: Partial<ExerciseRow>) => ({
+            ...emptyExercise(), ...e, videoUploading: false,
+          })));
+        }
+        setDraftRestored(true);
+      }
+    } catch {}
+    draftLoadedRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 작성 중인 내용을 자동 저장
+  useEffect(() => {
+    if (!draftLoadedRef.current || saved) return;
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({ date, title, memo, participants, exercises }));
+    } catch {}
+  }, [date, title, memo, participants, exercises, saved]);
+
+  // 저장 완료 시 임시 기록 삭제
+  useEffect(() => {
+    if (saved) {
+      try { localStorage.removeItem(draftKey); } catch {}
+    }
+  }, [saved]);
+
+  const discardDraft = () => {
+    try { localStorage.removeItem(draftKey); } catch {}
+    setDate(new Date().toISOString().split("T")[0]);
+    setTitle("");
+    setMemo("");
+    setParticipants([]);
+    setExercises([emptyExercise()]);
+    setDraftRestored(false);
+  };
 
   const addParticipant = (name: string) => {
     const t = name.trim();
@@ -194,6 +245,15 @@ export default function GroupSessionForm() {
       }}
       className="space-y-4 p-4 max-w-2xl mx-auto lg:p-6"
     >
+      {draftRestored && (
+        <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 text-xs text-amber-700">
+          <span>이전에 작성하던 기록을 불러왔어요.</span>
+          <button type="button" onClick={discardDraft} className="font-medium underline shrink-0">
+            새로 작성
+          </button>
+        </div>
+      )}
+
       {/* 기본 정보 */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-4">
         <h3 className="text-sm font-semibold text-gray-700">기본 정보</h3>
