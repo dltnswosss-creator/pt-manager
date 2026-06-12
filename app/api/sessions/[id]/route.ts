@@ -45,7 +45,7 @@ export async function PUT(req: NextRequest, ctx: RouteContext<"/api/sessions/[id
           weight: e.weight,
           unit: e.unit,
           memo: e.memo,
-          videoUrl: e.videoUrl ?? null,
+          videoUrls: e.videoUrls,
         })),
       });
     } catch (e) {

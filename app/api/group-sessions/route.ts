@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
           weight: e.weight,
           unit: e.unit,
           memo: e.memo,
-          videoUrl: (e as Record<string, unknown>).videoUrl as string | null,
+          videoUrls: e.videoUrls,
         })),
       });
       await prisma.groupSession.update({

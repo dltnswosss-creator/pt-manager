@@ -40,7 +40,7 @@ type Exercise = {
   weight: number | null;
   unit: string;
   memo: string | null;
-  videoUrl?: string | null;
+  videoUrls?: string[];
 };
 
 type SessionData = {
@@ -126,9 +126,7 @@ function buildExerciseBlocks(exercises: Exercise[]) {
       paragraph(`${i + 1}. ${e.name}`, true),
       paragraph(`   ${exerciseText(e)}${memoText}`)
     );
-    if (e.videoUrl) {
-      blocks.push(videoBlock(e.videoUrl));
-    }
+    e.videoUrls?.forEach((url) => blocks.push(videoBlock(url)));
   });
   return blocks;
 }

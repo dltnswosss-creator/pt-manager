@@ -35,7 +35,7 @@ export async function POST(_req: NextRequest, ctx: RouteContext<"/api/sessions/[
       weight: e.weight,
       unit: e.unit,
       memo: e.memo,
-      videoUrl: e.videoUrl,
+      videoUrls: e.videoUrls,
     })),
   });
 

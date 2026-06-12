@@ -70,17 +70,17 @@ model GroupSession {
 }
 
 model Exercise {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   sessionId Int
-  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   name      String
   sets      Int?
   reps      String?
   weight    Float?
-  unit      String  @default("kg")
+  unit      String   @default("kg")
   memo      String?
-  videoUrl  String?
-  order     Int     @default(0)
+  videoUrls String[] @default([])
+  order     Int      @default(0)
 }
 
 model GroupExercise {
@@ -93,7 +93,7 @@ model GroupExercise {
   weight         Float?
   unit           String       @default("kg")
   memo           String?
-  videoUrl       String?
+  videoUrls      String[]     @default([])
   order          Int          @default(0)
 }
 

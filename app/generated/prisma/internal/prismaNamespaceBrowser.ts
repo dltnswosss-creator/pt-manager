@@ -141,7 +141,7 @@ export const ExerciseScalarFieldEnum = {
   weight: 'weight',
   unit: 'unit',
   memo: 'memo',
-  videoUrl: 'videoUrl',
+  videoUrls: 'videoUrls',
   order: 'order'
 } as const
 
@@ -157,7 +157,7 @@ export const GroupExerciseScalarFieldEnum = {
   weight: 'weight',
   unit: 'unit',
   memo: 'memo',
-  videoUrl: 'videoUrl',
+  videoUrls: 'videoUrls',
   order: 'order'
 } as const
 

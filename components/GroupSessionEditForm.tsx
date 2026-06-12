@@ -8,7 +8,7 @@ import { Plus, Trash2, Loader2, Video, CheckCircle, X, ChevronUp, ChevronDown } 
 
 type ExerciseRow = {
   name: string; sets: string; reps: string; weight: string; unit: string; memo: string;
-  videoUrl: string | null; videoUploading: boolean; videoFileName: string | null;
+  videoUrls: string[]; videoUploading: boolean;
 };
 type GroupSession = {
   id: number;
@@ -16,7 +16,7 @@ type GroupSession = {
   title: string | null;
   memo: string | null;
   participants: string[];
-  exercises: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; videoUrl: string | null }[];
+  exercises: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; videoUrls: string[] }[];
 };
 
 export default function GroupSessionEditForm({ session }: { session: GroupSession }) {
@@ -33,9 +33,9 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
           name: e.name, sets: e.sets?.toString() ?? "",
           reps: e.reps ?? "", weight: e.weight?.toString() ?? "",
           unit: e.unit, memo: e.memo ?? "",
-          videoUrl: e.videoUrl ?? null, videoUploading: false, videoFileName: null,
+          videoUrls: e.videoUrls ?? [], videoUploading: false,
         }))
-      : [{ name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrl: null, videoUploading: false, videoFileName: null }]
+      : [{ name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrls: [], videoUploading: false }]
   );
   const [suggestion, setSuggestion] = useState<{ idx: number; results: string[] } | null>(null);
   const videoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -71,7 +71,7 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
       return;
     }
     setExercises((prev) => prev.map((e, idx) =>
-      idx === i ? { ...e, videoUploading: true, videoFileName: file.name } : e
+      idx === i ? { ...e, videoUploading: true } : e
     ));
     try {
       const res = await fetch("/api/upload/video", {
@@ -83,7 +83,7 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
       if (!res.ok) {
         alert(data.error || "영상 업로드에 실패했습니다. 다시 시도해주세요.");
         setExercises((prev) => prev.map((e, idx) =>
-          idx === i ? { ...e, videoUploading: false, videoFileName: null } : e
+          idx === i ? { ...e, videoUploading: false } : e
         ));
         return;
       }
@@ -93,21 +93,21 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
       const uploadRes = await fetch(data.signedUrl, { method: "PUT", body: uploadForm });
       if (!uploadRes.ok) throw new Error(`upload ${uploadRes.status}`);
       setExercises((prev) => prev.map((e, idx) =>
-        idx === i ? { ...e, videoUploading: false, videoUrl: data.publicUrl } : e
+        idx === i ? { ...e, videoUploading: false, videoUrls: [...e.videoUrls, data.publicUrl] } : e
       ));
     } catch {
       alert("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
       setExercises((prev) => prev.map((e, idx) =>
-        idx === i ? { ...e, videoUploading: false, videoFileName: null } : e
+        idx === i ? { ...e, videoUploading: false } : e
       ));
     }
+    if (videoInputRefs.current[i]) videoInputRefs.current[i]!.value = "";
   };
 
-  const clearVideo = (i: number) => {
+  const removeVideo = (i: number, videoIdx: number) => {
     setExercises((prev) => prev.map((e, idx) =>
-      idx === i ? { ...e, videoUrl: null, videoFileName: null } : e
+      idx === i ? { ...e, videoUrls: e.videoUrls.filter((_, vi) => vi !== videoIdx) } : e
     ));
-    if (videoInputRefs.current[i]) videoInputRefs.current[i]!.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,7 +119,7 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
         name: e.name, sets: e.sets ? Number(e.sets) : null,
         reps: e.reps || null, weight: e.weight ? Number(e.weight) : null,
         unit: e.unit, memo: e.memo || null,
-        videoUrl: e.videoUrl || null,
+        videoUrls: e.videoUrls,
       })),
     };
     const res = await fetch(`/api/group-sessions/${session.id}`, {
@@ -178,7 +178,7 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
           <h3 className="text-sm font-semibold text-gray-700">운동 목록</h3>
           <button
             type="button"
-            onClick={() => setExercises((p) => [...p, { name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrl: null, videoUploading: false, videoFileName: null }])}
+            onClick={() => setExercises((p) => [...p, { name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrls: [], videoUploading: false }])}
             className="flex items-center gap-1.5 text-xs text-indigo-600 font-medium py-1.5 px-3 rounded-lg hover:bg-indigo-50 transition-colors"
           >
             <Plus size={14} /> 운동 추가
@@ -253,21 +253,22 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
                 className={inputCls()} placeholder="메모 (선택)" />
 
               {/* 영상 업로드 */}
-              <div>
+              <div className="space-y-1.5">
                 <input
                   ref={(el) => { videoInputRefs.current[i] = el; }}
                   type="file" accept="video/*" className="hidden"
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) handleVideoSelect(i, f); }}
                 />
-                {ex.videoUrl ? (
-                  <div className="flex items-center gap-2 py-1">
+                {ex.videoUrls.map((url, vi) => (
+                  <div key={url} className="flex items-center gap-2 py-1">
                     <CheckCircle size={15} className="text-emerald-500 shrink-0" />
-                    <span className="text-xs text-emerald-600 font-medium flex-1 truncate">영상 등록됨</span>
-                    <button type="button" onClick={() => clearVideo(i)} className="p-1 text-gray-300 hover:text-red-400 transition-colors">
+                    <span className="text-xs text-emerald-600 font-medium flex-1 truncate">영상 {vi + 1} 등록됨</span>
+                    <button type="button" onClick={() => removeVideo(i, vi)} className="p-1 text-gray-300 hover:text-red-400 transition-colors">
                       <X size={14} />
                     </button>
                   </div>
-                ) : ex.videoUploading ? (
+                ))}
+                {ex.videoUploading ? (
                   <div className="flex items-center gap-2 py-1">
                     <Loader2 size={15} className="animate-spin text-indigo-500 shrink-0" />
                     <span className="text-xs text-gray-400">영상 업로드 중...</span>
@@ -279,7 +280,7 @@ export default function GroupSessionEditForm({ session }: { session: GroupSessio
                     className="flex items-center gap-2 py-2 px-3 w-full border border-dashed border-gray-200 rounded-lg text-xs text-gray-400 hover:text-indigo-600 hover:border-indigo-300 active:bg-indigo-50 transition-colors"
                   >
                     <Video size={14} />
-                    영상 첨부 (카메라롤 또는 파일)
+                    {ex.videoUrls.length > 0 ? "영상 추가 첨부" : "영상 첨부 (카메라롤 또는 파일)"}
                   </button>
                 )}
               </div>

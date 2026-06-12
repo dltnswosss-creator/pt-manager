@@ -51,7 +51,6 @@ export type GroupExerciseMinAggregateOutputType = {
   weight: number | null
   unit: string | null
   memo: string | null
-  videoUrl: string | null
   order: number | null
 }
 
@@ -64,7 +63,6 @@ export type GroupExerciseMaxAggregateOutputType = {
   weight: number | null
   unit: string | null
   memo: string | null
-  videoUrl: string | null
   order: number | null
 }
 
@@ -77,7 +75,7 @@ export type GroupExerciseCountAggregateOutputType = {
   weight: number
   unit: number
   memo: number
-  videoUrl: number
+  videoUrls: number
   order: number
   _all: number
 }
@@ -108,7 +106,6 @@ export type GroupExerciseMinAggregateInputType = {
   weight?: true
   unit?: true
   memo?: true
-  videoUrl?: true
   order?: true
 }
 
@@ -121,7 +118,6 @@ export type GroupExerciseMaxAggregateInputType = {
   weight?: true
   unit?: true
   memo?: true
-  videoUrl?: true
   order?: true
 }
 
@@ -134,7 +130,7 @@ export type GroupExerciseCountAggregateInputType = {
   weight?: true
   unit?: true
   memo?: true
-  videoUrl?: true
+  videoUrls?: true
   order?: true
   _all?: true
 }
@@ -234,7 +230,7 @@ export type GroupExerciseGroupByOutputType = {
   weight: number | null
   unit: string
   memo: string | null
-  videoUrl: string | null
+  videoUrls: string[]
   order: number
   _count: GroupExerciseCountAggregateOutputType | null
   _avg: GroupExerciseAvgAggregateOutputType | null
@@ -270,7 +266,7 @@ export type GroupExerciseWhereInput = {
   weight?: Prisma.FloatNullableFilter<"GroupExercise"> | number | null
   unit?: Prisma.StringFilter<"GroupExercise"> | string
   memo?: Prisma.StringNullableFilter<"GroupExercise"> | string | null
-  videoUrl?: Prisma.StringNullableFilter<"GroupExercise"> | string | null
+  videoUrls?: Prisma.StringNullableListFilter<"GroupExercise">
   order?: Prisma.IntFilter<"GroupExercise"> | number
   groupSession?: Prisma.XOR<Prisma.GroupSessionScalarRelationFilter, Prisma.GroupSessionWhereInput>
 }
@@ -284,7 +280,7 @@ export type GroupExerciseOrderByWithRelationInput = {
   weight?: Prisma.SortOrderInput | Prisma.SortOrder
   unit?: Prisma.SortOrder
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
-  videoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  videoUrls?: Prisma.SortOrder
   order?: Prisma.SortOrder
   groupSession?: Prisma.GroupSessionOrderByWithRelationInput
 }
@@ -301,7 +297,7 @@ export type GroupExerciseWhereUniqueInput = Prisma.AtLeast<{
   weight?: Prisma.FloatNullableFilter<"GroupExercise"> | number | null
   unit?: Prisma.StringFilter<"GroupExercise"> | string
   memo?: Prisma.StringNullableFilter<"GroupExercise"> | string | null
-  videoUrl?: Prisma.StringNullableFilter<"GroupExercise"> | string | null
+  videoUrls?: Prisma.StringNullableListFilter<"GroupExercise">
   order?: Prisma.IntFilter<"GroupExercise"> | number
   groupSession?: Prisma.XOR<Prisma.GroupSessionScalarRelationFilter, Prisma.GroupSessionWhereInput>
 }, "id">
@@ -315,7 +311,7 @@ export type GroupExerciseOrderByWithAggregationInput = {
   weight?: Prisma.SortOrderInput | Prisma.SortOrder
   unit?: Prisma.SortOrder
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
-  videoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  videoUrls?: Prisma.SortOrder
   order?: Prisma.SortOrder
   _count?: Prisma.GroupExerciseCountOrderByAggregateInput
   _avg?: Prisma.GroupExerciseAvgOrderByAggregateInput
@@ -336,7 +332,7 @@ export type GroupExerciseScalarWhereWithAggregatesInput = {
   weight?: Prisma.FloatNullableWithAggregatesFilter<"GroupExercise"> | number | null
   unit?: Prisma.StringWithAggregatesFilter<"GroupExercise"> | string
   memo?: Prisma.StringNullableWithAggregatesFilter<"GroupExercise"> | string | null
-  videoUrl?: Prisma.StringNullableWithAggregatesFilter<"GroupExercise"> | string | null
+  videoUrls?: Prisma.StringNullableListFilter<"GroupExercise">
   order?: Prisma.IntWithAggregatesFilter<"GroupExercise"> | number
 }
 
@@ -347,7 +343,7 @@ export type GroupExerciseCreateInput = {
   weight?: number | null
   unit?: string
   memo?: string | null
-  videoUrl?: string | null
+  videoUrls?: Prisma.GroupExerciseCreatevideoUrlsInput | string[]
   order?: number
   groupSession: Prisma.GroupSessionCreateNestedOneWithoutExercisesInput
 }
@@ -361,7 +357,7 @@ export type GroupExerciseUncheckedCreateInput = {
   weight?: number | null
   unit?: string
   memo?: string | null
-  videoUrl?: string | null
+  videoUrls?: Prisma.GroupExerciseCreatevideoUrlsInput | string[]
   order?: number
 }
 
@@ -372,7 +368,7 @@ export type GroupExerciseUpdateInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoUrls?: Prisma.GroupExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
   groupSession?: Prisma.GroupSessionUpdateOneRequiredWithoutExercisesNestedInput
 }
@@ -386,7 +382,7 @@ export type GroupExerciseUncheckedUpdateInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoUrls?: Prisma.GroupExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -399,7 +395,7 @@ export type GroupExerciseCreateManyInput = {
   weight?: number | null
   unit?: string
   memo?: string | null
-  videoUrl?: string | null
+  videoUrls?: Prisma.GroupExerciseCreatevideoUrlsInput | string[]
   order?: number
 }
 
@@ -410,7 +406,7 @@ export type GroupExerciseUpdateManyMutationInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoUrls?: Prisma.GroupExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -423,7 +419,7 @@ export type GroupExerciseUncheckedUpdateManyInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoUrls?: Prisma.GroupExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -446,7 +442,7 @@ export type GroupExerciseCountOrderByAggregateInput = {
   weight?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   memo?: Prisma.SortOrder
-  videoUrl?: Prisma.SortOrder
+  videoUrls?: Prisma.SortOrder
   order?: Prisma.SortOrder
 }
 
@@ -467,7 +463,6 @@ export type GroupExerciseMaxOrderByAggregateInput = {
   weight?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   memo?: Prisma.SortOrder
-  videoUrl?: Prisma.SortOrder
   order?: Prisma.SortOrder
 }
 
@@ -480,7 +475,6 @@ export type GroupExerciseMinOrderByAggregateInput = {
   weight?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   memo?: Prisma.SortOrder
-  videoUrl?: Prisma.SortOrder
   order?: Prisma.SortOrder
 }
 
@@ -534,6 +528,15 @@ export type GroupExerciseUncheckedUpdateManyWithoutGroupSessionNestedInput = {
   deleteMany?: Prisma.GroupExerciseScalarWhereInput | Prisma.GroupExerciseScalarWhereInput[]
 }
 
+export type GroupExerciseCreatevideoUrlsInput = {
+  set: string[]
+}
+
+export type GroupExerciseUpdatevideoUrlsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
 export type GroupExerciseCreateWithoutGroupSessionInput = {
   name: string
   sets?: number | null
@@ -541,7 +544,7 @@ export type GroupExerciseCreateWithoutGroupSessionInput = {
   weight?: number | null
   unit?: string
   memo?: string | null
-  videoUrl?: string | null
+  videoUrls?: Prisma.GroupExerciseCreatevideoUrlsInput | string[]
   order?: number
 }
 
@@ -553,7 +556,7 @@ export type GroupExerciseUncheckedCreateWithoutGroupSessionInput = {
   weight?: number | null
   unit?: string
   memo?: string | null
-  videoUrl?: string | null
+  videoUrls?: Prisma.GroupExerciseCreatevideoUrlsInput | string[]
   order?: number
 }
 
@@ -595,7 +598,7 @@ export type GroupExerciseScalarWhereInput = {
   weight?: Prisma.FloatNullableFilter<"GroupExercise"> | number | null
   unit?: Prisma.StringFilter<"GroupExercise"> | string
   memo?: Prisma.StringNullableFilter<"GroupExercise"> | string | null
-  videoUrl?: Prisma.StringNullableFilter<"GroupExercise"> | string | null
+  videoUrls?: Prisma.StringNullableListFilter<"GroupExercise">
   order?: Prisma.IntFilter<"GroupExercise"> | number
 }
 
@@ -607,7 +610,7 @@ export type GroupExerciseCreateManyGroupSessionInput = {
   weight?: number | null
   unit?: string
   memo?: string | null
-  videoUrl?: string | null
+  videoUrls?: Prisma.GroupExerciseCreatevideoUrlsInput | string[]
   order?: number
 }
 
@@ -618,7 +621,7 @@ export type GroupExerciseUpdateWithoutGroupSessionInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoUrls?: Prisma.GroupExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -630,7 +633,7 @@ export type GroupExerciseUncheckedUpdateWithoutGroupSessionInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoUrls?: Prisma.GroupExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -642,7 +645,7 @@ export type GroupExerciseUncheckedUpdateManyWithoutGroupSessionInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  videoUrls?: Prisma.GroupExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -657,7 +660,7 @@ export type GroupExerciseSelect<ExtArgs extends runtime.Types.Extensions.Interna
   weight?: boolean
   unit?: boolean
   memo?: boolean
-  videoUrl?: boolean
+  videoUrls?: boolean
   order?: boolean
   groupSession?: boolean | Prisma.GroupSessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["groupExercise"]>
@@ -671,7 +674,7 @@ export type GroupExerciseSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   weight?: boolean
   unit?: boolean
   memo?: boolean
-  videoUrl?: boolean
+  videoUrls?: boolean
   order?: boolean
   groupSession?: boolean | Prisma.GroupSessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["groupExercise"]>
@@ -685,7 +688,7 @@ export type GroupExerciseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   weight?: boolean
   unit?: boolean
   memo?: boolean
-  videoUrl?: boolean
+  videoUrls?: boolean
   order?: boolean
   groupSession?: boolean | Prisma.GroupSessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["groupExercise"]>
@@ -699,11 +702,11 @@ export type GroupExerciseSelectScalar = {
   weight?: boolean
   unit?: boolean
   memo?: boolean
-  videoUrl?: boolean
+  videoUrls?: boolean
   order?: boolean
 }
 
-export type GroupExerciseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "groupSessionId" | "name" | "sets" | "reps" | "weight" | "unit" | "memo" | "videoUrl" | "order", ExtArgs["result"]["groupExercise"]>
+export type GroupExerciseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "groupSessionId" | "name" | "sets" | "reps" | "weight" | "unit" | "memo" | "videoUrls" | "order", ExtArgs["result"]["groupExercise"]>
 export type GroupExerciseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   groupSession?: boolean | Prisma.GroupSessionDefaultArgs<ExtArgs>
 }
@@ -728,7 +731,7 @@ export type $GroupExercisePayload<ExtArgs extends runtime.Types.Extensions.Inter
     weight: number | null
     unit: string
     memo: string | null
-    videoUrl: string | null
+    videoUrls: string[]
     order: number
   }, ExtArgs["result"]["groupExercise"]>
   composites: {}
@@ -1162,7 +1165,7 @@ export interface GroupExerciseFieldRefs {
   readonly weight: Prisma.FieldRef<"GroupExercise", 'Float'>
   readonly unit: Prisma.FieldRef<"GroupExercise", 'String'>
   readonly memo: Prisma.FieldRef<"GroupExercise", 'String'>
-  readonly videoUrl: Prisma.FieldRef<"GroupExercise", 'String'>
+  readonly videoUrls: Prisma.FieldRef<"GroupExercise", 'String[]'>
   readonly order: Prisma.FieldRef<"GroupExercise", 'Int'>
 }
     

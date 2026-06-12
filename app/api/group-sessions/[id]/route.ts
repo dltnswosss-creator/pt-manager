@@ -44,7 +44,7 @@ export async function PUT(req: NextRequest, ctx: RouteContext<"/api/group-sessio
           weight: e.weight,
           unit: e.unit,
           memo: e.memo,
-          videoUrl: e.videoUrl ?? null,
+          videoUrls: e.videoUrls,
         })),
       });
     } catch (e) {
