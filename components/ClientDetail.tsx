@@ -13,8 +13,9 @@ import { cn } from "@/lib/utils";
 import { ArrowLeft, Edit, Trash2, Plus, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import SessionExportButton from "@/components/SessionExportButton";
 import NotionShareButton from "@/components/NotionShareButton";
+import ExerciseVideoUpload from "@/components/ExerciseVideoUpload";
 
-type Exercise = { id: number; name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null };
+type Exercise = { id: number; name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; videoUrls: string[] };
 type Session = { id: number; date: string; sessionType: string; duration: number | null; memo: string | null; notionUrl: string | null; exercises: Exercise[] };
 type MenstrualCycle = { lastStartDate: string; cycleLength: number; periodLength: number; memo: string | null } | null;
 type Client = {
@@ -244,14 +245,22 @@ export default function ClientDetail({ client }: { client: Client }) {
                             </thead>
                             <tbody>
                               {s.exercises.map((e, i) => (
-                                <tr key={e.id} className="border-t border-gray-50">
-                                  <td className="py-1.5 text-gray-300 text-xs">{i + 1}</td>
-                                  <td className="py-1.5 font-medium text-gray-900">{e.name}</td>
-                                  <td className="py-1.5 text-gray-600">{e.sets ?? "-"}</td>
-                                  <td className="py-1.5 text-gray-600">{e.reps ?? "-"}</td>
-                                  <td className="py-1.5 text-gray-600">{e.weight ? `${e.weight}${e.unit}` : "-"}</td>
-                                  <td className="py-1.5 text-gray-400 text-xs">{e.memo ?? ""}</td>
-                                </tr>
+                                <>
+                                  <tr key={e.id} className="border-t border-gray-50">
+                                    <td className="py-1.5 text-gray-300 text-xs">{i + 1}</td>
+                                    <td className="py-1.5 font-medium text-gray-900">{e.name}</td>
+                                    <td className="py-1.5 text-gray-600">{e.sets ?? "-"}</td>
+                                    <td className="py-1.5 text-gray-600">{e.reps ?? "-"}</td>
+                                    <td className="py-1.5 text-gray-600">{e.weight ? `${e.weight}${e.unit}` : "-"}</td>
+                                    <td className="py-1.5 text-gray-400 text-xs">{e.memo ?? ""}</td>
+                                  </tr>
+                                  <tr key={`${e.id}-video`} className="border-t-0">
+                                    <td />
+                                    <td colSpan={5} className="pb-2">
+                                      <ExerciseVideoUpload exerciseId={e.id} initialVideoUrls={e.videoUrls ?? []} />
+                                    </td>
+                                  </tr>
+                                </>
                               ))}
                             </tbody>
                           </table>
