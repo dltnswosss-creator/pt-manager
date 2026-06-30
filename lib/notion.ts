@@ -113,8 +113,16 @@ function callout(text: string, emoji: string) {
 function videoBlock(url: string) {
   return {
     object: "block" as const,
-    type: "video" as const,
-    video: { type: "external" as const, external: { url } },
+    type: "paragraph" as const,
+    paragraph: {
+      rich_text: [
+        {
+          type: "text" as const,
+          text: { content: "📹 영상 보기", link: { url } },
+          annotations: { bold: false, italic: false, strikethrough: false, underline: true, code: false, color: "blue" as const },
+        },
+      ],
+    },
   };
 }
 
