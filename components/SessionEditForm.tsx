@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { COMMON_EXERCISES } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -66,29 +67,15 @@ export default function SessionEditForm({ session }: { session: Session }) {
       idx === i ? { ...e, videoUploading: true } : e
     ));
     try {
-      const res = await fetch("/api/upload/video", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: file.name, fileSize: file.size }),
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/upload/video",
       });
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.error || "영상 업로드에 실패했습니다. 다시 시도해주세요.");
-        setExercises((prev) => prev.map((e, idx) =>
-          idx === i ? { ...e, videoUploading: false } : e
-        ));
-        return;
-      }
-      const uploadForm = new FormData();
-      uploadForm.append("cacheControl", "3600");
-      uploadForm.append("file", file);
-      const uploadRes = await fetch(data.signedUrl, { method: "PUT", body: uploadForm });
-      if (!uploadRes.ok) throw new Error(`upload ${uploadRes.status}`);
       setExercises((prev) => prev.map((e, idx) =>
-        idx === i ? { ...e, videoUploading: false, videoUrls: [...e.videoUrls, data.publicUrl] } : e
+        idx === i ? { ...e, videoUploading: false, videoUrls: [...e.videoUrls, blob.url] } : e
       ));
     } catch {
-      alert("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+      alert("영상 업로드에 실패했습니다. 다시 시도해주세요.");
       setExercises((prev) => prev.map((e, idx) =>
         idx === i ? { ...e, videoUploading: false } : e
       ));
