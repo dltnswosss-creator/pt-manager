@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
         ? { create: exercises.map((e: Record<string, unknown>, i: number) => ({ ...e, order: i })) }
         : undefined,
     },
-    include: { exercises: true, client: true },
+    include: { exercises: { orderBy: { order: "asc" } }, client: true },
   });
 
   let notionUrl: string | null = null;

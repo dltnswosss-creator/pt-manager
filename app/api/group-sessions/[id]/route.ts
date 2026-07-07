@@ -27,7 +27,7 @@ export async function PUT(req: NextRequest, ctx: RouteContext<"/api/group-sessio
         ? { create: exercises.map((e: Record<string, unknown>, i: number) => ({ ...e, order: i })) }
         : undefined,
     },
-    include: { exercises: true },
+    include: { exercises: { orderBy: { order: "asc" } } },
   });
 
   if (process.env.NOTION_API_KEY && session.notionUrl) {

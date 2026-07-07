@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         ? { create: exercises.map((e: Record<string, unknown>, i: number) => ({ ...e, order: i })) }
         : undefined,
     },
-    include: { exercises: true },
+    include: { exercises: { orderBy: { order: "asc" } } },
   });
 
   let notionUrl: string | null = null;
