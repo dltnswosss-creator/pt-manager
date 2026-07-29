@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -10,10 +10,11 @@ import {
 } from "@/lib/types";
 import { calcAge, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Edit, Trash2, Plus, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Plus, ChevronDown, ChevronUp, Pencil, TrendingUp } from "lucide-react";
 import SessionExportButton from "@/components/SessionExportButton";
 import NotionShareButton from "@/components/NotionShareButton";
 import ExerciseVideoUpload from "@/components/ExerciseVideoUpload";
+import ExerciseTrendChart from "@/components/ExerciseTrendChart";
 
 type Exercise = { id: number; name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; videoUrls: string[] };
 type Session = { id: number; date: string; sessionType: string; duration: number | null; memo: string | null; notionUrl: string | null; exercises: Exercise[] };
@@ -28,7 +29,28 @@ type Client = {
 
 export default function ClientDetail({ client }: { client: Client }) {
   const router = useRouter();
-  const tabs = ["인적사항", "수업 기록", ...(client.gender === "female" ? ["생리주기"] : [])];
+
+  const exerciseHistory = useMemo(() => {
+    const map = new Map<string, { date: string; weight: number; unit: string }[]>();
+    const sortedSessions = [...client.sessions].sort((a, b) => a.date.localeCompare(b.date));
+    for (const s of sortedSessions) {
+      for (const e of s.exercises) {
+        if (e.weight == null) continue;
+        const arr = map.get(e.name) ?? [];
+        arr.push({ date: s.date, weight: e.weight, unit: e.unit });
+        map.set(e.name, arr);
+      }
+    }
+    return Array.from(map.entries())
+      .filter(([, points]) => points.length >= 2)
+      .sort((a, b) => b[1].length - a[1].length);
+  }, [client.sessions]);
+
+  const tabs = [
+    "인적사항", "수업 기록",
+    ...(exerciseHistory.length > 0 ? ["진행 추이"] : []),
+    ...(client.gender === "female" ? ["생리주기"] : []),
+  ];
   const [tab, setTab] = useState(tabs[0]);
   const [cycleForm, setCycleForm] = useState({
     lastStartDate: client.menstrualCycle?.lastStartDate ?? "",
@@ -278,6 +300,24 @@ export default function ClientDetail({ client }: { client: Client }) {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* 진행 추이 탭 */}
+      {tab === "진행 추이" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {exerciseHistory.map(([name, points]) => (
+            <div key={name} className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp size={14} className="text-indigo-500" />
+                  <p className="text-sm font-semibold text-gray-900">{name}</p>
+                </div>
+                <span className="text-xs text-gray-400">{points.length}회 기록</span>
+              </div>
+              <ExerciseTrendChart points={points} />
+            </div>
+          ))}
         </div>
       )}
 

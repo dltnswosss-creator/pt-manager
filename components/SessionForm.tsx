@@ -7,7 +7,7 @@ import { COMMON_EXERCISES } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
   Plus, Trash2, Video, CheckCircle, Loader2, X,
-  Copy, ExternalLink, Check, ChevronUp, ChevronDown,
+  Copy, ExternalLink, Check, ChevronUp, ChevronDown, History,
 } from "lucide-react";
 
 type ExerciseRow = {
@@ -42,6 +42,7 @@ export default function SessionForm({
   const [notionUrl, setNotionUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
+  const [loadingPrev, setLoadingPrev] = useState(false);
   const videoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const draftLoadedRef = useRef(false);
 
@@ -110,6 +111,38 @@ export default function SessionForm({
       [copy[i], copy[j]] = [copy[j], copy[i]];
       return copy;
     });
+  };
+
+  const loadPreviousSession = async () => {
+    if (!clientId) return;
+    const hasData = exercises.some((e) => e.name.trim() || e.sets || e.reps || e.weight || e.memo.trim());
+    if (hasData && !confirm("작성 중인 운동 목록을 이전 수업 내용으로 덮어쓸까요?")) return;
+    setLoadingPrev(true);
+    try {
+      const res = await fetch(`/api/clients/${clientId}`);
+      const data = await res.json();
+      const last = data.sessions?.[0];
+      if (!last || !last.exercises?.length) {
+        alert("불러올 이전 수업 기록이 없습니다.");
+        return;
+      }
+      setExercises(
+        last.exercises.map((e: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string }) => ({
+          name: e.name,
+          sets: e.sets != null ? String(e.sets) : "",
+          reps: e.reps ?? "",
+          weight: e.weight != null ? String(e.weight) : "",
+          unit: e.unit ?? "kg",
+          memo: "",
+          videoUrls: [],
+          videoUploading: false,
+        }))
+      );
+    } catch {
+      alert("이전 수업 기록을 불러오지 못했습니다.");
+    } finally {
+      setLoadingPrev(false);
+    }
   };
 
   const setEx = (i: number, k: keyof ExerciseRow, v: string) => {
@@ -299,13 +332,24 @@ export default function SessionForm({
       <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-700">운동 목록</h3>
-          <button
-            type="button"
-            onClick={() => setExercises((p) => [...p, emptyExercise()])}
-            className="flex items-center gap-1.5 text-xs text-indigo-600 font-medium py-1.5 px-3 rounded-lg hover:bg-indigo-50 active:bg-indigo-100 transition-colors"
-          >
-            <Plus size={14} /> 운동 추가
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={loadPreviousSession}
+              disabled={!clientId || loadingPrev}
+              className="flex items-center gap-1.5 text-xs text-gray-500 font-medium py-1.5 px-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            >
+              {loadingPrev ? <Loader2 size={14} className="animate-spin" /> : <History size={14} />}
+              이전 수업 불러오기
+            </button>
+            <button
+              type="button"
+              onClick={() => setExercises((p) => [...p, emptyExercise()])}
+              className="flex items-center gap-1.5 text-xs text-indigo-600 font-medium py-1.5 px-3 rounded-lg hover:bg-indigo-50 active:bg-indigo-100 transition-colors"
+            >
+              <Plus size={14} /> 운동 추가
+            </button>
+          </div>
         </div>
 
         <div className="space-y-3">
