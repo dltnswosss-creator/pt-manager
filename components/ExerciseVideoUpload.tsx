@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Video, Loader2, CheckCircle, X, ExternalLink } from "lucide-react";
+import { uploadWithProgress } from "@/lib/utils";
 
 export default function ExerciseVideoUpload({
   exerciseId,
@@ -12,6 +13,7 @@ export default function ExerciseVideoUpload({
 }) {
   const [videoUrls, setVideoUrls] = useState(initialVideoUrls);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
@@ -20,6 +22,7 @@ export default function ExerciseVideoUpload({
       return;
     }
     setUploading(true);
+    setProgress(0);
     try {
       const res = await fetch("/api/upload/video", {
         method: "POST",
@@ -31,8 +34,7 @@ export default function ExerciseVideoUpload({
         alert(data.error || "업로드 실패");
         return;
       }
-      const uploadRes = await fetch(data.signedUrl, { method: "PUT", body: file });
-      if (!uploadRes.ok) throw new Error(`upload ${uploadRes.status}`);
+      await uploadWithProgress(data.signedUrl, file, setProgress);
 
       const newUrls = [...videoUrls, data.publicUrl];
       const patchRes = await fetch(`/api/exercises/${exerciseId}/videos`, {
@@ -42,8 +44,11 @@ export default function ExerciseVideoUpload({
       });
       if (!patchRes.ok) throw new Error("DB 저장 실패");
       setVideoUrls(newUrls);
-    } catch {
-      alert("영상 업로드에 실패했습니다. 다시 시도해주세요.");
+    } catch (err) {
+      const timedOut = err instanceof Error && err.message === "upload timed out";
+      alert(timedOut
+        ? "업로드가 너무 오래 걸려 취소했습니다. 네트워크 상태를 확인하고 다시 시도해주세요."
+        : "영상 업로드에 실패했습니다. 네트워크 상태를 확인하고 다시 시도해주세요.");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -91,7 +96,7 @@ export default function ExerciseVideoUpload({
       {uploading ? (
         <div className="flex items-center gap-1.5">
           <Loader2 size={13} className="animate-spin text-indigo-500 shrink-0" />
-          <span className="text-xs text-gray-400">업로드 중...</span>
+          <span className="text-xs text-gray-400">업로드 중... {progress}%</span>
         </div>
       ) : (
         <button

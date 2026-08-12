@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { COMMON_EXERCISES } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, uploadWithProgress } from "@/lib/utils";
 import {
   Plus, Trash2, Video, CheckCircle, Loader2, X,
   Copy, ExternalLink, Check, ChevronUp, ChevronDown, History,
@@ -15,12 +15,13 @@ type ExerciseRow = {
   unit: string; memo: string;
   videoUrls: string[];
   videoUploading: boolean;
+  videoProgress: number;
 };
 type Client = { id: number; name: string };
 
 const emptyExercise = (): ExerciseRow => ({
   name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "",
-  videoUrls: [], videoUploading: false,
+  videoUrls: [], videoUploading: false, videoProgress: 0,
 });
 
 export default function SessionForm({
@@ -63,6 +64,7 @@ export default function SessionForm({
             ...emptyExercise(), ...e,
             videoUrls: Array.isArray(e.videoUrls) ? e.videoUrls : (e.videoUrl ? [e.videoUrl] : []),
             videoUploading: false,
+            videoProgress: 0,
           })));
         }
         setDraftRestored(true);
@@ -160,7 +162,7 @@ export default function SessionForm({
       return;
     }
     setExercises((prev) => prev.map((e, idx) =>
-      idx === i ? { ...e, videoUploading: true } : e
+      idx === i ? { ...e, videoUploading: true, videoProgress: 0 } : e
     ));
     try {
       const res = await fetch("/api/upload/video", {
@@ -174,13 +176,17 @@ export default function SessionForm({
         setExercises((prev) => prev.map((e, idx) => idx === i ? { ...e, videoUploading: false } : e));
         return;
       }
-      const uploadRes = await fetch(data.signedUrl, { method: "PUT", body: file });
-      if (!uploadRes.ok) throw new Error(`upload ${uploadRes.status}`);
+      await uploadWithProgress(data.signedUrl, file, (pct) => {
+        setExercises((prev) => prev.map((e, idx) => idx === i ? { ...e, videoProgress: pct } : e));
+      });
       setExercises((prev) => prev.map((e, idx) =>
         idx === i ? { ...e, videoUploading: false, videoUrls: [...e.videoUrls, data.publicUrl] } : e
       ));
-    } catch {
-      alert("영상 업로드에 실패했습니다. 다시 시도해주세요.");
+    } catch (err) {
+      const timedOut = err instanceof Error && err.message === "upload timed out";
+      alert(timedOut
+        ? "업로드가 너무 오래 걸려 취소했습니다. 네트워크 상태를 확인하고 다시 시도해주세요."
+        : "영상 업로드에 실패했습니다. 네트워크 상태를 확인하고 다시 시도해주세요.");
       setExercises((prev) => prev.map((e, idx) => idx === i ? { ...e, videoUploading: false } : e));
     }
     if (videoInputRefs.current[i]) videoInputRefs.current[i]!.value = "";
@@ -469,7 +475,7 @@ export default function SessionForm({
                 {ex.videoUploading ? (
                   <div className="flex items-center gap-2 py-1">
                     <Loader2 size={15} className="animate-spin text-indigo-500 shrink-0" />
-                    <span className="text-xs text-gray-400">영상 업로드 중...</span>
+                    <span className="text-xs text-gray-400">영상 업로드 중... {ex.videoProgress}%</span>
                   </div>
                 ) : (
                   <button
