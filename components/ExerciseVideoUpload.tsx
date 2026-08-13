@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Video, Loader2, CheckCircle, X, ExternalLink } from "lucide-react";
 import { uploadWithProgress } from "@/lib/utils";
+import { maybeCompressVideo } from "@/lib/video";
 
 export default function ExerciseVideoUpload({
   exerciseId,
@@ -13,6 +14,7 @@ export default function ExerciseVideoUpload({
 }) {
   const [videoUrls, setVideoUrls] = useState(initialVideoUrls);
   const [uploading, setUploading] = useState(false);
+  const [stage, setStage] = useState<"compressing" | "uploading">("uploading");
   const [progress, setProgress] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -23,18 +25,21 @@ export default function ExerciseVideoUpload({
     }
     setUploading(true);
     setProgress(0);
+    setStage("compressing");
     try {
+      const { blob, fileName } = await maybeCompressVideo(file);
+      setStage("uploading");
       const res = await fetch("/api/upload/video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: file.name, fileSize: file.size }),
+        body: JSON.stringify({ fileName, fileSize: blob.size }),
       });
       const data = await res.json();
       if (!res.ok) {
         alert(data.error || "업로드 실패");
         return;
       }
-      await uploadWithProgress(data.signedUrl, file, setProgress);
+      await uploadWithProgress(data.signedUrl, blob, setProgress);
 
       const newUrls = [...videoUrls, data.publicUrl];
       const patchRes = await fetch(`/api/exercises/${exerciseId}/videos`, {
@@ -96,7 +101,9 @@ export default function ExerciseVideoUpload({
       {uploading ? (
         <div className="flex items-center gap-1.5">
           <Loader2 size={13} className="animate-spin text-indigo-500 shrink-0" />
-          <span className="text-xs text-gray-400">업로드 중... {progress}%</span>
+          <span className="text-xs text-gray-400">
+            {stage === "compressing" ? "영상 압축 중..." : `업로드 중... ${progress}%`}
+          </span>
         </div>
       ) : (
         <button

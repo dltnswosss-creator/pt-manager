@@ -14,7 +14,7 @@ export function formatDate(dateStr: string) {
 // 네트워크가 끊겨도 요청이 영원히 pending 상태로 남을 수 있어 대용량 영상(모바일 회선)에서 "업로드 중"에 멈춘 것처럼 보임.
 export function uploadWithProgress(
   url: string,
-  file: File,
+  body: Blob,
   onProgress?: (percent: number) => void,
   timeoutMs = 10 * 60 * 1000
 ): Promise<void> {
@@ -31,7 +31,7 @@ export function uploadWithProgress(
     };
     xhr.onerror = () => reject(new Error("network error"));
     xhr.ontimeout = () => reject(new Error("upload timed out"));
-    xhr.send(file);
+    xhr.send(body);
   });
 }
 

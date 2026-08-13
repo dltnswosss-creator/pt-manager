@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { COMMON_EXERCISES } from "@/lib/types";
 import { cn, uploadWithProgress } from "@/lib/utils";
+import { maybeCompressVideo } from "@/lib/video";
 import {
   Plus, Trash2, Video, CheckCircle, Loader2, X,
   Copy, ExternalLink, Check, ChevronUp, ChevronDown, History,
@@ -16,12 +17,13 @@ type ExerciseRow = {
   videoUrls: string[];
   videoUploading: boolean;
   videoProgress: number;
+  videoStage: "compressing" | "uploading";
 };
 type Client = { id: number; name: string };
 
 const emptyExercise = (): ExerciseRow => ({
   name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "",
-  videoUrls: [], videoUploading: false, videoProgress: 0,
+  videoUrls: [], videoUploading: false, videoProgress: 0, videoStage: "uploading",
 });
 
 export default function SessionForm({
@@ -65,6 +67,7 @@ export default function SessionForm({
             videoUrls: Array.isArray(e.videoUrls) ? e.videoUrls : (e.videoUrl ? [e.videoUrl] : []),
             videoUploading: false,
             videoProgress: 0,
+            videoStage: "uploading",
           })));
         }
         setDraftRestored(true);
@@ -138,6 +141,8 @@ export default function SessionForm({
           memo: "",
           videoUrls: [],
           videoUploading: false,
+          videoProgress: 0,
+          videoStage: "uploading" as const,
         }))
       );
     } catch {
@@ -162,13 +167,15 @@ export default function SessionForm({
       return;
     }
     setExercises((prev) => prev.map((e, idx) =>
-      idx === i ? { ...e, videoUploading: true, videoProgress: 0 } : e
+      idx === i ? { ...e, videoUploading: true, videoProgress: 0, videoStage: "compressing" } : e
     ));
     try {
+      const { blob, fileName } = await maybeCompressVideo(file);
+      setExercises((prev) => prev.map((e, idx) => idx === i ? { ...e, videoStage: "uploading" } : e));
       const res = await fetch("/api/upload/video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: file.name, fileSize: file.size }),
+        body: JSON.stringify({ fileName, fileSize: blob.size }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -176,7 +183,7 @@ export default function SessionForm({
         setExercises((prev) => prev.map((e, idx) => idx === i ? { ...e, videoUploading: false } : e));
         return;
       }
-      await uploadWithProgress(data.signedUrl, file, (pct) => {
+      await uploadWithProgress(data.signedUrl, blob, (pct) => {
         setExercises((prev) => prev.map((e, idx) => idx === i ? { ...e, videoProgress: pct } : e));
       });
       setExercises((prev) => prev.map((e, idx) =>
@@ -475,7 +482,9 @@ export default function SessionForm({
                 {ex.videoUploading ? (
                   <div className="flex items-center gap-2 py-1">
                     <Loader2 size={15} className="animate-spin text-indigo-500 shrink-0" />
-                    <span className="text-xs text-gray-400">영상 업로드 중... {ex.videoProgress}%</span>
+                    <span className="text-xs text-gray-400">
+                      {ex.videoStage === "compressing" ? "영상 압축 중..." : `영상 업로드 중... ${ex.videoProgress}%`}
+                    </span>
                   </div>
                 ) : (
                   <button

@@ -3,12 +3,13 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { COMMON_EXERCISES } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, uploadWithProgress } from "@/lib/utils";
+import { maybeCompressVideo } from "@/lib/video";
 import { Plus, Trash2, Loader2, Video, CheckCircle, X, ChevronUp, ChevronDown } from "lucide-react";
 
 type ExerciseRow = {
   name: string; sets: string; reps: string; weight: string; unit: string; memo: string;
-  videoUrls: string[]; videoUploading: boolean;
+  videoUrls: string[]; videoUploading: boolean; videoProgress: number; videoStage: "compressing" | "uploading";
 };
 type Session = {
   id: number;
@@ -31,9 +32,9 @@ export default function SessionEditForm({ session }: { session: Session }) {
           name: e.name, sets: e.sets?.toString() ?? "",
           reps: e.reps ?? "", weight: e.weight?.toString() ?? "",
           unit: e.unit, memo: e.memo ?? "",
-          videoUrls: e.videoUrls ?? [], videoUploading: false,
+          videoUrls: e.videoUrls ?? [], videoUploading: false, videoProgress: 0, videoStage: "uploading",
         }))
-      : [{ name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrls: [], videoUploading: false }]
+      : [{ name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrls: [], videoUploading: false, videoProgress: 0, videoStage: "uploading" as const }]
   );
   const [suggestion, setSuggestion] = useState<{ idx: number; results: string[] } | null>(null);
   const videoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -63,13 +64,15 @@ export default function SessionEditForm({ session }: { session: Session }) {
       return;
     }
     setExercises((prev) => prev.map((e, idx) =>
-      idx === i ? { ...e, videoUploading: true } : e
+      idx === i ? { ...e, videoUploading: true, videoProgress: 0, videoStage: "compressing" } : e
     ));
     try {
+      const { blob, fileName } = await maybeCompressVideo(file);
+      setExercises((prev) => prev.map((e, idx) => idx === i ? { ...e, videoStage: "uploading" } : e));
       const res = await fetch("/api/upload/video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName: file.name, fileSize: file.size }),
+        body: JSON.stringify({ fileName, fileSize: blob.size }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -77,13 +80,17 @@ export default function SessionEditForm({ session }: { session: Session }) {
         setExercises((prev) => prev.map((e, idx) => idx === i ? { ...e, videoUploading: false } : e));
         return;
       }
-      const uploadRes = await fetch(data.signedUrl, { method: "PUT", body: file });
-      if (!uploadRes.ok) throw new Error(`upload ${uploadRes.status}`);
+      await uploadWithProgress(data.signedUrl, blob, (pct) => {
+        setExercises((prev) => prev.map((e, idx) => idx === i ? { ...e, videoProgress: pct } : e));
+      });
       setExercises((prev) => prev.map((e, idx) =>
         idx === i ? { ...e, videoUploading: false, videoUrls: [...e.videoUrls, data.publicUrl] } : e
       ));
-    } catch {
-      alert("영상 업로드에 실패했습니다. 다시 시도해주세요.");
+    } catch (err) {
+      const timedOut = err instanceof Error && err.message === "upload timed out";
+      alert(timedOut
+        ? "업로드가 너무 오래 걸려 취소했습니다. 네트워크 상태를 확인하고 다시 시도해주세요."
+        : "영상 업로드에 실패했습니다. 네트워크 상태를 확인하고 다시 시도해주세요.");
       setExercises((prev) => prev.map((e, idx) => idx === i ? { ...e, videoUploading: false } : e));
     }
     if (videoInputRefs.current[i]) videoInputRefs.current[i]!.value = "";
@@ -152,7 +159,7 @@ export default function SessionEditForm({ session }: { session: Session }) {
           <h3 className="text-sm font-semibold text-gray-700">운동 목록</h3>
           <button
             type="button"
-            onClick={() => setExercises((p) => [...p, { name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrls: [], videoUploading: false }])}
+            onClick={() => setExercises((p) => [...p, { name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrls: [], videoUploading: false, videoProgress: 0, videoStage: "uploading" }])}
             className="flex items-center gap-1.5 text-xs text-indigo-600 font-medium py-1.5 px-3 rounded-lg hover:bg-indigo-50 transition-colors"
           >
             <Plus size={14} /> 운동 추가
@@ -246,7 +253,9 @@ export default function SessionEditForm({ session }: { session: Session }) {
                 {ex.videoUploading ? (
                   <div className="flex items-center gap-2 py-1">
                     <Loader2 size={15} className="animate-spin text-indigo-500 shrink-0" />
-                    <span className="text-xs text-gray-400">영상 업로드 중...</span>
+                    <span className="text-xs text-gray-400">
+                      {ex.videoStage === "compressing" ? "영상 압축 중..." : `영상 업로드 중... ${ex.videoProgress}%`}
+                    </span>
                   </div>
                 ) : (
                   <button
