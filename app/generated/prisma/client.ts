@@ -72,6 +72,11 @@ export type GroupExercise = Prisma.GroupExerciseModel
  */
 export type MenstrualCycle = Prisma.MenstrualCycleModel
 /**
+ * Model MonthlyGoal
+ * 
+ */
+export type MonthlyGoal = Prisma.MonthlyGoalModel
+/**
  * Model Location
  * 
  */

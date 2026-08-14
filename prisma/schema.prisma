@@ -41,6 +41,7 @@ model Client {
   sessions        Session[]
   menstrualCycle  MenstrualCycle?
   schedules       Schedule[]
+  monthlyGoals    MonthlyGoal[]
 }
 
 model Session {
@@ -106,6 +107,28 @@ model MenstrualCycle {
   periodLength  Int      @default(5)
   memo          String?
   updatedAt     DateTime @updatedAt
+}
+
+model MonthlyGoal {
+  id              Int      @id @default(autoincrement())
+  clientId        Int
+  client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  yearMonth       String   // "YYYY-MM"
+
+  // ACSM 기반 목표
+  targetFrequency Int?     // 주당 세션 횟수 목표
+  targetSets      Int?     // 세션당 세트 수 목표
+  targetVolume    Int?     // 주당 총 세트 수 목표 (근비대 기준)
+  intensityGuide  String?  // 강도 관련 가이드 문구
+
+  feedback        String?  // 지난달 대비 자동/수동 피드백
+  goalNote        String?  // 트레이너가 작성하는 목표 메모
+  achieved        Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([clientId, yearMonth])
 }
 
 model Location {

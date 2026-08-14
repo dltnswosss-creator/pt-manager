@@ -390,6 +390,7 @@ export const ModelName = {
   Exercise: 'Exercise',
   GroupExercise: 'GroupExercise',
   MenstrualCycle: 'MenstrualCycle',
+  MonthlyGoal: 'MonthlyGoal',
   Location: 'Location',
   Schedule: 'Schedule'
 } as const
@@ -407,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "client" | "session" | "groupSession" | "exercise" | "groupExercise" | "menstrualCycle" | "location" | "schedule"
+    modelProps: "client" | "session" | "groupSession" | "exercise" | "groupExercise" | "menstrualCycle" | "monthlyGoal" | "location" | "schedule"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -855,6 +856,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MonthlyGoal: {
+      payload: Prisma.$MonthlyGoalPayload<ExtArgs>
+      fields: Prisma.MonthlyGoalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MonthlyGoalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MonthlyGoalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload>
+        }
+        findFirst: {
+          args: Prisma.MonthlyGoalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MonthlyGoalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload>
+        }
+        findMany: {
+          args: Prisma.MonthlyGoalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload>[]
+        }
+        create: {
+          args: Prisma.MonthlyGoalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload>
+        }
+        createMany: {
+          args: Prisma.MonthlyGoalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MonthlyGoalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload>[]
+        }
+        delete: {
+          args: Prisma.MonthlyGoalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload>
+        }
+        update: {
+          args: Prisma.MonthlyGoalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload>
+        }
+        deleteMany: {
+          args: Prisma.MonthlyGoalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MonthlyGoalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MonthlyGoalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload>[]
+        }
+        upsert: {
+          args: Prisma.MonthlyGoalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MonthlyGoalPayload>
+        }
+        aggregate: {
+          args: Prisma.MonthlyGoalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMonthlyGoal>
+        }
+        groupBy: {
+          args: Prisma.MonthlyGoalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MonthlyGoalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MonthlyGoalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MonthlyGoalCountAggregateOutputType> | number
+        }
+      }
+    }
     Location: {
       payload: Prisma.$LocationPayload<ExtArgs>
       fields: Prisma.LocationFieldRefs
@@ -1142,6 +1217,24 @@ export const MenstrualCycleScalarFieldEnum = {
 export type MenstrualCycleScalarFieldEnum = (typeof MenstrualCycleScalarFieldEnum)[keyof typeof MenstrualCycleScalarFieldEnum]
 
 
+export const MonthlyGoalScalarFieldEnum = {
+  id: 'id',
+  clientId: 'clientId',
+  yearMonth: 'yearMonth',
+  targetFrequency: 'targetFrequency',
+  targetSets: 'targetSets',
+  targetVolume: 'targetVolume',
+  intensityGuide: 'intensityGuide',
+  feedback: 'feedback',
+  goalNote: 'goalNote',
+  achieved: 'achieved',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MonthlyGoalScalarFieldEnum = (typeof MonthlyGoalScalarFieldEnum)[keyof typeof MonthlyGoalScalarFieldEnum]
+
+
 export const LocationScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1254,6 +1347,13 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 /**
@@ -1372,6 +1472,7 @@ export type GlobalOmitConfig = {
   exercise?: Prisma.ExerciseOmit
   groupExercise?: Prisma.GroupExerciseOmit
   menstrualCycle?: Prisma.MenstrualCycleOmit
+  monthlyGoal?: Prisma.MonthlyGoalOmit
   location?: Prisma.LocationOmit
   schedule?: Prisma.ScheduleOmit
 }

@@ -57,6 +57,7 @@ export const ModelName = {
   Exercise: 'Exercise',
   GroupExercise: 'GroupExercise',
   MenstrualCycle: 'MenstrualCycle',
+  MonthlyGoal: 'MonthlyGoal',
   Location: 'Location',
   Schedule: 'Schedule'
 } as const
@@ -175,6 +176,24 @@ export const MenstrualCycleScalarFieldEnum = {
 } as const
 
 export type MenstrualCycleScalarFieldEnum = (typeof MenstrualCycleScalarFieldEnum)[keyof typeof MenstrualCycleScalarFieldEnum]
+
+
+export const MonthlyGoalScalarFieldEnum = {
+  id: 'id',
+  clientId: 'clientId',
+  yearMonth: 'yearMonth',
+  targetFrequency: 'targetFrequency',
+  targetSets: 'targetSets',
+  targetVolume: 'targetVolume',
+  intensityGuide: 'intensityGuide',
+  feedback: 'feedback',
+  goalNote: 'goalNote',
+  achieved: 'achieved',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MonthlyGoalScalarFieldEnum = (typeof MonthlyGoalScalarFieldEnum)[keyof typeof MonthlyGoalScalarFieldEnum]
 
 
 export const LocationScalarFieldEnum = {

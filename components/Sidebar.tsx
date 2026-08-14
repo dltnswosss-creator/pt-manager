@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, ClipboardList, Dumbbell, CalendarDays } from "lucide-react";
+import { LayoutDashboard, Users, ClipboardList, Dumbbell, CalendarDays, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -11,6 +11,7 @@ const nav = [
   { href: "/clients", label: "회원 관리", icon: Users },
   { href: "/sessions/new", label: "수업 기록", icon: ClipboardList },
   { href: "/group-sessions", label: "그룹 수업", icon: Dumbbell },
+  { href: "/monthly-report", label: "월간 리포트", icon: TrendingUp },
 ];
 
 export default function Sidebar() {
