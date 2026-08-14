@@ -12,6 +12,7 @@ import {
   type SessionEntry,
 } from "@/lib/monthlyReport";
 import MonthlyReportCard from "@/components/MonthlyReportCard";
+import type { PainArea } from "@/lib/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default async function MonthlyReportPage({
@@ -37,8 +38,10 @@ export default async function MonthlyReportPage({
     const sessions: SessionEntry[] = c.sessions;
     const current = getMonthStats(sessions, yearMonth);
     const previous = getMonthStats(sessions, prevYearMonth);
-    const feedback = generateFeedback(current, previous.sessionCount > 0 ? previous : null);
-    const suggestion = suggestGoal(current);
+    const previousOrNull = previous.sessionCount > 0 ? previous : null;
+    const feedback = generateFeedback(current, previousOrNull);
+    const painAreas: PainArea[] = c.painAreas ? JSON.parse(c.painAreas) : [];
+    const suggestion = suggestGoal(current, previousOrNull, { exerciseLevel: c.exerciseLevel, painAreas });
     const savedGoal = c.monthlyGoals[0] ?? null;
 
     // Map은 서버→클라이언트 컴포넌트로 그대로 넘기지 않고 배열로 직렬화

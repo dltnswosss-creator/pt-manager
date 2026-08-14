@@ -167,12 +167,70 @@ export function generateFeedback(current: MonthStats, previous: MonthStats | nul
   return feedback;
 }
 
-export function suggestGoal(current: MonthStats): GoalSuggestion {
+export type PainAreaLite = { area: string; intensity: "caution" | "watch" | "avoid" };
+
+export type ClientContext = {
+  exerciseLevel: string | null;
+  painAreas: PainAreaLite[];
+};
+
+function levelIntensityBase(level: string | null): string {
+  switch (level) {
+    case "advanced":
+      return "숙련자이므로 주요 복합 운동은 고중량·저반복(6~8회, RIR 1~2)으로 진행하고, 정체된 종목은 세트 수나 빈도 변주(주기화)를 고려하세요.";
+    case "intermediate":
+      return "주요 복합 운동은 전 가동범위로, 고중량·저반복(6~10회, RIR 2~3) 위주로 진행하세요.";
+    case "beginner":
+      return "아직 초보 단계이므로 무거운 중량보다 정확한 동작(전 가동범위)과 꾸준한 빈도를 우선하고, 중량은 회당 2.5~5%씩 소폭 늘리세요.";
+    case "none":
+      return "운동 경험이 적은 만큼 가벼운 중량으로 동작을 먼저 익히고, 통증 없이 10~15회를 편하게 반복할 수 있을 때 중량을 올리세요.";
+    default:
+      return "주요 복합 운동은 전 가동범위로, 고중량·저반복(6~10회) 위주로 진행하세요.";
+  }
+}
+
+export function suggestGoal(
+  current: MonthStats,
+  previous: MonthStats | null,
+  ctx: ClientContext = { exerciseLevel: null, painAreas: [] }
+): GoalSuggestion {
   const weeklyVolume = current.weeksInMonth > 0 ? current.totalSets / current.weeksInMonth : 0;
+  const parts: string[] = [levelIntensityBase(ctx.exerciseLevel)];
+
+  if (previous) {
+    const improved: string[] = [];
+    const stagnant: string[] = [];
+    for (const [name, stat] of current.exercises) {
+      if (stat.maxWeight == null) continue;
+      const prevStat = previous.exercises.get(name);
+      if (!prevStat || prevStat.maxWeight == null) continue;
+      if (stat.maxWeight > prevStat.maxWeight) improved.push(name);
+      else stagnant.push(name);
+    }
+    if (stagnant.length > 0) {
+      parts.push(
+        `${stagnant.slice(0, 3).join(", ")}${stagnant.length > 3 ? " 등" : ""} 중량이 지난달과 같거나 줄었어요 — 이 종목들부터 소폭 증량을 시도해보세요.`
+      );
+    } else if (improved.length > 0) {
+      parts.push(
+        `${improved.slice(0, 3).join(", ")}${improved.length > 3 ? " 등" : ""} 종목이 잘 늘고 있으니 같은 방식으로 계속 진행하세요.`
+      );
+    }
+  }
+
+  const avoidAreas = ctx.painAreas.filter((p) => p.intensity === "avoid").map((p) => p.area);
+  const watchAreas = ctx.painAreas.filter((p) => p.intensity !== "avoid").map((p) => p.area);
+  if (avoidAreas.length > 0) {
+    parts.push(`${avoidAreas.join(", ")} 부위는 통증으로 직접 부하가 가는 동작은 피하고 대체 운동을 활용하세요.`);
+  }
+  if (watchAreas.length > 0) {
+    parts.push(`${watchAreas.join(", ")} 부위는 통증 여부를 확인하며 진행하세요.`);
+  }
+
   return {
     targetFrequency: Math.max(2, Math.ceil(current.avgFrequency || 2)),
     targetSets: 3,
     targetVolume: Math.max(10, Math.round(weeklyVolume) || 10),
-    intensityGuide: "주요 복합 운동은 전 가동범위로, 고중량·저반복(6~10회) 위주로 진행하고 이전 달 대비 중량·세트·반복수 중 하나를 점진적으로 늘리세요.",
+    intensityGuide: parts.join(" "),
   };
 }
