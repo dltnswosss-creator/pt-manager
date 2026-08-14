@@ -7,7 +7,7 @@ import { CheckCircle2, AlertTriangle, Info, ChevronDown, ChevronUp } from "lucid
 import { cn } from "@/lib/utils";
 import type { Feedback, GoalSuggestion } from "@/lib/monthlyReport";
 
-type ExerciseSummary = { name: string; totalSets: number; maxWeight: number | null; unit: string };
+type ExerciseSummary = { name: string; totalSets: number; maxWeight: number | null; maxReps: number | null; unit: string };
 type SavedGoal = {
   targetFrequency: number | null;
   targetSets: number | null;
@@ -117,7 +117,7 @@ export default function MonthlyReportCard({
             <div className="flex flex-wrap gap-1.5">
               {exerciseSummary.map((e) => (
                 <span key={e.name} className="text-xs px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-100">
-                  {e.name} · {e.totalSets}세트{e.maxWeight != null ? ` · 최고 ${e.maxWeight}${e.unit}` : ""}
+                  {e.name} · {e.totalSets}세트{e.maxWeight != null ? ` · 최고 ${e.maxWeight}${e.unit}` : ""}{e.maxReps != null ? ` · 최대 ${e.maxReps}회` : ""}
                 </span>
               ))}
             </div>

@@ -143,7 +143,8 @@ export const ExerciseScalarFieldEnum = {
   unit: 'unit',
   memo: 'memo',
   videoUrls: 'videoUrls',
-  order: 'order'
+  order: 'order',
+  isMain: 'isMain'
 } as const
 
 export type ExerciseScalarFieldEnum = (typeof ExerciseScalarFieldEnum)[keyof typeof ExerciseScalarFieldEnum]

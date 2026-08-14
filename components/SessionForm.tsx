@@ -13,7 +13,7 @@ import {
 
 type ExerciseRow = {
   name: string; sets: string; reps: string; weight: string;
-  unit: string; memo: string;
+  unit: string; memo: string; isMain: boolean;
   videoUrls: string[];
   videoUploading: boolean;
   videoProgress: number;
@@ -22,7 +22,7 @@ type ExerciseRow = {
 type Client = { id: number; name: string };
 
 const emptyExercise = (): ExerciseRow => ({
-  name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "",
+  name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", isMain: true,
   videoUrls: [], videoUploading: false, videoProgress: 0, videoStage: "uploading",
 });
 
@@ -132,13 +132,14 @@ export default function SessionForm({
         return;
       }
       setExercises(
-        last.exercises.map((e: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string }) => ({
+        last.exercises.map((e: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; isMain?: boolean }) => ({
           name: e.name,
           sets: e.sets != null ? String(e.sets) : "",
           reps: e.reps ?? "",
           weight: e.weight != null ? String(e.weight) : "",
           unit: e.unit ?? "kg",
           memo: "",
+          isMain: e.isMain ?? true,
           videoUrls: [],
           videoUploading: false,
           videoProgress: 0,
@@ -199,6 +200,10 @@ export default function SessionForm({
     if (videoInputRefs.current[i]) videoInputRefs.current[i]!.value = "";
   };
 
+  const toggleMain = (i: number) => {
+    setExercises((prev) => prev.map((e, idx) => (idx === i ? { ...e, isMain: !e.isMain } : e)));
+  };
+
   const removeVideo = (i: number, videoIdx: number) => {
     setExercises((prev) => prev.map((e, idx) =>
       idx === i ? { ...e, videoUrls: e.videoUrls.filter((_, vi) => vi !== videoIdx) } : e
@@ -224,6 +229,7 @@ export default function SessionForm({
           weight: e.weight ? Number(e.weight) : null,
           unit: e.unit,
           memo: e.memo || null,
+          isMain: e.isMain,
           videoUrls: e.videoUrls,
         })),
     };
@@ -452,6 +458,17 @@ export default function SessionForm({
                   </select>
                 </div>
               </div>
+
+              {/* 메인 운동 여부 */}
+              <label className="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer w-fit">
+                <input
+                  type="checkbox"
+                  checked={ex.isMain}
+                  onChange={() => toggleMain(i)}
+                  className="accent-indigo-600"
+                />
+                메인 운동 (월간 리포트에서 중량·세트·반복수 추적)
+              </label>
 
               {/* 메모 */}
               <input

@@ -52,6 +52,7 @@ export type ExerciseMinAggregateOutputType = {
   unit: string | null
   memo: string | null
   order: number | null
+  isMain: boolean | null
 }
 
 export type ExerciseMaxAggregateOutputType = {
@@ -64,6 +65,7 @@ export type ExerciseMaxAggregateOutputType = {
   unit: string | null
   memo: string | null
   order: number | null
+  isMain: boolean | null
 }
 
 export type ExerciseCountAggregateOutputType = {
@@ -77,6 +79,7 @@ export type ExerciseCountAggregateOutputType = {
   memo: number
   videoUrls: number
   order: number
+  isMain: number
   _all: number
 }
 
@@ -107,6 +110,7 @@ export type ExerciseMinAggregateInputType = {
   unit?: true
   memo?: true
   order?: true
+  isMain?: true
 }
 
 export type ExerciseMaxAggregateInputType = {
@@ -119,6 +123,7 @@ export type ExerciseMaxAggregateInputType = {
   unit?: true
   memo?: true
   order?: true
+  isMain?: true
 }
 
 export type ExerciseCountAggregateInputType = {
@@ -132,6 +137,7 @@ export type ExerciseCountAggregateInputType = {
   memo?: true
   videoUrls?: true
   order?: true
+  isMain?: true
   _all?: true
 }
 
@@ -232,6 +238,7 @@ export type ExerciseGroupByOutputType = {
   memo: string | null
   videoUrls: string[]
   order: number
+  isMain: boolean
   _count: ExerciseCountAggregateOutputType | null
   _avg: ExerciseAvgAggregateOutputType | null
   _sum: ExerciseSumAggregateOutputType | null
@@ -268,6 +275,7 @@ export type ExerciseWhereInput = {
   memo?: Prisma.StringNullableFilter<"Exercise"> | string | null
   videoUrls?: Prisma.StringNullableListFilter<"Exercise">
   order?: Prisma.IntFilter<"Exercise"> | number
+  isMain?: Prisma.BoolFilter<"Exercise"> | boolean
   session?: Prisma.XOR<Prisma.SessionScalarRelationFilter, Prisma.SessionWhereInput>
 }
 
@@ -282,6 +290,7 @@ export type ExerciseOrderByWithRelationInput = {
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
   videoUrls?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
   session?: Prisma.SessionOrderByWithRelationInput
 }
 
@@ -299,6 +308,7 @@ export type ExerciseWhereUniqueInput = Prisma.AtLeast<{
   memo?: Prisma.StringNullableFilter<"Exercise"> | string | null
   videoUrls?: Prisma.StringNullableListFilter<"Exercise">
   order?: Prisma.IntFilter<"Exercise"> | number
+  isMain?: Prisma.BoolFilter<"Exercise"> | boolean
   session?: Prisma.XOR<Prisma.SessionScalarRelationFilter, Prisma.SessionWhereInput>
 }, "id">
 
@@ -313,6 +323,7 @@ export type ExerciseOrderByWithAggregationInput = {
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
   videoUrls?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
   _count?: Prisma.ExerciseCountOrderByAggregateInput
   _avg?: Prisma.ExerciseAvgOrderByAggregateInput
   _max?: Prisma.ExerciseMaxOrderByAggregateInput
@@ -334,6 +345,7 @@ export type ExerciseScalarWhereWithAggregatesInput = {
   memo?: Prisma.StringNullableWithAggregatesFilter<"Exercise"> | string | null
   videoUrls?: Prisma.StringNullableListFilter<"Exercise">
   order?: Prisma.IntWithAggregatesFilter<"Exercise"> | number
+  isMain?: Prisma.BoolWithAggregatesFilter<"Exercise"> | boolean
 }
 
 export type ExerciseCreateInput = {
@@ -345,6 +357,7 @@ export type ExerciseCreateInput = {
   memo?: string | null
   videoUrls?: Prisma.ExerciseCreatevideoUrlsInput | string[]
   order?: number
+  isMain?: boolean
   session: Prisma.SessionCreateNestedOneWithoutExercisesInput
 }
 
@@ -359,6 +372,7 @@ export type ExerciseUncheckedCreateInput = {
   memo?: string | null
   videoUrls?: Prisma.ExerciseCreatevideoUrlsInput | string[]
   order?: number
+  isMain?: boolean
 }
 
 export type ExerciseUpdateInput = {
@@ -370,6 +384,7 @@ export type ExerciseUpdateInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   videoUrls?: Prisma.ExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   session?: Prisma.SessionUpdateOneRequiredWithoutExercisesNestedInput
 }
 
@@ -384,6 +399,7 @@ export type ExerciseUncheckedUpdateInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   videoUrls?: Prisma.ExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ExerciseCreateManyInput = {
@@ -397,6 +413,7 @@ export type ExerciseCreateManyInput = {
   memo?: string | null
   videoUrls?: Prisma.ExerciseCreatevideoUrlsInput | string[]
   order?: number
+  isMain?: boolean
 }
 
 export type ExerciseUpdateManyMutationInput = {
@@ -408,6 +425,7 @@ export type ExerciseUpdateManyMutationInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   videoUrls?: Prisma.ExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ExerciseUncheckedUpdateManyInput = {
@@ -421,6 +439,7 @@ export type ExerciseUncheckedUpdateManyInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   videoUrls?: Prisma.ExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ExerciseListRelationFilter = {
@@ -444,6 +463,7 @@ export type ExerciseCountOrderByAggregateInput = {
   memo?: Prisma.SortOrder
   videoUrls?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
 }
 
 export type ExerciseAvgOrderByAggregateInput = {
@@ -464,6 +484,7 @@ export type ExerciseMaxOrderByAggregateInput = {
   unit?: Prisma.SortOrder
   memo?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
 }
 
 export type ExerciseMinOrderByAggregateInput = {
@@ -476,6 +497,7 @@ export type ExerciseMinOrderByAggregateInput = {
   unit?: Prisma.SortOrder
   memo?: Prisma.SortOrder
   order?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
 }
 
 export type ExerciseSumOrderByAggregateInput = {
@@ -537,6 +559,10 @@ export type ExerciseUpdatevideoUrlsInput = {
   push?: string | string[]
 }
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type ExerciseCreateWithoutSessionInput = {
   name: string
   sets?: number | null
@@ -546,6 +572,7 @@ export type ExerciseCreateWithoutSessionInput = {
   memo?: string | null
   videoUrls?: Prisma.ExerciseCreatevideoUrlsInput | string[]
   order?: number
+  isMain?: boolean
 }
 
 export type ExerciseUncheckedCreateWithoutSessionInput = {
@@ -558,6 +585,7 @@ export type ExerciseUncheckedCreateWithoutSessionInput = {
   memo?: string | null
   videoUrls?: Prisma.ExerciseCreatevideoUrlsInput | string[]
   order?: number
+  isMain?: boolean
 }
 
 export type ExerciseCreateOrConnectWithoutSessionInput = {
@@ -600,6 +628,7 @@ export type ExerciseScalarWhereInput = {
   memo?: Prisma.StringNullableFilter<"Exercise"> | string | null
   videoUrls?: Prisma.StringNullableListFilter<"Exercise">
   order?: Prisma.IntFilter<"Exercise"> | number
+  isMain?: Prisma.BoolFilter<"Exercise"> | boolean
 }
 
 export type ExerciseCreateManySessionInput = {
@@ -612,6 +641,7 @@ export type ExerciseCreateManySessionInput = {
   memo?: string | null
   videoUrls?: Prisma.ExerciseCreatevideoUrlsInput | string[]
   order?: number
+  isMain?: boolean
 }
 
 export type ExerciseUpdateWithoutSessionInput = {
@@ -623,6 +653,7 @@ export type ExerciseUpdateWithoutSessionInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   videoUrls?: Prisma.ExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ExerciseUncheckedUpdateWithoutSessionInput = {
@@ -635,6 +666,7 @@ export type ExerciseUncheckedUpdateWithoutSessionInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   videoUrls?: Prisma.ExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ExerciseUncheckedUpdateManyWithoutSessionInput = {
@@ -647,6 +679,7 @@ export type ExerciseUncheckedUpdateManyWithoutSessionInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   videoUrls?: Prisma.ExerciseUpdatevideoUrlsInput | string[]
   order?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -662,6 +695,7 @@ export type ExerciseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   memo?: boolean
   videoUrls?: boolean
   order?: boolean
+  isMain?: boolean
   session?: boolean | Prisma.SessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["exercise"]>
 
@@ -676,6 +710,7 @@ export type ExerciseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   memo?: boolean
   videoUrls?: boolean
   order?: boolean
+  isMain?: boolean
   session?: boolean | Prisma.SessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["exercise"]>
 
@@ -690,6 +725,7 @@ export type ExerciseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   memo?: boolean
   videoUrls?: boolean
   order?: boolean
+  isMain?: boolean
   session?: boolean | Prisma.SessionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["exercise"]>
 
@@ -704,9 +740,10 @@ export type ExerciseSelectScalar = {
   memo?: boolean
   videoUrls?: boolean
   order?: boolean
+  isMain?: boolean
 }
 
-export type ExerciseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sessionId" | "name" | "sets" | "reps" | "weight" | "unit" | "memo" | "videoUrls" | "order", ExtArgs["result"]["exercise"]>
+export type ExerciseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sessionId" | "name" | "sets" | "reps" | "weight" | "unit" | "memo" | "videoUrls" | "order" | "isMain", ExtArgs["result"]["exercise"]>
 export type ExerciseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   session?: boolean | Prisma.SessionDefaultArgs<ExtArgs>
 }
@@ -733,6 +770,7 @@ export type $ExercisePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     memo: string | null
     videoUrls: string[]
     order: number
+    isMain: boolean
   }, ExtArgs["result"]["exercise"]>
   composites: {}
 }
@@ -1167,6 +1205,7 @@ export interface ExerciseFieldRefs {
   readonly memo: Prisma.FieldRef<"Exercise", 'String'>
   readonly videoUrls: Prisma.FieldRef<"Exercise", 'String[]'>
   readonly order: Prisma.FieldRef<"Exercise", 'Int'>
+  readonly isMain: Prisma.FieldRef<"Exercise", 'Boolean'>
 }
     
 

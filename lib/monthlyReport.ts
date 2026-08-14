@@ -4,8 +4,10 @@
 export type ExerciseEntry = {
   name: string;
   sets: number | null;
+  reps: string | null;
   weight: number | null;
   unit: string;
+  isMain: boolean;
 };
 
 export type SessionEntry = {
@@ -19,8 +21,17 @@ export type ExerciseStat = {
   maxWeight: number | null;
   weightSum: number;
   weightCount: number;
+  maxReps: number | null;
   unit: string;
 };
+
+// "8-12", "10회" 등 자유 텍스트에서 가장 큰 숫자를 반복수로 추출
+function parseMaxReps(reps: string | null): number | null {
+  if (!reps) return null;
+  const nums = reps.match(/\d+(\.\d+)?/g);
+  if (!nums || nums.length === 0) return null;
+  return Math.max(...nums.map(Number));
+}
 
 export type MonthStats = {
   yearMonth: string;
@@ -74,7 +85,8 @@ export function getMonthStats(sessions: SessionEntry[], yearMonth: string): Mont
   let totalSets = 0;
 
   for (const s of monthSessions) {
-    for (const e of s.exercises) {
+    // 스트레칭 등 보조 운동(isMain: false)은 세트/중량/반복수 비교에서 제외
+    for (const e of s.exercises.filter((ex) => ex.isMain)) {
       const sets = e.sets ?? 0;
       totalSets += sets;
       const cur = exercises.get(e.name) ?? {
@@ -83,6 +95,7 @@ export function getMonthStats(sessions: SessionEntry[], yearMonth: string): Mont
         maxWeight: null,
         weightSum: 0,
         weightCount: 0,
+        maxReps: null,
         unit: e.unit,
       };
       cur.occurrences += 1;
@@ -92,6 +105,10 @@ export function getMonthStats(sessions: SessionEntry[], yearMonth: string): Mont
         cur.maxWeight = cur.maxWeight == null ? e.weight : Math.max(cur.maxWeight, e.weight);
         cur.weightSum += e.weight;
         cur.weightCount += 1;
+      }
+      const reps = parseMaxReps(e.reps);
+      if (reps != null) {
+        cur.maxReps = cur.maxReps == null ? reps : Math.max(cur.maxReps, reps);
       }
       exercises.set(e.name, cur);
     }
@@ -132,33 +149,48 @@ export function generateFeedback(current: MonthStats, previous: MonthStats | nul
     }
   }
 
+  if (current.exercises.size === 0) {
+    feedback.push({
+      type: "info",
+      text: "이번 달은 '메인' 표시된 종목이 없어 세트·중량·반복수 비교를 할 수 없습니다. 비교가 필요한 종목에 메인 표시를 확인해주세요.",
+    });
+    return feedback;
+  }
+
   const avgSets = Math.round(current.avgSetsPerSession * 10) / 10;
   if (avgSets >= 2) {
-    feedback.push({ type: "positive", text: `세션당 평균 ${avgSets}세트 — ACSM 권장 세트 수(2~3세트)를 충족합니다.` });
+    feedback.push({ type: "positive", text: `메인 운동 기준 세션당 평균 ${avgSets}세트 — ACSM 권장 세트 수(2~3세트)를 충족합니다.` });
   } else if (avgSets > 0) {
-    feedback.push({ type: "warning", text: `세션당 평균 ${avgSets}세트로 다소 부족합니다. 세션당 2~3세트를 목표로 하세요.` });
+    feedback.push({ type: "warning", text: `메인 운동 기준 세션당 평균 ${avgSets}세트로 다소 부족합니다. 세션당 2~3세트를 목표로 하세요.` });
   }
 
   if (previous) {
-    const tracked = Array.from(current.exercises.entries()).filter(([, s]) => s.weightCount > 0);
-    let improved = 0;
+    let weightUp = 0;
+    let repsUpOnly = 0;
     let compared = 0;
-    for (const [name, stat] of tracked) {
+    for (const [name, stat] of current.exercises) {
+      if (stat.maxWeight == null) continue;
       const prevStat = previous.exercises.get(name);
-      if (!prevStat || prevStat.maxWeight == null || stat.maxWeight == null) continue;
+      if (!prevStat || prevStat.maxWeight == null) continue;
       compared += 1;
-      if (stat.maxWeight > prevStat.maxWeight) improved += 1;
+      if (stat.maxWeight > prevStat.maxWeight) {
+        weightUp += 1;
+      } else if (stat.maxReps != null && prevStat.maxReps != null && stat.maxReps > prevStat.maxReps) {
+        repsUpOnly += 1;
+      }
     }
+    const progressed = weightUp + repsUpOnly;
     if (compared > 0) {
-      if (improved / compared >= 0.5) {
+      const detail = repsUpOnly > 0 ? ` (중량 증가 ${weightUp}개, 동일 중량에서 반복수 증가 ${repsUpOnly}개)` : "";
+      if (progressed / compared >= 0.5) {
         feedback.push({
           type: "positive",
-          text: `추적 중인 ${compared}개 종목 중 ${improved}개에서 최고 중량이 증가했습니다 — 점진적 과부하가 잘 적용되고 있습니다.`,
+          text: `메인 운동 ${compared}개 종목 중 ${progressed}개에서 중량 또는 반복수가 늘었습니다${detail} — 점진적 과부하가 잘 적용되고 있습니다.`,
         });
       } else {
         feedback.push({
           type: "warning",
-          text: `추적 중인 ${compared}개 종목 중 ${improved}개만 중량이 증가했습니다. 중량·세트·반복수 중 하나를 소폭 높여보세요.`,
+          text: `메인 운동 ${compared}개 종목 중 ${progressed}개만 중량·반복수가 늘었습니다${detail}. 나머지 종목은 중량·세트·반복수 중 하나를 소폭 높여보세요.`,
         });
       }
     }
@@ -204,7 +236,8 @@ export function suggestGoal(
       if (stat.maxWeight == null) continue;
       const prevStat = previous.exercises.get(name);
       if (!prevStat || prevStat.maxWeight == null) continue;
-      if (stat.maxWeight > prevStat.maxWeight) improved.push(name);
+      const repsUp = stat.maxReps != null && prevStat.maxReps != null && stat.maxReps > prevStat.maxReps;
+      if (stat.maxWeight > prevStat.maxWeight || repsUp) improved.push(name);
       else stagnant.push(name);
     }
     if (stagnant.length > 0) {

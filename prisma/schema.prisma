@@ -82,6 +82,7 @@ model Exercise {
   memo      String?
   videoUrls String[] @default([])
   order     Int      @default(0)
+  isMain    Boolean  @default(true) // 월간 리포트 추적 대상 여부 (스트레칭 등 보조 운동은 제외 가능)
 }
 
 model GroupExercise {

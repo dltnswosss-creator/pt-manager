@@ -8,7 +8,7 @@ import { maybeCompressVideo } from "@/lib/video";
 import { Plus, Trash2, Loader2, Video, CheckCircle, X, ChevronUp, ChevronDown } from "lucide-react";
 
 type ExerciseRow = {
-  name: string; sets: string; reps: string; weight: string; unit: string; memo: string;
+  name: string; sets: string; reps: string; weight: string; unit: string; memo: string; isMain: boolean;
   videoUrls: string[]; videoUploading: boolean; videoProgress: number; videoStage: "compressing" | "uploading";
 };
 type Session = {
@@ -17,7 +17,7 @@ type Session = {
   date: string;
   duration: number | null;
   memo: string | null;
-  exercises: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; videoUrls: string[] }[];
+  exercises: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; isMain: boolean; videoUrls: string[] }[];
 };
 
 export default function SessionEditForm({ session }: { session: Session }) {
@@ -31,10 +31,10 @@ export default function SessionEditForm({ session }: { session: Session }) {
       ? session.exercises.map((e) => ({
           name: e.name, sets: e.sets?.toString() ?? "",
           reps: e.reps ?? "", weight: e.weight?.toString() ?? "",
-          unit: e.unit, memo: e.memo ?? "",
+          unit: e.unit, memo: e.memo ?? "", isMain: e.isMain ?? true,
           videoUrls: e.videoUrls ?? [], videoUploading: false, videoProgress: 0, videoStage: "uploading",
         }))
-      : [{ name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrls: [], videoUploading: false, videoProgress: 0, videoStage: "uploading" as const }]
+      : [{ name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", isMain: true, videoUrls: [], videoUploading: false, videoProgress: 0, videoStage: "uploading" as const }]
   );
   const [suggestion, setSuggestion] = useState<{ idx: number; results: string[] } | null>(null);
   const videoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -96,6 +96,10 @@ export default function SessionEditForm({ session }: { session: Session }) {
     if (videoInputRefs.current[i]) videoInputRefs.current[i]!.value = "";
   };
 
+  const toggleMain = (i: number) => {
+    setExercises((prev) => prev.map((e, idx) => (idx === i ? { ...e, isMain: !e.isMain } : e)));
+  };
+
   const removeVideo = (i: number, videoIdx: number) => {
     setExercises((prev) => prev.map((e, idx) =>
       idx === i ? { ...e, videoUrls: e.videoUrls.filter((_, vi) => vi !== videoIdx) } : e
@@ -116,6 +120,7 @@ export default function SessionEditForm({ session }: { session: Session }) {
         weight: e.weight ? Number(e.weight) : null,
         unit: e.unit,
         memo: e.memo || null,
+        isMain: e.isMain,
         videoUrls: e.videoUrls,
       })),
     };
@@ -159,7 +164,7 @@ export default function SessionEditForm({ session }: { session: Session }) {
           <h3 className="text-sm font-semibold text-gray-700">운동 목록</h3>
           <button
             type="button"
-            onClick={() => setExercises((p) => [...p, { name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", videoUrls: [], videoUploading: false, videoProgress: 0, videoStage: "uploading" }])}
+            onClick={() => setExercises((p) => [...p, { name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", isMain: true, videoUrls: [], videoUploading: false, videoProgress: 0, videoStage: "uploading" }])}
             className="flex items-center gap-1.5 text-xs text-indigo-600 font-medium py-1.5 px-3 rounded-lg hover:bg-indigo-50 transition-colors"
           >
             <Plus size={14} /> 운동 추가
@@ -230,6 +235,11 @@ export default function SessionEditForm({ session }: { session: Session }) {
                   </select>
                 </div>
               </div>
+
+              <label className="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer w-fit">
+                <input type="checkbox" checked={ex.isMain} onChange={() => toggleMain(i)} className="accent-indigo-600" />
+                메인 운동 (월간 리포트에서 중량·세트·반복수 추적)
+              </label>
 
               <input value={ex.memo} onChange={(e) => setEx(i, "memo", e.target.value)}
                 className={inputCls()} placeholder="메모 (선택)" />

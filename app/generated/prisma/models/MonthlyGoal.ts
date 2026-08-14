@@ -584,10 +584,6 @@ export type MonthlyGoalUncheckedUpdateManyWithoutClientNestedInput = {
   deleteMany?: Prisma.MonthlyGoalScalarWhereInput | Prisma.MonthlyGoalScalarWhereInput[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type MonthlyGoalCreateWithoutClientInput = {
   yearMonth: string
   targetFrequency?: number | null
