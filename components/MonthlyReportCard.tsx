@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, AlertTriangle, Info, ChevronDown, ChevronUp } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CheckCircle2, AlertTriangle, Info, ChevronDown, ChevronUp, Maximize2 } from "lucide-react";
 import type { Feedback, GoalSuggestion } from "@/lib/monthlyReport";
+import MonthlyGoalForm from "@/components/MonthlyGoalForm";
 
 type ExerciseSummary = { name: string; totalSets: number; maxWeight: number | null; maxReps: number | null; unit: string };
+type BodyPartVolume = { part: string; label: string; totalSets: number };
 type SavedGoal = {
   targetFrequency: number | null;
   targetSets: number | null;
@@ -25,6 +25,7 @@ export default function MonthlyReportCard({
   avgFrequency,
   avgSetsPerSession,
   exerciseSummary,
+  bodyPartVolume,
   feedback,
   suggestion,
   savedGoal,
@@ -36,32 +37,12 @@ export default function MonthlyReportCard({
   avgFrequency: number;
   avgSetsPerSession: number;
   exerciseSummary: ExerciseSummary[];
+  bodyPartVolume: BodyPartVolume[];
   feedback: Feedback[];
   suggestion: GoalSuggestion;
   savedGoal: SavedGoal;
 }) {
-  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
-  const [form, setForm] = useState({
-    targetFrequency: savedGoal?.targetFrequency ?? suggestion.targetFrequency,
-    targetSets: savedGoal?.targetSets ?? suggestion.targetSets,
-    targetVolume: savedGoal?.targetVolume ?? suggestion.targetVolume,
-    intensityGuide: savedGoal?.intensityGuide ?? suggestion.intensityGuide,
-    goalNote: savedGoal?.goalNote ?? "",
-    achieved: savedGoal?.achieved ?? false,
-  });
-  const [saving, setSaving] = useState(false);
-
-  const save = async () => {
-    setSaving(true);
-    await fetch(`/api/clients/${clientId}/monthly-goal`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ yearMonth, ...form }),
-    });
-    setSaving(false);
-    router.refresh();
-  };
 
   const warningCount = feedback.filter((f) => f.type === "warning").length;
 
@@ -93,6 +74,14 @@ export default function MonthlyReportCard({
             ) : (
               <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">양호</span>
             )}
+            <Link
+              href={`/monthly-report/${clientId}?ym=${yearMonth}`}
+              onClick={(e) => e.stopPropagation()}
+              className="p-1.5 rounded-lg text-gray-300 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              title="전체 화면으로 보기"
+            >
+              <Maximize2 size={15} />
+            </Link>
             {expanded ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
           </div>
         </div>
@@ -123,68 +112,29 @@ export default function MonthlyReportCard({
             </div>
           )}
 
+          {/* 부위별 볼륨 */}
+          {bodyPartVolume.length > 0 && (
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-gray-500">부위별 볼륨</p>
+              {bodyPartVolume.map((p) => (
+                <div key={p.part} className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 w-10 shrink-0">{p.label}</span>
+                  <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-indigo-400 rounded-full"
+                      style={{ width: `${Math.round((p.totalSets / bodyPartVolume[0].totalSets) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-gray-400 w-12 shrink-0 text-right">{p.totalSets}세트</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* 목표 설정 */}
-          <div className="bg-indigo-50/50 rounded-lg p-4 space-y-3">
-            <p className="text-xs font-semibold text-indigo-700">다음 달 목표 (ACSM 가이드라인 기반 제안)</p>
-            <div className="grid grid-cols-3 gap-3">
-              <NumberField label="주당 세션(회)" value={form.targetFrequency} onChange={(v) => setForm((f) => ({ ...f, targetFrequency: v }))} />
-              <NumberField label="세션당 세트" value={form.targetSets} onChange={(v) => setForm((f) => ({ ...f, targetSets: v }))} />
-              <NumberField label="주당 총 세트" value={form.targetVolume} onChange={(v) => setForm((f) => ({ ...f, targetVolume: v }))} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-500">강도 가이드</label>
-              <textarea
-                value={form.intensityGuide}
-                onChange={(e) => setForm((f) => ({ ...f, intensityGuide: e.target.value }))}
-                rows={2}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-500">회원님께 전달할 메모</label>
-              <textarea
-                value={form.goalNote}
-                onChange={(e) => setForm((f) => ({ ...f, goalNote: e.target.value }))}
-                rows={2}
-                placeholder="예: 이번 달 스쿼트 중량 잘 늘고 있어요! 다음 달은 주 3회, 데드리프트 중량도 함께 올려봐요."
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
-              />
-            </div>
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.achieved}
-                  onChange={(e) => setForm((f) => ({ ...f, achieved: e.target.checked }))}
-                  className="accent-indigo-600"
-                />
-                이번 달 목표 달성으로 표시
-              </label>
-              <button
-                onClick={save}
-                disabled={saving}
-                className="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-              >
-                {saving ? "저장 중..." : "목표 저장"}
-              </button>
-            </div>
-          </div>
+          <MonthlyGoalForm yearMonth={yearMonth} clientId={clientId} suggestion={suggestion} savedGoal={savedGoal} />
         </div>
       )}
-    </div>
-  );
-}
-
-function NumberField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
-  return (
-    <div className="space-y-1">
-      <label className="text-xs font-medium text-gray-500">{label}</label>
-      <input
-        type="number"
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
     </div>
   );
 }

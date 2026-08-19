@@ -18,25 +18,18 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
         })()
       : null;
 
-  if (schedule.type === "individual" && schedule.clientId) {
-    const session = await prisma.session.create({
-      data: {
-        clientId: schedule.clientId,
-        date: schedule.date,
-        sessionType: "individual",
-        duration,
-        memo: schedule.memo,
-      },
-    });
-    return Response.json({ redirect: `/sessions/${session.id}/edit` });
+  if (!schedule.clientId) {
+    return Response.json({ error: "회원이 지정되지 않은 일정입니다" }, { status: 400 });
   }
 
-  const groupSession = await prisma.groupSession.create({
+  const session = await prisma.session.create({
     data: {
+      clientId: schedule.clientId,
       date: schedule.date,
-      participants: schedule.participants,
+      sessionType: "individual",
+      duration,
       memo: schedule.memo,
     },
   });
-  return Response.json({ redirect: `/group-sessions/${groupSession.id}/edit` });
+  return Response.json({ redirect: `/sessions/${session.id}/edit` });
 }

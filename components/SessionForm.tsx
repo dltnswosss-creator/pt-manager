@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { COMMON_EXERCISES } from "@/lib/types";
+import { COMMON_EXERCISES, BODY_PART_ORDER, BODY_PART_LABELS, type BodyPart } from "@/lib/types";
 import { cn, uploadWithProgress } from "@/lib/utils";
 import { maybeCompressVideo } from "@/lib/video";
 import {
@@ -14,6 +14,7 @@ import {
 type ExerciseRow = {
   name: string; sets: string; reps: string; weight: string;
   unit: string; memo: string; isMain: boolean;
+  bodyParts: string[];
   videoUrls: string[];
   videoUploading: boolean;
   videoProgress: number;
@@ -23,6 +24,7 @@ type Client = { id: number; name: string };
 
 const emptyExercise = (): ExerciseRow => ({
   name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", isMain: true,
+  bodyParts: [],
   videoUrls: [], videoUploading: false, videoProgress: 0, videoStage: "uploading",
 });
 
@@ -132,7 +134,7 @@ export default function SessionForm({
         return;
       }
       setExercises(
-        last.exercises.map((e: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; isMain?: boolean }) => ({
+        last.exercises.map((e: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; isMain?: boolean; bodyParts?: string[] }) => ({
           name: e.name,
           sets: e.sets != null ? String(e.sets) : "",
           reps: e.reps ?? "",
@@ -140,6 +142,7 @@ export default function SessionForm({
           unit: e.unit ?? "kg",
           memo: "",
           isMain: e.isMain ?? true,
+          bodyParts: e.bodyParts ?? [],
           videoUrls: [],
           videoUploading: false,
           videoProgress: 0,
@@ -204,6 +207,13 @@ export default function SessionForm({
     setExercises((prev) => prev.map((e, idx) => (idx === i ? { ...e, isMain: !e.isMain } : e)));
   };
 
+  const toggleBodyPart = (i: number, part: BodyPart) => {
+    setExercises((prev) => prev.map((e, idx) => (idx === i ? {
+      ...e,
+      bodyParts: e.bodyParts.includes(part) ? e.bodyParts.filter((p) => p !== part) : [...e.bodyParts, part],
+    } : e)));
+  };
+
   const removeVideo = (i: number, videoIdx: number) => {
     setExercises((prev) => prev.map((e, idx) =>
       idx === i ? { ...e, videoUrls: e.videoUrls.filter((_, vi) => vi !== videoIdx) } : e
@@ -230,6 +240,7 @@ export default function SessionForm({
           unit: e.unit,
           memo: e.memo || null,
           isMain: e.isMain,
+          bodyParts: e.bodyParts,
           videoUrls: e.videoUrls,
         })),
     };
@@ -457,6 +468,25 @@ export default function SessionForm({
                     <option value="lbs">lbs</option>
                   </select>
                 </div>
+              </div>
+
+              {/* 부위 태그 */}
+              <div className="flex flex-wrap gap-1.5">
+                {BODY_PART_ORDER.map((part) => (
+                  <button
+                    key={part}
+                    type="button"
+                    onClick={() => toggleBodyPart(i, part)}
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors",
+                      ex.bodyParts.includes(part)
+                        ? "bg-indigo-600 text-white border-indigo-600"
+                        : "bg-white text-gray-500 border-gray-200 hover:bg-gray-100"
+                    )}
+                  >
+                    {BODY_PART_LABELS[part]}
+                  </button>
+                ))}
               </div>
 
               {/* 메인 운동 여부 */}

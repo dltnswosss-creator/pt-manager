@@ -21,7 +21,6 @@ export default async function DashboardPage() {
   const thisMonthStr = `${thisMonthStart.getFullYear()}-${String(thisMonthStart.getMonth() + 1).padStart(2, "0")}-01`;
 
   const todaySessions = await prisma.session.findMany({ where: { date: today } });
-  const todayGroupSessions = await prisma.groupSession.findMany({ where: { date: today } });
 
   const todaySchedules = await prisma.schedule.findMany({
     where: { date: today, status: { not: "cancelled" } },
@@ -30,7 +29,6 @@ export default async function DashboardPage() {
   });
 
   const monthSessionCount = await prisma.session.count({ where: { date: { gte: thisMonthStr } } });
-  const monthGroupCount = await prisma.groupSession.count({ where: { date: { gte: thisMonthStr } } });
 
   const recentSessions = await prisma.session.findMany({
     take: 5,
@@ -58,8 +56,8 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-3 gap-3">
         <StatCard icon={<Users size={18} className="text-indigo-600" />} label="전체 회원" value={clients.length} bg="bg-indigo-50" />
-        <StatCard icon={<CalendarDays size={18} className="text-emerald-600" />} label="오늘 수업" value={todaySessions.length + todayGroupSessions.length} bg="bg-emerald-50" />
-        <StatCard icon={<ClipboardList size={18} className="text-amber-600" />} label="이번달 수업" value={monthSessionCount + monthGroupCount} bg="bg-amber-50" />
+        <StatCard icon={<CalendarDays size={18} className="text-emerald-600" />} label="오늘 수업" value={todaySessions.length} bg="bg-emerald-50" />
+        <StatCard icon={<ClipboardList size={18} className="text-amber-600" />} label="이번달 수업" value={monthSessionCount} bg="bg-amber-50" />
       </div>
 
       {/* 오늘의 일정 */}
@@ -74,10 +72,7 @@ export default async function DashboardPage() {
           <div className="space-y-2">
             {todaySchedules.map((s) => {
               const color = s.location?.color ?? "#6366f1";
-              const label =
-                s.type === "individual"
-                  ? (s.client?.name ?? "회원 미지정")
-                  : `그룹 (${s.participants.length}인)`;
+              const label = s.client?.name ?? "회원 미지정";
               return (
                 <Link
                   key={s.id}

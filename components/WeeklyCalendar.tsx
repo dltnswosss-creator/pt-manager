@@ -380,7 +380,7 @@ export default function WeeklyCalendar({
                       const isCancelled = s.status === "cancelled";
                       const isCompleted = s.status === "completed";
                       const isScheduled = s.status === "scheduled";
-                      const label = s.type === "individual" ? (s.client?.name ?? "회원 미지정") : `그룹${s.participants.length > 0 ? ` (${s.participants.length}인)` : ""}`;
+                      const label = s.client?.name ?? "회원 미지정";
                       return (
                         <div
                           key={s.id}
@@ -487,7 +487,7 @@ export default function WeeklyCalendar({
                             </p>
                             {!isShort && (
                               <p className="text-[8px] font-medium leading-none truncate mt-0.5 text-gray-700">
-                                {s.type === "individual" ? (s.client?.name ?? "미지정") : "그룹"}
+                                {s.client?.name ?? "미지정"}
                               </p>
                             )}
                           </div>
@@ -600,7 +600,7 @@ export default function WeeklyCalendar({
               {drag.targetStartTime ?? drag.schedule.startTime}
             </p>
             <p className="text-[11px] font-medium text-gray-800 truncate">
-              {drag.schedule.type === "individual" ? (drag.schedule.client?.name ?? "회원 미지정") : "그룹"}
+              {drag.schedule.client?.name ?? "회원 미지정"}
             </p>
           </div>
           {drag.isCopy && (
@@ -669,7 +669,7 @@ function ScheduleBlock({
   const isScheduled = s.status === "scheduled";
   const height = eventHeight(s.startTime, s.endTime);
   const isShort = height < 52;
-  const label = s.type === "individual" ? (s.client?.name ?? "회원 미지정") : `그룹 ${s.participants.length > 0 ? `(${s.participants.length}인)` : ""}`;
+  const label = s.client?.name ?? "회원 미지정";
 
   return (
     <div
@@ -734,7 +734,6 @@ function QuickAddModal({ state, locations, clients, onClose, onSave, onDetail }:
 }) {
   const [clientId, setClientId] = useState<number | null>(null);
   const [locationId, setLocationId] = useState<number | null>(null);
-  const [type, setType] = useState("individual");
   const [saving, setSaving] = useState(false);
 
   const modalW = 264;
@@ -746,7 +745,7 @@ function QuickAddModal({ state, locations, clients, onClose, onSave, onDetail }:
 
   async function handleSave() {
     setSaving(true);
-    await onSave({ date: state.date, startTime: state.startTime, endTime: state.endTime, type, clientId: type === "individual" ? clientId : null, participants: [], locationId, memo: "", status: "scheduled" });
+    await onSave({ date: state.date, startTime: state.startTime, endTime: state.endTime, type: "individual", clientId, participants: [], locationId, memo: "", status: "scheduled" });
     setSaving(false);
   }
 
@@ -761,17 +760,10 @@ function QuickAddModal({ state, locations, clients, onClose, onSave, onDetail }:
           </div>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 text-gray-400"><X size={14} /></button>
         </div>
-        <div className="flex gap-1 mb-3">
-          {[["individual", "1:1"], ["group", "그룹"]].map(([v, l]) => (
-            <button key={v} onClick={() => setType(v)} className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${type === v ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>{l}</button>
-          ))}
-        </div>
-        {type === "individual" && (
-          <select value={clientId ?? ""} onChange={(e) => setClientId(e.target.value ? Number(e.target.value) : null)} className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-300">
-            <option value="">회원 선택</option>
-            {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        )}
+        <select value={clientId ?? ""} onChange={(e) => setClientId(e.target.value ? Number(e.target.value) : null)} className="w-full border border-gray-200 rounded-lg px-2.5 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option value="">회원 선택</option>
+          {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
         <div className="flex flex-wrap gap-1.5 mb-4">
           <button onClick={() => setLocationId(null)} className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${locationId === null ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}>미지정</button>
           {locations.map((loc) => (

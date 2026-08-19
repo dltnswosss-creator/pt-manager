@@ -28,20 +28,10 @@ export type Client = Prisma.ClientModel
  */
 export type Session = Prisma.SessionModel
 /**
- * Model GroupSession
- * 
- */
-export type GroupSession = Prisma.GroupSessionModel
-/**
  * Model Exercise
  * 
  */
 export type Exercise = Prisma.ExerciseModel
-/**
- * Model GroupExercise
- * 
- */
-export type GroupExercise = Prisma.GroupExerciseModel
 /**
  * Model MenstrualCycle
  * 

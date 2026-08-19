@@ -8,6 +8,7 @@ export type ExerciseEntry = {
   weight: number | null;
   unit: string;
   isMain: boolean;
+  bodyParts: string[];
 };
 
 export type SessionEntry = {
@@ -41,6 +42,8 @@ export type MonthStats = {
   totalSets: number;
   avgSetsPerSession: number;
   exercises: Map<string, ExerciseStat>;
+  // 부위 태그 기준 세트수 집계 (다중 태그 시 각 부위에 동일 세트수 반영, 태그 없는 기록은 미포함)
+  bodyPartVolume: Map<string, number>;
 };
 
 export type Feedback = { type: "positive" | "warning" | "info"; text: string };
@@ -82,6 +85,7 @@ export function getMonthStats(sessions: SessionEntry[], yearMonth: string): Mont
   const weeksInMonth = daysInMonth(yearMonth) / 7;
 
   const exercises = new Map<string, ExerciseStat>();
+  const bodyPartVolume = new Map<string, number>();
   let totalSets = 0;
 
   for (const s of monthSessions) {
@@ -111,6 +115,10 @@ export function getMonthStats(sessions: SessionEntry[], yearMonth: string): Mont
         cur.maxReps = cur.maxReps == null ? reps : Math.max(cur.maxReps, reps);
       }
       exercises.set(e.name, cur);
+
+      for (const part of e.bodyParts) {
+        bodyPartVolume.set(part, (bodyPartVolume.get(part) ?? 0) + sets);
+      }
     }
   }
 
@@ -122,6 +130,7 @@ export function getMonthStats(sessions: SessionEntry[], yearMonth: string): Mont
     totalSets,
     avgSetsPerSession: monthSessions.length > 0 ? totalSets / monthSessions.length : 0,
     exercises,
+    bodyPartVolume,
   };
 }
 

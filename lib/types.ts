@@ -76,6 +76,21 @@ export const BODY_AREAS = [
   "무릎(좌)", "무릎(우)", "발목(좌)", "발목(우)", "기타",
 ];
 
+export type BodyPart = "lower" | "back" | "chest" | "shoulder" | "arm" | "core" | "full" | "functional";
+
+export const BODY_PART_ORDER: BodyPart[] = ["lower", "back", "chest", "shoulder", "arm", "core", "full", "functional"];
+
+export const BODY_PART_LABELS: Record<BodyPart, string> = {
+  lower: "하체",
+  back: "등",
+  chest: "가슴",
+  shoulder: "어깨",
+  arm: "팔",
+  core: "코어",
+  full: "전신",
+  functional: "기능적",
+};
+
 export const COMMON_EXERCISES = [
   "스쿼트", "데드리프트", "벤치프레스", "오버헤드프레스", "바벨로우",
   "풀업", "친업", "딥스", "런지", "레그프레스", "레그컬", "레그익스텐션",

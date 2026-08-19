@@ -12,7 +12,7 @@ import {
   type SessionEntry,
 } from "@/lib/monthlyReport";
 import MonthlyReportCard from "@/components/MonthlyReportCard";
-import type { PainArea } from "@/lib/types";
+import { BODY_PART_ORDER, BODY_PART_LABELS, type PainArea, type BodyPart } from "@/lib/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default async function MonthlyReportPage({
@@ -28,7 +28,7 @@ export default async function MonthlyReportPage({
     orderBy: { name: "asc" },
     include: {
       sessions: {
-        select: { date: true, exercises: { select: { name: true, sets: true, reps: true, weight: true, unit: true, isMain: true } } },
+        select: { date: true, exercises: { select: { name: true, sets: true, reps: true, weight: true, unit: true, isMain: true, bodyParts: true } } },
       },
       monthlyGoals: { where: { yearMonth } },
     },
@@ -50,6 +50,11 @@ export default async function MonthlyReportPage({
       .sort((a, b) => b.totalSets - a.totalSets)
       .slice(0, 5);
 
+    const bodyPartVolume = BODY_PART_ORDER
+      .map((part) => ({ part, label: BODY_PART_LABELS[part as BodyPart], totalSets: current.bodyPartVolume.get(part) ?? 0 }))
+      .filter((p) => p.totalSets > 0)
+      .sort((a, b) => b.totalSets - a.totalSets);
+
     return {
       clientId: c.id,
       clientName: c.name,
@@ -57,6 +62,7 @@ export default async function MonthlyReportPage({
       avgFrequency: current.avgFrequency,
       avgSetsPerSession: current.avgSetsPerSession,
       exerciseSummary,
+      bodyPartVolume,
       feedback,
       suggestion,
       savedGoal: savedGoal ? JSON.parse(JSON.stringify(savedGoal)) : null,

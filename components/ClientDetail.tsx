@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   getMenstrualPhase, PHASE_LABELS, PHASE_COLORS, PHASE_GUIDE,
   EXERCISE_LEVEL_LABELS, PAIN_INTENSITY_LABELS, PAIN_INTENSITY_COLORS,
-  type PainArea, type MenstrualPhase,
+  BODY_PART_LABELS, type PainArea, type MenstrualPhase, type BodyPart,
 } from "@/lib/types";
 import { calcAge, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ import NotionShareButton from "@/components/NotionShareButton";
 import ExerciseVideoUpload from "@/components/ExerciseVideoUpload";
 import ExerciseTrendChart from "@/components/ExerciseTrendChart";
 
-type Exercise = { id: number; name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; videoUrls: string[] };
+type Exercise = { id: number; name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; bodyParts: string[]; videoUrls: string[] };
 type Session = { id: number; date: string; sessionType: string; duration: number | null; memo: string | null; notionUrl: string | null; exercises: Exercise[] };
 type MenstrualCycle = { lastStartDate: string; cycleLength: number; periodLength: number; memo: string | null } | null;
 type Client = {
@@ -232,7 +232,7 @@ export default function ClientDetail({ client }: { client: Client }) {
                       <span className="text-xs text-gray-400">{s.exercises.length}개 운동</span>
                       <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
                         <SessionExportButton session={s} clientName={client.name} />
-                        <NotionShareButton sessionId={s.id} type="session" existingUrl={s.notionUrl} />
+                        <NotionShareButton sessionId={s.id} existingUrl={s.notionUrl} />
                         <Link
                           href={`/sessions/${s.id}/edit`}
                           onClick={(e) => e.stopPropagation()}
@@ -270,7 +270,18 @@ export default function ClientDetail({ client }: { client: Client }) {
                                 <>
                                   <tr key={e.id} className="border-t border-gray-50">
                                     <td className="py-1.5 text-gray-300 text-xs">{i + 1}</td>
-                                    <td className="py-1.5 font-medium text-gray-900">{e.name}</td>
+                                    <td className="py-1.5 font-medium text-gray-900">
+                                      {e.name}
+                                      {e.bodyParts.length > 0 && (
+                                        <span className="ml-1.5 inline-flex gap-1">
+                                          {e.bodyParts.map((p) => (
+                                            <span key={p} className="text-[10px] font-normal px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-500">
+                                              {BODY_PART_LABELS[p as BodyPart] ?? p}
+                                            </span>
+                                          ))}
+                                        </span>
+                                      )}
+                                    </td>
                                     <td className="py-1.5 text-gray-600">{e.sets ?? "-"}</td>
                                     <td className="py-1.5 text-gray-600">{e.reps ?? "-"}</td>
                                     <td className="py-1.5 text-gray-600">{e.weight ? `${e.weight}${e.unit}` : "-"}</td>

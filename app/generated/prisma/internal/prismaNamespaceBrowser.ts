@@ -53,9 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Client: 'Client',
   Session: 'Session',
-  GroupSession: 'GroupSession',
   Exercise: 'Exercise',
-  GroupExercise: 'GroupExercise',
   MenstrualCycle: 'MenstrualCycle',
   MonthlyGoal: 'MonthlyGoal',
   Location: 'Location',
@@ -119,20 +117,6 @@ export const SessionScalarFieldEnum = {
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
 
 
-export const GroupSessionScalarFieldEnum = {
-  id: 'id',
-  date: 'date',
-  title: 'title',
-  memo: 'memo',
-  participants: 'participants',
-  notionPageId: 'notionPageId',
-  notionUrl: 'notionUrl',
-  createdAt: 'createdAt'
-} as const
-
-export type GroupSessionScalarFieldEnum = (typeof GroupSessionScalarFieldEnum)[keyof typeof GroupSessionScalarFieldEnum]
-
-
 export const ExerciseScalarFieldEnum = {
   id: 'id',
   sessionId: 'sessionId',
@@ -144,26 +128,11 @@ export const ExerciseScalarFieldEnum = {
   memo: 'memo',
   videoUrls: 'videoUrls',
   order: 'order',
-  isMain: 'isMain'
+  isMain: 'isMain',
+  bodyParts: 'bodyParts'
 } as const
 
 export type ExerciseScalarFieldEnum = (typeof ExerciseScalarFieldEnum)[keyof typeof ExerciseScalarFieldEnum]
-
-
-export const GroupExerciseScalarFieldEnum = {
-  id: 'id',
-  groupSessionId: 'groupSessionId',
-  name: 'name',
-  sets: 'sets',
-  reps: 'reps',
-  weight: 'weight',
-  unit: 'unit',
-  memo: 'memo',
-  videoUrls: 'videoUrls',
-  order: 'order'
-} as const
-
-export type GroupExerciseScalarFieldEnum = (typeof GroupExerciseScalarFieldEnum)[keyof typeof GroupExerciseScalarFieldEnum]
 
 
 export const MenstrualCycleScalarFieldEnum = {

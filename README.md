@@ -23,11 +23,6 @@
 - 운동별 영상 첨부 (카메라롤 또는 파일, 50MB 이하)
 - 저장 시 **Notion 수업 일지 자동 생성** + 링크 즉시 복사
 
-### 그룹 수업 기록 (3:1 포함)
-- 날짜, 제목, 참여 회원 이름 태그
-- 운동 목록 + 영상 첨부
-- 저장 시 Notion 일지 자동 생성
-
 ### Notion 자동 공유
 - 수업 저장 즉시 Notion 페이지 자동 생성
 - 운동별 영상 → Notion 비디오 블록으로 삽입
@@ -63,17 +58,14 @@ pt-manager/
 │   ├── api/
 │   │   ├── clients/           회원 CRUD
 │   │   ├── sessions/          1:1 수업 CRUD + Notion 자동생성
-│   │   ├── group-sessions/    그룹 수업 CRUD + Notion 자동생성
 │   │   ├── upload/video/      Supabase Storage 영상 업로드
 │   │   └── diagnose/          연결 진단 엔드포인트
 │   ├── clients/               회원 관리 페이지
 │   ├── sessions/              1:1 수업 페이지
-│   ├── group-sessions/        그룹 수업 페이지
 │   └── layout.tsx             공통 레이아웃 (PWA 메타태그)
 ├── components/
 │   ├── Sidebar.tsx            데스크탑 사이드바 + 모바일 하단 탭
 │   ├── SessionForm.tsx        1:1 수업 입력 폼
-│   ├── GroupSessionForm.tsx   그룹 수업 입력 폼
 │   └── ClientDetail.tsx       회원 상세 (인적사항/수업기록/생리주기)
 ├── lib/
 │   ├── prisma.ts              Prisma 클라이언트 (pg 어댑터)

@@ -386,9 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Client: 'Client',
   Session: 'Session',
-  GroupSession: 'GroupSession',
   Exercise: 'Exercise',
-  GroupExercise: 'GroupExercise',
   MenstrualCycle: 'MenstrualCycle',
   MonthlyGoal: 'MonthlyGoal',
   Location: 'Location',
@@ -408,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "client" | "session" | "groupSession" | "exercise" | "groupExercise" | "menstrualCycle" | "monthlyGoal" | "location" | "schedule"
+    modelProps: "client" | "session" | "exercise" | "menstrualCycle" | "monthlyGoal" | "location" | "schedule"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -560,80 +558,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    GroupSession: {
-      payload: Prisma.$GroupSessionPayload<ExtArgs>
-      fields: Prisma.GroupSessionFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.GroupSessionFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.GroupSessionFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload>
-        }
-        findFirst: {
-          args: Prisma.GroupSessionFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.GroupSessionFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload>
-        }
-        findMany: {
-          args: Prisma.GroupSessionFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload>[]
-        }
-        create: {
-          args: Prisma.GroupSessionCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload>
-        }
-        createMany: {
-          args: Prisma.GroupSessionCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.GroupSessionCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload>[]
-        }
-        delete: {
-          args: Prisma.GroupSessionDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload>
-        }
-        update: {
-          args: Prisma.GroupSessionUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload>
-        }
-        deleteMany: {
-          args: Prisma.GroupSessionDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.GroupSessionUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.GroupSessionUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload>[]
-        }
-        upsert: {
-          args: Prisma.GroupSessionUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupSessionPayload>
-        }
-        aggregate: {
-          args: Prisma.GroupSessionAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateGroupSession>
-        }
-        groupBy: {
-          args: Prisma.GroupSessionGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.GroupSessionGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.GroupSessionCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.GroupSessionCountAggregateOutputType> | number
-        }
-      }
-    }
     Exercise: {
       payload: Prisma.$ExercisePayload<ExtArgs>
       fields: Prisma.ExerciseFieldRefs
@@ -705,80 +629,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ExerciseCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ExerciseCountAggregateOutputType> | number
-        }
-      }
-    }
-    GroupExercise: {
-      payload: Prisma.$GroupExercisePayload<ExtArgs>
-      fields: Prisma.GroupExerciseFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.GroupExerciseFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.GroupExerciseFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload>
-        }
-        findFirst: {
-          args: Prisma.GroupExerciseFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.GroupExerciseFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload>
-        }
-        findMany: {
-          args: Prisma.GroupExerciseFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload>[]
-        }
-        create: {
-          args: Prisma.GroupExerciseCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload>
-        }
-        createMany: {
-          args: Prisma.GroupExerciseCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.GroupExerciseCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload>[]
-        }
-        delete: {
-          args: Prisma.GroupExerciseDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload>
-        }
-        update: {
-          args: Prisma.GroupExerciseUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload>
-        }
-        deleteMany: {
-          args: Prisma.GroupExerciseDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.GroupExerciseUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.GroupExerciseUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload>[]
-        }
-        upsert: {
-          args: Prisma.GroupExerciseUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$GroupExercisePayload>
-        }
-        aggregate: {
-          args: Prisma.GroupExerciseAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateGroupExercise>
-        }
-        groupBy: {
-          args: Prisma.GroupExerciseGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.GroupExerciseGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.GroupExerciseCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.GroupExerciseCountAggregateOutputType> | number
         }
       }
     }
@@ -1158,20 +1008,6 @@ export const SessionScalarFieldEnum = {
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
 
 
-export const GroupSessionScalarFieldEnum = {
-  id: 'id',
-  date: 'date',
-  title: 'title',
-  memo: 'memo',
-  participants: 'participants',
-  notionPageId: 'notionPageId',
-  notionUrl: 'notionUrl',
-  createdAt: 'createdAt'
-} as const
-
-export type GroupSessionScalarFieldEnum = (typeof GroupSessionScalarFieldEnum)[keyof typeof GroupSessionScalarFieldEnum]
-
-
 export const ExerciseScalarFieldEnum = {
   id: 'id',
   sessionId: 'sessionId',
@@ -1183,26 +1019,11 @@ export const ExerciseScalarFieldEnum = {
   memo: 'memo',
   videoUrls: 'videoUrls',
   order: 'order',
-  isMain: 'isMain'
+  isMain: 'isMain',
+  bodyParts: 'bodyParts'
 } as const
 
 export type ExerciseScalarFieldEnum = (typeof ExerciseScalarFieldEnum)[keyof typeof ExerciseScalarFieldEnum]
-
-
-export const GroupExerciseScalarFieldEnum = {
-  id: 'id',
-  groupSessionId: 'groupSessionId',
-  name: 'name',
-  sets: 'sets',
-  reps: 'reps',
-  weight: 'weight',
-  unit: 'unit',
-  memo: 'memo',
-  videoUrls: 'videoUrls',
-  order: 'order'
-} as const
-
-export type GroupExerciseScalarFieldEnum = (typeof GroupExerciseScalarFieldEnum)[keyof typeof GroupExerciseScalarFieldEnum]
 
 
 export const MenstrualCycleScalarFieldEnum = {
@@ -1469,9 +1290,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   client?: Prisma.ClientOmit
   session?: Prisma.SessionOmit
-  groupSession?: Prisma.GroupSessionOmit
   exercise?: Prisma.ExerciseOmit
-  groupExercise?: Prisma.GroupExerciseOmit
   menstrualCycle?: Prisma.MenstrualCycleOmit
   monthlyGoal?: Prisma.MonthlyGoalOmit
   location?: Prisma.LocationOmit

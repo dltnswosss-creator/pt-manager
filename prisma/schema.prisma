@@ -58,18 +58,6 @@ model Session {
   createdAt    DateTime   @default(now())
 }
 
-model GroupSession {
-  id           Int             @id @default(autoincrement())
-  date         String
-  title        String?
-  memo         String?
-  participants String[]        @default([])
-  notionPageId String?
-  notionUrl    String?
-  exercises    GroupExercise[]
-  createdAt    DateTime        @default(now())
-}
-
 model Exercise {
   id        Int      @id @default(autoincrement())
   sessionId Int
@@ -83,20 +71,7 @@ model Exercise {
   videoUrls String[] @default([])
   order     Int      @default(0)
   isMain    Boolean  @default(true) // 월간 리포트 추적 대상 여부 (스트레칭 등 보조 운동은 제외 가능)
-}
-
-model GroupExercise {
-  id             Int          @id @default(autoincrement())
-  groupSessionId Int
-  groupSession   GroupSession @relation(fields: [groupSessionId], references: [id], onDelete: Cascade)
-  name           String
-  sets           Int?
-  reps           String?
-  weight         Float?
-  unit           String       @default("kg")
-  memo           String?
-  videoUrls      String[]     @default([])
-  order          Int          @default(0)
+  bodyParts String[] @default([]) // 부위 태그 (하체/등/가슴/어깨/팔/코어/전신/기능적), 다중 선택 가능
 }
 
 model MenstrualCycle {

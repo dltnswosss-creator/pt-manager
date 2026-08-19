@@ -115,7 +115,5 @@ npx dotenv-cli -e .env -- node scripts/migrate-to-supabase.mjs
 Client          회원 정보 (인적사항, 병력, 생활습관)
 Session         1:1 수업 기록
 Exercise        수업별 운동 (세트/횟수/중량/영상URL)
-GroupSession    그룹 수업 기록 (참여자 이름 배열)
-GroupExercise   그룹 수업별 운동
 MenstrualCycle  여성 회원 생리주기 정보
 ```

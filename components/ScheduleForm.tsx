@@ -42,9 +42,6 @@ export default function ScheduleForm({ initial, mode }: Props) {
   const [form, setForm] = useState<ScheduleData>({ ...defaultForm(), ...initial });
   const [locations, setLocations] = useState<Location[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
-  const [participantInput, setParticipantInput] = useState(
-    initial?.participants?.join(", ") ?? ""
-  );
   const [loading, setLoading] = useState(false);
   const [completing, setCompleting] = useState(false);
 
@@ -68,14 +65,7 @@ export default function ScheduleForm({ initial, mode }: Props) {
 
     const payload = {
       ...form,
-      participants:
-        form.type === "group"
-          ? participantInput
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean)
-          : [],
-      clientId: form.type === "individual" ? form.clientId : null,
+      participants: [],
     };
 
     try {
@@ -173,7 +163,6 @@ export default function ScheduleForm({ initial, mode }: Props) {
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
           >
             <option value="individual">1:1</option>
-            <option value="group">그룹</option>
           </select>
         </div>
       </div>
@@ -226,38 +215,22 @@ export default function ScheduleForm({ initial, mode }: Props) {
         )}
       </div>
 
-      {/* 회원 (1:1) or 참여자 (그룹) */}
-      {form.type === "individual" ? (
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">회원</label>
-          <select
-            value={form.clientId ?? ""}
-            onChange={(e) => set("clientId", e.target.value ? Number(e.target.value) : null)}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-          >
-            <option value="">회원 선택</option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : (
-        <div>
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            참여자{" "}
-            <span className="text-gray-400 font-normal">(쉼표로 구분)</span>
-          </label>
-          <input
-            type="text"
-            value={participantInput}
-            onChange={(e) => setParticipantInput(e.target.value)}
-            placeholder="홍길동, 김철수, 이영희"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
-          />
-        </div>
-      )}
+      {/* 회원 */}
+      <div>
+        <label className="block text-xs font-medium text-gray-600 mb-1">회원</label>
+        <select
+          value={form.clientId ?? ""}
+          onChange={(e) => set("clientId", e.target.value ? Number(e.target.value) : null)}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        >
+          <option value="">회원 선택</option>
+          {clients.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {/* 메모 */}
       <div>

@@ -5,18 +5,15 @@ import { ExternalLink, Loader2, RefreshCw, Check } from "lucide-react";
 
 type Props = {
   sessionId: number;
-  type: "session" | "group";
   existingUrl?: string | null;
 };
 
-export default function NotionShareButton({ sessionId, type, existingUrl }: Props) {
+export default function NotionShareButton({ sessionId, existingUrl }: Props) {
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState(existingUrl ?? null);
   const [copied, setCopied] = useState(false);
 
-  const apiPath = type === "session"
-    ? `/api/sessions/${sessionId}/share`
-    : `/api/group-sessions/${sessionId}/share`;
+  const apiPath = `/api/sessions/${sessionId}/share`;
 
   const handleShare = async () => {
     setLoading(true);

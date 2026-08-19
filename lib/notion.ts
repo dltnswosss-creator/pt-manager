@@ -52,14 +52,6 @@ type SessionData = {
   exercises: Exercise[];
 };
 
-type GroupSessionData = {
-  title: string | null;
-  date: string;
-  participants: string[];
-  memo: string | null;
-  exercises: Exercise[];
-};
-
 function exerciseText(e: Exercise): string {
   const parts = [
     e.sets ? `${e.sets}세트` : null,
@@ -213,57 +205,3 @@ export async function updateSessionNotionPage(notionUrl: string, data: SessionDa
   });
 }
 
-export async function updateGroupSessionNotionPage(notionUrl: string, data: GroupSessionData): Promise<void> {
-  const pageId = notionUrlToPageId(notionUrl);
-  const participantsText = data.participants.length > 0 ? data.participants.join(", ") : "미기록";
-
-  await clearPageBlocks(pageId);
-
-  const children: object[] = [
-    callout(`📅 ${formatDate(data.date)}   참여 회원: ${participantsText}`, "👥"),
-    divider(),
-    heading3("운동 목록"),
-    ...buildExerciseBlocks(data.exercises),
-    divider(),
-  ];
-  if (data.memo) children.push(callout(data.memo, "💬"));
-
-  await notion.blocks.children.append({
-    block_id: pageId,
-    children: children as Parameters<typeof notion.blocks.children.append>[0]["children"],
-  });
-}
-
-export async function createGroupSessionNotionPage(data: GroupSessionData): Promise<string> {
-  const rootId = process.env.NOTION_PARENT_PAGE_ID!;
-  const participantsText = data.participants.length > 0 ? data.participants.join(", ") : "미기록";
-  const sessionTitle = `${sessionDateTitle(data.date)}${data.title ? ` ${data.title}` : ""}`;
-
-  // PT 수업일지 → 그룹 수업 → 날짜
-  const groupPageId = await getOrCreateChildPage(rootId, "그룹 수업", "👥");
-
-  const children: object[] = [
-    callout(`📅 ${formatDate(data.date)}   참여 회원: ${participantsText}`, "👥"),
-    divider(),
-    heading3("운동 목록"),
-    ...buildExerciseBlocks(data.exercises),
-    divider(),
-  ];
-
-  if (data.memo) {
-    children.push(callout(data.memo, "💬"));
-  }
-
-  const response = await notion.pages.create({
-    parent: { page_id: groupPageId },
-    icon: { type: "emoji", emoji: "👥" },
-    properties: {
-      title: {
-        title: [{ type: "text", text: { content: sessionTitle } }],
-      },
-    },
-    children: children as Parameters<typeof notion.pages.create>[0]["children"],
-  });
-
-  return `https://notion.so/${response.id.replace(/-/g, "")}`;
-}

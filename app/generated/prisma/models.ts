@@ -10,9 +10,7 @@
  */
 export type * from './models/Client'
 export type * from './models/Session'
-export type * from './models/GroupSession'
 export type * from './models/Exercise'
-export type * from './models/GroupExercise'
 export type * from './models/MenstrualCycle'
 export type * from './models/MonthlyGoal'
 export type * from './models/Location'
