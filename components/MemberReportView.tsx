@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { formatYearMonth, shiftYearMonth, type Feedback, type GoalSuggestion } from "@/lib/monthlyReport";
 import MonthlyGoalForm from "@/components/MonthlyGoalForm";
+import BodyMap from "@/components/BodyMap";
 
 type ExerciseSummary = { name: string; totalSets: number; maxWeight: number | null; maxReps: number | null; unit: string };
 type BodyPartVolume = { part: string; label: string; totalSets: number };
@@ -105,8 +106,9 @@ export default function MemberReportView({
 
         {/* 부위별 볼륨 */}
         {bodyPartVolume.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <p className="text-sm font-semibold text-gray-700">부위별 볼륨</p>
+            <BodyMap volume={bodyPartVolume} />
             <div className="space-y-2">
               {bodyPartVolume.map((p) => (
                 <div key={p.part} className="flex items-center gap-3">
