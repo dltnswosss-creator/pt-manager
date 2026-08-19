@@ -92,7 +92,7 @@ model MonthlyGoal {
   yearMonth       String   // "YYYY-MM"
 
   // ACSM 기반 목표
-  targetFrequency Int?     // 주당 세션 횟수 목표
+  targetFrequency Int?     // 월간 목표 수업 횟수
   targetSets      Int?     // 세션당 세트 수 목표
   targetVolume    Int?     // 주당 총 세트 수 목표 (근비대 기준)
   intensityGuide  String?  // 강도 관련 가이드 문구

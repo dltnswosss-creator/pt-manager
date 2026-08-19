@@ -47,8 +47,7 @@ export default async function MonthlyReportPage({
     // Map은 서버→클라이언트 컴포넌트로 그대로 넘기지 않고 배열로 직렬화
     const exerciseSummary = Array.from(current.exercises.entries())
       .map(([name, s]) => ({ name, totalSets: s.totalSets, maxWeight: s.maxWeight, maxReps: s.maxReps, unit: s.unit }))
-      .sort((a, b) => b.totalSets - a.totalSets)
-      .slice(0, 5);
+      .sort((a, b) => b.totalSets - a.totalSets);
 
     const bodyPartVolume = BODY_PART_ORDER
       .map((part) => ({ part, label: BODY_PART_LABELS[part as BodyPart], totalSets: current.bodyPartVolume.get(part) ?? 0 }))
@@ -59,7 +58,6 @@ export default async function MonthlyReportPage({
       clientId: c.id,
       clientName: c.name,
       sessionCount: current.sessionCount,
-      avgFrequency: current.avgFrequency,
       avgSetsPerSession: current.avgSetsPerSession,
       exerciseSummary,
       bodyPartVolume,

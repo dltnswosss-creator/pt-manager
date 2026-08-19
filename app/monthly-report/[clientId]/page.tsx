@@ -60,7 +60,6 @@ export default async function MemberMonthlyReportPage({
       clientId={client.id}
       clientName={client.name}
       sessionCount={current.sessionCount}
-      avgFrequency={current.avgFrequency}
       avgSetsPerSession={current.avgSetsPerSession}
       exerciseSummary={exerciseSummary}
       bodyPartVolume={bodyPartVolume}

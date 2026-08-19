@@ -9,6 +9,7 @@ import {
 import { formatYearMonth, shiftYearMonth, type Feedback, type GoalSuggestion } from "@/lib/monthlyReport";
 import MonthlyGoalForm from "@/components/MonthlyGoalForm";
 import BodyMap from "@/components/BodyMap";
+import ExerciseSummaryChart from "@/components/ExerciseSummaryChart";
 
 type ExerciseSummary = { name: string; totalSets: number; maxWeight: number | null; maxReps: number | null; unit: string };
 type BodyPartVolume = { part: string; label: string; totalSets: number };
@@ -26,7 +27,6 @@ export default function MemberReportView({
   clientId,
   clientName,
   sessionCount,
-  avgFrequency,
   avgSetsPerSession,
   exerciseSummary,
   bodyPartVolume,
@@ -38,7 +38,6 @@ export default function MemberReportView({
   clientId: number;
   clientName: string;
   sessionCount: number;
-  avgFrequency: number;
   avgSetsPerSession: number;
   exerciseSummary: ExerciseSummary[];
   bodyPartVolume: BodyPartVolume[];
@@ -86,9 +85,8 @@ export default function MemberReportView({
         </div>
 
         {/* 요약 통계 */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <StatTile label="이번 달 수업" value={`${sessionCount}회`} />
-          <StatTile label="주 평균 빈도" value={`${Math.round(avgFrequency * 10) / 10}회`} />
           <StatTile label="세션당 평균" value={`${Math.round(avgSetsPerSession * 10) / 10}세트`} />
         </div>
 
@@ -130,13 +128,7 @@ export default function MemberReportView({
         {exerciseSummary.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm font-semibold text-gray-700">운동별 요약</p>
-            <div className="flex flex-wrap gap-1.5">
-              {exerciseSummary.map((e) => (
-                <span key={e.name} className="text-xs px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-100">
-                  {e.name} · {e.totalSets}세트{e.maxWeight != null ? ` · 최고 ${e.maxWeight}${e.unit}` : ""}{e.maxReps != null ? ` · 최대 ${e.maxReps}회` : ""}
-                </span>
-              ))}
-            </div>
+            <ExerciseSummaryChart exercises={exerciseSummary} />
           </div>
         )}
 

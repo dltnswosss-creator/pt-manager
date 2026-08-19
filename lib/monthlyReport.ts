@@ -1,5 +1,7 @@
 // ACSM 저항운동 처방 가이드라인(2026) 기반 월간 리포트 계산
-// - 빈도 ≥2회/주, 세트 2~3세트/세션(근력), 주당 총 10세트 이상(근비대), 전 가동범위, 점진적 과부하
+// - 세트 2~3세트/세션(근력), 주당 총 10세트 이상(근비대), 전 가동범위, 점진적 과부하
+// - 수업 빈도는 트레이너와의 계약(주 N회)으로 이미 고정되는 경우가 많아 ACSM 주당 빈도 기준과 비교하지 않고,
+//   월별 실제 수업 횟수(sessionCount)만 그대로 기록한다.
 
 export type ExerciseEntry = {
   name: string;
@@ -38,7 +40,6 @@ export type MonthStats = {
   yearMonth: string;
   sessionCount: number;
   weeksInMonth: number;
-  avgFrequency: number;
   totalSets: number;
   avgSetsPerSession: number;
   exercises: Map<string, ExerciseStat>;
@@ -126,7 +127,6 @@ export function getMonthStats(sessions: SessionEntry[], yearMonth: string): Mont
     yearMonth,
     sessionCount: monthSessions.length,
     weeksInMonth,
-    avgFrequency: weeksInMonth > 0 ? monthSessions.length / weeksInMonth : 0,
     totalSets,
     avgSetsPerSession: monthSessions.length > 0 ? totalSets / monthSessions.length : 0,
     exercises,
@@ -140,22 +140,6 @@ export function generateFeedback(current: MonthStats, previous: MonthStats | nul
   if (current.sessionCount === 0) {
     feedback.push({ type: "warning", text: "이번 달 등록된 수업 기록이 없습니다." });
     return feedback;
-  }
-
-  const freq = Math.round(current.avgFrequency * 10) / 10;
-  if (current.avgFrequency >= 2) {
-    feedback.push({ type: "positive", text: `주 평균 ${freq}회 운동 — ACSM 권장 빈도(주 2회 이상)를 충족하고 있습니다.` });
-  } else {
-    feedback.push({ type: "warning", text: `주 평균 ${freq}회로 ACSM 권장 빈도(주 2회 이상)에 못 미칩니다.` });
-  }
-
-  if (previous && previous.sessionCount > 0) {
-    const freqDelta = Math.round((current.avgFrequency - previous.avgFrequency) * 10) / 10;
-    if (freqDelta > 0.05) {
-      feedback.push({ type: "positive", text: `지난달 대비 운동 빈도가 주 ${freqDelta}회 늘었습니다.` });
-    } else if (freqDelta < -0.05) {
-      feedback.push({ type: "warning", text: `지난달 대비 운동 빈도가 주 ${Math.abs(freqDelta)}회 줄었습니다.` });
-    }
   }
 
   if (current.exercises.size === 0) {
@@ -270,7 +254,7 @@ export function suggestGoal(
   }
 
   return {
-    targetFrequency: Math.max(2, Math.ceil(current.avgFrequency || 2)),
+    targetFrequency: Math.max(current.sessionCount, 1),
     targetSets: 3,
     targetVolume: Math.max(10, Math.round(weeklyVolume) || 10),
     intensityGuide: parts.join(" "),

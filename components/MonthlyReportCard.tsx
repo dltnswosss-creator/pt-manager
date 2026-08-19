@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle2, AlertTriangle, Info, ChevronDown, ChevronUp, Maximize2 } from "lucide-react";
 import type { Feedback, GoalSuggestion } from "@/lib/monthlyReport";
 import MonthlyGoalForm from "@/components/MonthlyGoalForm";
+import ExerciseSummaryChart from "@/components/ExerciseSummaryChart";
 
 type ExerciseSummary = { name: string; totalSets: number; maxWeight: number | null; maxReps: number | null; unit: string };
 type BodyPartVolume = { part: string; label: string; totalSets: number };
@@ -22,7 +23,6 @@ export default function MonthlyReportCard({
   clientId,
   clientName,
   sessionCount,
-  avgFrequency,
   avgSetsPerSession,
   exerciseSummary,
   bodyPartVolume,
@@ -34,7 +34,6 @@ export default function MonthlyReportCard({
   clientId: number;
   clientName: string;
   sessionCount: number;
-  avgFrequency: number;
   avgSetsPerSession: number;
   exerciseSummary: ExerciseSummary[];
   bodyPartVolume: BodyPartVolume[];
@@ -61,7 +60,7 @@ export default function MonthlyReportCard({
             <div className="min-w-0">
               <p className="text-sm font-semibold text-gray-900 truncate">{clientName}</p>
               <p className="text-xs text-gray-400 mt-0.5">
-                이번 달 수업 {sessionCount}회 · 주 평균 {Math.round(avgFrequency * 10) / 10}회 · 세션당 {Math.round(avgSetsPerSession * 10) / 10}세트
+                이번 달 수업 {sessionCount}회 · 세션당 {Math.round(avgSetsPerSession * 10) / 10}세트
               </p>
             </div>
           </div>
@@ -103,12 +102,9 @@ export default function MonthlyReportCard({
 
           {/* 운동별 요약 */}
           {exerciseSummary.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {exerciseSummary.map((e) => (
-                <span key={e.name} className="text-xs px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 border border-gray-100">
-                  {e.name} · {e.totalSets}세트{e.maxWeight != null ? ` · 최고 ${e.maxWeight}${e.unit}` : ""}{e.maxReps != null ? ` · 최대 ${e.maxReps}회` : ""}
-                </span>
-              ))}
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-gray-500">운동별 요약</p>
+              <ExerciseSummaryChart exercises={exerciseSummary} limit={5} />
             </div>
           )}
 

@@ -50,7 +50,7 @@ export default function MonthlyGoalForm({
     <div className="bg-indigo-50/50 rounded-lg p-4 space-y-3">
       <p className="text-xs font-semibold text-indigo-700">다음 달 목표 (ACSM 가이드라인 기반 제안)</p>
       <div className="grid grid-cols-3 gap-3">
-        <NumberField label="주당 세션(회)" value={form.targetFrequency} onChange={(v) => setForm((f) => ({ ...f, targetFrequency: v }))} />
+        <NumberField label="목표 수업 횟수(회)" value={form.targetFrequency} onChange={(v) => setForm((f) => ({ ...f, targetFrequency: v }))} />
         <NumberField label="세션당 세트" value={form.targetSets} onChange={(v) => setForm((f) => ({ ...f, targetSets: v }))} />
         <NumberField label="주당 총 세트" value={form.targetVolume} onChange={(v) => setForm((f) => ({ ...f, targetVolume: v }))} />
       </div>
