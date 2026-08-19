@@ -12,6 +12,9 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         orderBy: { date: "desc" },
         include: { exercises: { orderBy: { order: "asc" } } },
       },
+      inBodyRecords: {
+        orderBy: { date: "asc" },
+      },
     },
   });
   if (!client) notFound();

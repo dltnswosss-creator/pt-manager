@@ -10,6 +10,14 @@ export function formatDate(dateStr: string) {
   return d.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
 }
 
+export function formatDateShort(dateStr: string) {
+  const d = new Date(dateStr);
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yy}/${mm}/${dd}`;
+}
+
 // PUT을 fetch가 아닌 XHR로 보내는 이유: fetch는 업로드 진행률을 알 수 없고,
 // 네트워크가 끊겨도 요청이 영원히 pending 상태로 남을 수 있어 대용량 영상(모바일 회선)에서 "업로드 중"에 멈춘 것처럼 보임.
 export function uploadWithProgress(

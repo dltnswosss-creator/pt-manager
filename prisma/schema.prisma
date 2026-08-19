@@ -42,6 +42,7 @@ model Client {
   menstrualCycle  MenstrualCycle?
   schedules       Schedule[]
   monthlyGoals    MonthlyGoal[]
+  inBodyRecords   InBodyRecord[]
 }
 
 model Session {
@@ -105,6 +106,21 @@ model MonthlyGoal {
   updatedAt       DateTime @updatedAt
 
   @@unique([clientId, yearMonth])
+}
+
+model InBodyRecord {
+  id                 Int      @id @default(autoincrement())
+  clientId           Int
+  client             Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  date               String
+  weight             Float?   // 체중 (kg)
+  skeletalMuscleMass Float?   // 골격근량 (kg)
+  bodyFatMass        Float?   // 체지방량 (kg)
+  bodyFatPercent     Float?   // 체지방률 (%)
+  bmr                Int?     // 기초대사량 (kcal)
+  createdAt          DateTime @default(now())
+
+  @@unique([clientId, date])
 }
 
 model Location {

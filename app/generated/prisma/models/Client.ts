@@ -348,6 +348,7 @@ export type ClientWhereInput = {
   menstrualCycle?: Prisma.XOR<Prisma.MenstrualCycleNullableScalarRelationFilter, Prisma.MenstrualCycleWhereInput> | null
   schedules?: Prisma.ScheduleListRelationFilter
   monthlyGoals?: Prisma.MonthlyGoalListRelationFilter
+  inBodyRecords?: Prisma.InBodyRecordListRelationFilter
 }
 
 export type ClientOrderByWithRelationInput = {
@@ -375,6 +376,7 @@ export type ClientOrderByWithRelationInput = {
   menstrualCycle?: Prisma.MenstrualCycleOrderByWithRelationInput
   schedules?: Prisma.ScheduleOrderByRelationAggregateInput
   monthlyGoals?: Prisma.MonthlyGoalOrderByRelationAggregateInput
+  inBodyRecords?: Prisma.InBodyRecordOrderByRelationAggregateInput
 }
 
 export type ClientWhereUniqueInput = Prisma.AtLeast<{
@@ -405,6 +407,7 @@ export type ClientWhereUniqueInput = Prisma.AtLeast<{
   menstrualCycle?: Prisma.XOR<Prisma.MenstrualCycleNullableScalarRelationFilter, Prisma.MenstrualCycleWhereInput> | null
   schedules?: Prisma.ScheduleListRelationFilter
   monthlyGoals?: Prisma.MonthlyGoalListRelationFilter
+  inBodyRecords?: Prisma.InBodyRecordListRelationFilter
 }, "id">
 
 export type ClientOrderByWithAggregationInput = {
@@ -485,6 +488,7 @@ export type ClientCreateInput = {
   menstrualCycle?: Prisma.MenstrualCycleCreateNestedOneWithoutClientInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutClientInput
   monthlyGoals?: Prisma.MonthlyGoalCreateNestedManyWithoutClientInput
+  inBodyRecords?: Prisma.InBodyRecordCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateInput = {
@@ -512,6 +516,7 @@ export type ClientUncheckedCreateInput = {
   menstrualCycle?: Prisma.MenstrualCycleUncheckedCreateNestedOneWithoutClientInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutClientInput
   monthlyGoals?: Prisma.MonthlyGoalUncheckedCreateNestedManyWithoutClientInput
+  inBodyRecords?: Prisma.InBodyRecordUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientUpdateInput = {
@@ -538,6 +543,7 @@ export type ClientUpdateInput = {
   menstrualCycle?: Prisma.MenstrualCycleUpdateOneWithoutClientNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutClientNestedInput
   monthlyGoals?: Prisma.MonthlyGoalUpdateManyWithoutClientNestedInput
+  inBodyRecords?: Prisma.InBodyRecordUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateInput = {
@@ -565,6 +571,7 @@ export type ClientUncheckedUpdateInput = {
   menstrualCycle?: Prisma.MenstrualCycleUncheckedUpdateOneWithoutClientNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutClientNestedInput
   monthlyGoals?: Prisma.MonthlyGoalUncheckedUpdateManyWithoutClientNestedInput
+  inBodyRecords?: Prisma.InBodyRecordUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateManyInput = {
@@ -804,6 +811,20 @@ export type ClientUpdateOneRequiredWithoutMonthlyGoalsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ClientUpdateToOneWithWhereWithoutMonthlyGoalsInput, Prisma.ClientUpdateWithoutMonthlyGoalsInput>, Prisma.ClientUncheckedUpdateWithoutMonthlyGoalsInput>
 }
 
+export type ClientCreateNestedOneWithoutInBodyRecordsInput = {
+  create?: Prisma.XOR<Prisma.ClientCreateWithoutInBodyRecordsInput, Prisma.ClientUncheckedCreateWithoutInBodyRecordsInput>
+  connectOrCreate?: Prisma.ClientCreateOrConnectWithoutInBodyRecordsInput
+  connect?: Prisma.ClientWhereUniqueInput
+}
+
+export type ClientUpdateOneRequiredWithoutInBodyRecordsNestedInput = {
+  create?: Prisma.XOR<Prisma.ClientCreateWithoutInBodyRecordsInput, Prisma.ClientUncheckedCreateWithoutInBodyRecordsInput>
+  connectOrCreate?: Prisma.ClientCreateOrConnectWithoutInBodyRecordsInput
+  upsert?: Prisma.ClientUpsertWithoutInBodyRecordsInput
+  connect?: Prisma.ClientWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ClientUpdateToOneWithWhereWithoutInBodyRecordsInput, Prisma.ClientUpdateWithoutInBodyRecordsInput>, Prisma.ClientUncheckedUpdateWithoutInBodyRecordsInput>
+}
+
 export type ClientCreateNestedOneWithoutSchedulesInput = {
   create?: Prisma.XOR<Prisma.ClientCreateWithoutSchedulesInput, Prisma.ClientUncheckedCreateWithoutSchedulesInput>
   connectOrCreate?: Prisma.ClientCreateOrConnectWithoutSchedulesInput
@@ -843,6 +864,7 @@ export type ClientCreateWithoutSessionsInput = {
   menstrualCycle?: Prisma.MenstrualCycleCreateNestedOneWithoutClientInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutClientInput
   monthlyGoals?: Prisma.MonthlyGoalCreateNestedManyWithoutClientInput
+  inBodyRecords?: Prisma.InBodyRecordCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutSessionsInput = {
@@ -869,6 +891,7 @@ export type ClientUncheckedCreateWithoutSessionsInput = {
   menstrualCycle?: Prisma.MenstrualCycleUncheckedCreateNestedOneWithoutClientInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutClientInput
   monthlyGoals?: Prisma.MonthlyGoalUncheckedCreateNestedManyWithoutClientInput
+  inBodyRecords?: Prisma.InBodyRecordUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutSessionsInput = {
@@ -910,6 +933,7 @@ export type ClientUpdateWithoutSessionsInput = {
   menstrualCycle?: Prisma.MenstrualCycleUpdateOneWithoutClientNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutClientNestedInput
   monthlyGoals?: Prisma.MonthlyGoalUpdateManyWithoutClientNestedInput
+  inBodyRecords?: Prisma.InBodyRecordUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutSessionsInput = {
@@ -936,6 +960,7 @@ export type ClientUncheckedUpdateWithoutSessionsInput = {
   menstrualCycle?: Prisma.MenstrualCycleUncheckedUpdateOneWithoutClientNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutClientNestedInput
   monthlyGoals?: Prisma.MonthlyGoalUncheckedUpdateManyWithoutClientNestedInput
+  inBodyRecords?: Prisma.InBodyRecordUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateWithoutMenstrualCycleInput = {
@@ -961,6 +986,7 @@ export type ClientCreateWithoutMenstrualCycleInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutClientInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutClientInput
   monthlyGoals?: Prisma.MonthlyGoalCreateNestedManyWithoutClientInput
+  inBodyRecords?: Prisma.InBodyRecordCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutMenstrualCycleInput = {
@@ -987,6 +1013,7 @@ export type ClientUncheckedCreateWithoutMenstrualCycleInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutClientInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutClientInput
   monthlyGoals?: Prisma.MonthlyGoalUncheckedCreateNestedManyWithoutClientInput
+  inBodyRecords?: Prisma.InBodyRecordUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutMenstrualCycleInput = {
@@ -1028,6 +1055,7 @@ export type ClientUpdateWithoutMenstrualCycleInput = {
   sessions?: Prisma.SessionUpdateManyWithoutClientNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutClientNestedInput
   monthlyGoals?: Prisma.MonthlyGoalUpdateManyWithoutClientNestedInput
+  inBodyRecords?: Prisma.InBodyRecordUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutMenstrualCycleInput = {
@@ -1054,6 +1082,7 @@ export type ClientUncheckedUpdateWithoutMenstrualCycleInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutClientNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutClientNestedInput
   monthlyGoals?: Prisma.MonthlyGoalUncheckedUpdateManyWithoutClientNestedInput
+  inBodyRecords?: Prisma.InBodyRecordUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateWithoutMonthlyGoalsInput = {
@@ -1079,6 +1108,7 @@ export type ClientCreateWithoutMonthlyGoalsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutClientInput
   menstrualCycle?: Prisma.MenstrualCycleCreateNestedOneWithoutClientInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutClientInput
+  inBodyRecords?: Prisma.InBodyRecordCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutMonthlyGoalsInput = {
@@ -1105,6 +1135,7 @@ export type ClientUncheckedCreateWithoutMonthlyGoalsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutClientInput
   menstrualCycle?: Prisma.MenstrualCycleUncheckedCreateNestedOneWithoutClientInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutClientInput
+  inBodyRecords?: Prisma.InBodyRecordUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutMonthlyGoalsInput = {
@@ -1146,6 +1177,7 @@ export type ClientUpdateWithoutMonthlyGoalsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutClientNestedInput
   menstrualCycle?: Prisma.MenstrualCycleUpdateOneWithoutClientNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutClientNestedInput
+  inBodyRecords?: Prisma.InBodyRecordUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutMonthlyGoalsInput = {
@@ -1172,6 +1204,129 @@ export type ClientUncheckedUpdateWithoutMonthlyGoalsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutClientNestedInput
   menstrualCycle?: Prisma.MenstrualCycleUncheckedUpdateOneWithoutClientNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutClientNestedInput
+  inBodyRecords?: Prisma.InBodyRecordUncheckedUpdateManyWithoutClientNestedInput
+}
+
+export type ClientCreateWithoutInBodyRecordsInput = {
+  name: string
+  gender: string
+  birthDate?: string | null
+  phone?: string | null
+  email?: string | null
+  job?: string | null
+  startDate?: string | null
+  goal?: string | null
+  exerciseLevel?: string | null
+  exerciseHistory?: string | null
+  medicalHistory?: string | null
+  painAreas?: string | null
+  medications?: string | null
+  mealCount?: number | null
+  mealPattern?: string | null
+  sleepHours?: number | null
+  memo?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutClientInput
+  menstrualCycle?: Prisma.MenstrualCycleCreateNestedOneWithoutClientInput
+  schedules?: Prisma.ScheduleCreateNestedManyWithoutClientInput
+  monthlyGoals?: Prisma.MonthlyGoalCreateNestedManyWithoutClientInput
+}
+
+export type ClientUncheckedCreateWithoutInBodyRecordsInput = {
+  id?: number
+  name: string
+  gender: string
+  birthDate?: string | null
+  phone?: string | null
+  email?: string | null
+  job?: string | null
+  startDate?: string | null
+  goal?: string | null
+  exerciseLevel?: string | null
+  exerciseHistory?: string | null
+  medicalHistory?: string | null
+  painAreas?: string | null
+  medications?: string | null
+  mealCount?: number | null
+  mealPattern?: string | null
+  sleepHours?: number | null
+  memo?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutClientInput
+  menstrualCycle?: Prisma.MenstrualCycleUncheckedCreateNestedOneWithoutClientInput
+  schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutClientInput
+  monthlyGoals?: Prisma.MonthlyGoalUncheckedCreateNestedManyWithoutClientInput
+}
+
+export type ClientCreateOrConnectWithoutInBodyRecordsInput = {
+  where: Prisma.ClientWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClientCreateWithoutInBodyRecordsInput, Prisma.ClientUncheckedCreateWithoutInBodyRecordsInput>
+}
+
+export type ClientUpsertWithoutInBodyRecordsInput = {
+  update: Prisma.XOR<Prisma.ClientUpdateWithoutInBodyRecordsInput, Prisma.ClientUncheckedUpdateWithoutInBodyRecordsInput>
+  create: Prisma.XOR<Prisma.ClientCreateWithoutInBodyRecordsInput, Prisma.ClientUncheckedCreateWithoutInBodyRecordsInput>
+  where?: Prisma.ClientWhereInput
+}
+
+export type ClientUpdateToOneWithWhereWithoutInBodyRecordsInput = {
+  where?: Prisma.ClientWhereInput
+  data: Prisma.XOR<Prisma.ClientUpdateWithoutInBodyRecordsInput, Prisma.ClientUncheckedUpdateWithoutInBodyRecordsInput>
+}
+
+export type ClientUpdateWithoutInBodyRecordsInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  job?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exerciseLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exerciseHistory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalHistory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  painAreas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medications?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mealCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mealPattern?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sleepHours?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutClientNestedInput
+  menstrualCycle?: Prisma.MenstrualCycleUpdateOneWithoutClientNestedInput
+  schedules?: Prisma.ScheduleUpdateManyWithoutClientNestedInput
+  monthlyGoals?: Prisma.MonthlyGoalUpdateManyWithoutClientNestedInput
+}
+
+export type ClientUncheckedUpdateWithoutInBodyRecordsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  job?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  startDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  goal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exerciseLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  exerciseHistory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medicalHistory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  painAreas?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  medications?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mealCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mealPattern?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sleepHours?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutClientNestedInput
+  menstrualCycle?: Prisma.MenstrualCycleUncheckedUpdateOneWithoutClientNestedInput
+  schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutClientNestedInput
+  monthlyGoals?: Prisma.MonthlyGoalUncheckedUpdateManyWithoutClientNestedInput
 }
 
 export type ClientCreateWithoutSchedulesInput = {
@@ -1197,6 +1352,7 @@ export type ClientCreateWithoutSchedulesInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutClientInput
   menstrualCycle?: Prisma.MenstrualCycleCreateNestedOneWithoutClientInput
   monthlyGoals?: Prisma.MonthlyGoalCreateNestedManyWithoutClientInput
+  inBodyRecords?: Prisma.InBodyRecordCreateNestedManyWithoutClientInput
 }
 
 export type ClientUncheckedCreateWithoutSchedulesInput = {
@@ -1223,6 +1379,7 @@ export type ClientUncheckedCreateWithoutSchedulesInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutClientInput
   menstrualCycle?: Prisma.MenstrualCycleUncheckedCreateNestedOneWithoutClientInput
   monthlyGoals?: Prisma.MonthlyGoalUncheckedCreateNestedManyWithoutClientInput
+  inBodyRecords?: Prisma.InBodyRecordUncheckedCreateNestedManyWithoutClientInput
 }
 
 export type ClientCreateOrConnectWithoutSchedulesInput = {
@@ -1264,6 +1421,7 @@ export type ClientUpdateWithoutSchedulesInput = {
   sessions?: Prisma.SessionUpdateManyWithoutClientNestedInput
   menstrualCycle?: Prisma.MenstrualCycleUpdateOneWithoutClientNestedInput
   monthlyGoals?: Prisma.MonthlyGoalUpdateManyWithoutClientNestedInput
+  inBodyRecords?: Prisma.InBodyRecordUpdateManyWithoutClientNestedInput
 }
 
 export type ClientUncheckedUpdateWithoutSchedulesInput = {
@@ -1290,6 +1448,7 @@ export type ClientUncheckedUpdateWithoutSchedulesInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutClientNestedInput
   menstrualCycle?: Prisma.MenstrualCycleUncheckedUpdateOneWithoutClientNestedInput
   monthlyGoals?: Prisma.MonthlyGoalUncheckedUpdateManyWithoutClientNestedInput
+  inBodyRecords?: Prisma.InBodyRecordUncheckedUpdateManyWithoutClientNestedInput
 }
 
 
@@ -1301,12 +1460,14 @@ export type ClientCountOutputType = {
   sessions: number
   schedules: number
   monthlyGoals: number
+  inBodyRecords: number
 }
 
 export type ClientCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | ClientCountOutputTypeCountSessionsArgs
   schedules?: boolean | ClientCountOutputTypeCountSchedulesArgs
   monthlyGoals?: boolean | ClientCountOutputTypeCountMonthlyGoalsArgs
+  inBodyRecords?: boolean | ClientCountOutputTypeCountInBodyRecordsArgs
 }
 
 /**
@@ -1340,6 +1501,13 @@ export type ClientCountOutputTypeCountMonthlyGoalsArgs<ExtArgs extends runtime.T
   where?: Prisma.MonthlyGoalWhereInput
 }
 
+/**
+ * ClientCountOutputType without action
+ */
+export type ClientCountOutputTypeCountInBodyRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InBodyRecordWhereInput
+}
+
 
 export type ClientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1366,6 +1534,7 @@ export type ClientSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   menstrualCycle?: boolean | Prisma.Client$menstrualCycleArgs<ExtArgs>
   schedules?: boolean | Prisma.Client$schedulesArgs<ExtArgs>
   monthlyGoals?: boolean | Prisma.Client$monthlyGoalsArgs<ExtArgs>
+  inBodyRecords?: boolean | Prisma.Client$inBodyRecordsArgs<ExtArgs>
   _count?: boolean | Prisma.ClientCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["client"]>
 
@@ -1444,6 +1613,7 @@ export type ClientInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   menstrualCycle?: boolean | Prisma.Client$menstrualCycleArgs<ExtArgs>
   schedules?: boolean | Prisma.Client$schedulesArgs<ExtArgs>
   monthlyGoals?: boolean | Prisma.Client$monthlyGoalsArgs<ExtArgs>
+  inBodyRecords?: boolean | Prisma.Client$inBodyRecordsArgs<ExtArgs>
   _count?: boolean | Prisma.ClientCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ClientIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1456,6 +1626,7 @@ export type $ClientPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     menstrualCycle: Prisma.$MenstrualCyclePayload<ExtArgs> | null
     schedules: Prisma.$SchedulePayload<ExtArgs>[]
     monthlyGoals: Prisma.$MonthlyGoalPayload<ExtArgs>[]
+    inBodyRecords: Prisma.$InBodyRecordPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1876,6 +2047,7 @@ export interface Prisma__ClientClient<T, Null = never, ExtArgs extends runtime.T
   menstrualCycle<T extends Prisma.Client$menstrualCycleArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$menstrualCycleArgs<ExtArgs>>): Prisma.Prisma__MenstrualCycleClient<runtime.Types.Result.GetResult<Prisma.$MenstrualCyclePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   schedules<T extends Prisma.Client$schedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   monthlyGoals<T extends Prisma.Client$monthlyGoalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$monthlyGoalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MonthlyGoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  inBodyRecords<T extends Prisma.Client$inBodyRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Client$inBodyRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InBodyRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2406,6 +2578,30 @@ export type Client$monthlyGoalsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.MonthlyGoalScalarFieldEnum | Prisma.MonthlyGoalScalarFieldEnum[]
+}
+
+/**
+ * Client.inBodyRecords
+ */
+export type Client$inBodyRecordsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InBodyRecord
+   */
+  select?: Prisma.InBodyRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InBodyRecord
+   */
+  omit?: Prisma.InBodyRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InBodyRecordInclude<ExtArgs> | null
+  where?: Prisma.InBodyRecordWhereInput
+  orderBy?: Prisma.InBodyRecordOrderByWithRelationInput | Prisma.InBodyRecordOrderByWithRelationInput[]
+  cursor?: Prisma.InBodyRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InBodyRecordScalarFieldEnum | Prisma.InBodyRecordScalarFieldEnum[]
 }
 
 /**

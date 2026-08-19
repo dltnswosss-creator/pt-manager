@@ -67,6 +67,11 @@ export type MenstrualCycle = Prisma.MenstrualCycleModel
  */
 export type MonthlyGoal = Prisma.MonthlyGoalModel
 /**
+ * Model InBodyRecord
+ * 
+ */
+export type InBodyRecord = Prisma.InBodyRecordModel
+/**
  * Model Location
  * 
  */

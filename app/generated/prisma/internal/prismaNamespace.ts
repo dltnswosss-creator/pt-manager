@@ -389,6 +389,7 @@ export const ModelName = {
   Exercise: 'Exercise',
   MenstrualCycle: 'MenstrualCycle',
   MonthlyGoal: 'MonthlyGoal',
+  InBodyRecord: 'InBodyRecord',
   Location: 'Location',
   Schedule: 'Schedule'
 } as const
@@ -406,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "client" | "session" | "exercise" | "menstrualCycle" | "monthlyGoal" | "location" | "schedule"
+    modelProps: "client" | "session" | "exercise" | "menstrualCycle" | "monthlyGoal" | "inBodyRecord" | "location" | "schedule"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -780,6 +781,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    InBodyRecord: {
+      payload: Prisma.$InBodyRecordPayload<ExtArgs>
+      fields: Prisma.InBodyRecordFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InBodyRecordFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InBodyRecordFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload>
+        }
+        findFirst: {
+          args: Prisma.InBodyRecordFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InBodyRecordFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload>
+        }
+        findMany: {
+          args: Prisma.InBodyRecordFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload>[]
+        }
+        create: {
+          args: Prisma.InBodyRecordCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload>
+        }
+        createMany: {
+          args: Prisma.InBodyRecordCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InBodyRecordCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload>[]
+        }
+        delete: {
+          args: Prisma.InBodyRecordDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload>
+        }
+        update: {
+          args: Prisma.InBodyRecordUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload>
+        }
+        deleteMany: {
+          args: Prisma.InBodyRecordDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InBodyRecordUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InBodyRecordUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload>[]
+        }
+        upsert: {
+          args: Prisma.InBodyRecordUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InBodyRecordPayload>
+        }
+        aggregate: {
+          args: Prisma.InBodyRecordAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInBodyRecord>
+        }
+        groupBy: {
+          args: Prisma.InBodyRecordGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InBodyRecordGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InBodyRecordCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InBodyRecordCountAggregateOutputType> | number
+        }
+      }
+    }
     Location: {
       payload: Prisma.$LocationPayload<ExtArgs>
       fields: Prisma.LocationFieldRefs
@@ -1057,6 +1132,21 @@ export const MonthlyGoalScalarFieldEnum = {
 export type MonthlyGoalScalarFieldEnum = (typeof MonthlyGoalScalarFieldEnum)[keyof typeof MonthlyGoalScalarFieldEnum]
 
 
+export const InBodyRecordScalarFieldEnum = {
+  id: 'id',
+  clientId: 'clientId',
+  date: 'date',
+  weight: 'weight',
+  skeletalMuscleMass: 'skeletalMuscleMass',
+  bodyFatMass: 'bodyFatMass',
+  bodyFatPercent: 'bodyFatPercent',
+  bmr: 'bmr',
+  createdAt: 'createdAt'
+} as const
+
+export type InBodyRecordScalarFieldEnum = (typeof InBodyRecordScalarFieldEnum)[keyof typeof InBodyRecordScalarFieldEnum]
+
+
 export const LocationScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1293,6 +1383,7 @@ export type GlobalOmitConfig = {
   exercise?: Prisma.ExerciseOmit
   menstrualCycle?: Prisma.MenstrualCycleOmit
   monthlyGoal?: Prisma.MonthlyGoalOmit
+  inBodyRecord?: Prisma.InBodyRecordOmit
   location?: Prisma.LocationOmit
   schedule?: Prisma.ScheduleOmit
 }

@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   getMenstrualPhase, PHASE_LABELS, PHASE_COLORS, PHASE_GUIDE,
   EXERCISE_LEVEL_LABELS, PAIN_INTENSITY_LABELS, PAIN_INTENSITY_COLORS,
-  BODY_PART_LABELS, type PainArea, type MenstrualPhase, type BodyPart,
+  BODY_PART_LABELS, BODY_PART_ORDER, type PainArea, type MenstrualPhase, type BodyPart,
 } from "@/lib/types";
 import { calcAge, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -15,16 +15,18 @@ import SessionExportButton from "@/components/SessionExportButton";
 import NotionShareButton from "@/components/NotionShareButton";
 import ExerciseVideoUpload from "@/components/ExerciseVideoUpload";
 import ExerciseTrendChart from "@/components/ExerciseTrendChart";
+import InBodyPanel from "@/components/InBodyPanel";
 
 type Exercise = { id: number; name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; bodyParts: string[]; videoUrls: string[] };
 type Session = { id: number; date: string; sessionType: string; duration: number | null; memo: string | null; notionUrl: string | null; exercises: Exercise[] };
 type MenstrualCycle = { lastStartDate: string; cycleLength: number; periodLength: number; memo: string | null } | null;
+type InBodyRecord = { id: number; date: string; weight: number | null; skeletalMuscleMass: number | null; bodyFatMass: number | null; bodyFatPercent: number | null; bmr: number | null };
 type Client = {
   id: number; name: string; gender: string; birthDate: string | null; phone: string | null; email: string | null;
   job: string | null; startDate: string | null; goal: string | null; exerciseLevel: string | null;
   exerciseHistory: string | null; medicalHistory: string | null; painAreas: string | null; medications: string | null;
   mealCount: number | null; mealPattern: string | null; sleepHours: number | null; memo: string | null;
-  sessions: Session[]; menstrualCycle: MenstrualCycle;
+  sessions: Session[]; menstrualCycle: MenstrualCycle; inBodyRecords: InBodyRecord[];
 };
 
 export default function ClientDetail({ client }: { client: Client }) {
@@ -32,6 +34,7 @@ export default function ClientDetail({ client }: { client: Client }) {
 
   const exerciseHistory = useMemo(() => {
     const map = new Map<string, { date: string; weight: number; unit: string }[]>();
+    const partsMap = new Map<string, Set<string>>();
     const sortedSessions = [...client.sessions].sort((a, b) => a.date.localeCompare(b.date));
     for (const s of sortedSessions) {
       for (const e of s.exercises) {
@@ -39,16 +42,38 @@ export default function ClientDetail({ client }: { client: Client }) {
         const arr = map.get(e.name) ?? [];
         arr.push({ date: s.date, weight: e.weight, unit: e.unit });
         map.set(e.name, arr);
+        const parts = partsMap.get(e.name) ?? new Set<string>();
+        for (const p of e.bodyParts) parts.add(p);
+        partsMap.set(e.name, parts);
       }
     }
     return Array.from(map.entries())
       .filter(([, points]) => points.length >= 2)
-      .sort((a, b) => b[1].length - a[1].length);
+      .map(([name, points]) => ({ name, points, bodyParts: Array.from(partsMap.get(name) ?? []) as BodyPart[] }))
+      .sort((a, b) => b.points.length - a.points.length);
   }, [client.sessions]);
+
+  const BIG3_KEYWORDS = ["스쿼트", "데드리프트", "벤치프레스"];
+  const isBig3 = (name: string) => BIG3_KEYWORDS.some((k) => name.includes(k));
+
+  const availableParts = useMemo(() => {
+    const set = new Set<BodyPart>();
+    exerciseHistory.forEach((h) => h.bodyParts.forEach((p) => set.add(p)));
+    return BODY_PART_ORDER.filter((p) => set.has(p));
+  }, [exerciseHistory]);
+  const hasBig3 = useMemo(() => exerciseHistory.some((h) => isBig3(h.name)), [exerciseHistory]);
+  const progressFilters = ["전체", ...(hasBig3 ? ["3대 운동"] : []), ...availableParts];
+  const [progressFilter, setProgressFilter] = useState("전체");
+  const filteredExerciseHistory = useMemo(() => {
+    if (progressFilter === "전체") return exerciseHistory;
+    if (progressFilter === "3대 운동") return exerciseHistory.filter((h) => isBig3(h.name));
+    return exerciseHistory.filter((h) => h.bodyParts.includes(progressFilter as BodyPart));
+  }, [exerciseHistory, progressFilter]);
 
   const tabs = [
     "인적사항", "수업 기록",
     ...(exerciseHistory.length > 0 ? ["진행 추이"] : []),
+    "인바디",
     ...(client.gender === "female" ? ["생리주기"] : []),
   ];
   const [tab, setTab] = useState(tabs[0]);
@@ -316,20 +341,63 @@ export default function ClientDetail({ client }: { client: Client }) {
 
       {/* 진행 추이 탭 */}
       {tab === "진행 추이" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {exerciseHistory.map(([name, points]) => (
-            <div key={name} className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <TrendingUp size={14} className="text-indigo-500" />
-                  <p className="text-sm font-semibold text-gray-900">{name}</p>
-                </div>
-                <span className="text-xs text-gray-400">{points.length}회 기록</span>
-              </div>
-              <ExerciseTrendChart points={points} />
+        <div className="space-y-4">
+          {progressFilters.length > 1 && (
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+              {progressFilters.map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setProgressFilter(f)}
+                  className={cn(
+                    "shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                    progressFilter === f ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  )}
+                >
+                  {f === "전체" || f === "3대 운동" ? f : BODY_PART_LABELS[f as BodyPart]}
+                </button>
+              ))}
             </div>
-          ))}
+          )}
+
+          {filteredExerciseHistory.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">해당 부위 기록이 없어요</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {filteredExerciseHistory.map(({ name, points }) => {
+                const delta = Math.round((points[points.length - 1].weight - points[0].weight) * 10) / 10;
+                const unit = points[points.length - 1].unit;
+                return (
+                  <div key={name} className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <TrendingUp size={14} className="text-indigo-500" />
+                        <p className="text-sm font-semibold text-gray-900">{name}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={cn("text-xs font-semibold px-1.5 py-0.5 rounded-full", {
+                            "bg-emerald-50 text-emerald-600": delta > 0,
+                            "bg-rose-50 text-rose-500": delta < 0,
+                            "bg-gray-50 text-gray-400": delta === 0,
+                          })}
+                        >
+                          {delta > 0 ? "+" : ""}{delta}{unit}
+                        </span>
+                        <span className="text-xs text-gray-400">{points.length}회 기록</span>
+                      </div>
+                    </div>
+                    <ExerciseTrendChart points={points} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
+      )}
+
+      {/* 인바디 탭 */}
+      {tab === "인바디" && (
+        <InBodyPanel clientId={client.id} records={client.inBodyRecords} />
       )}
 
       {/* 생리주기 탭 */}
