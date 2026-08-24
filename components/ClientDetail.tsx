@@ -14,7 +14,7 @@ import { ArrowLeft, Edit, Trash2, Plus, ChevronDown, ChevronUp, Pencil, Trending
 import SessionExportButton from "@/components/SessionExportButton";
 import NotionShareButton from "@/components/NotionShareButton";
 import ExerciseVideoUpload from "@/components/ExerciseVideoUpload";
-import ExerciseTrendChart from "@/components/ExerciseTrendChart";
+import ProgressTrendChart from "@/components/ProgressTrendChart";
 import InBodyPanel from "@/components/InBodyPanel";
 
 type Exercise = { id: number; name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; memo: string | null; bodyParts: string[]; videoUrls: string[] };
@@ -69,6 +69,13 @@ export default function ClientDetail({ client }: { client: Client }) {
     if (progressFilter === "3대 운동") return exerciseHistory.filter((h) => isBig3(h.name));
     return exerciseHistory.filter((h) => h.bodyParts.includes(progressFilter as BodyPart));
   }, [exerciseHistory, progressFilter]);
+  const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
+  const activeExercise = filteredExerciseHistory.find((h) => h.name === selectedExercise) ?? filteredExerciseHistory[0] ?? null;
+
+  const exerciseDelta = (points: { weight: number; unit: string }[]) => ({
+    delta: Math.round((points[points.length - 1].weight - points[0].weight) * 10) / 10,
+    unit: points[points.length - 1].unit,
+  });
 
   const tabs = [
     "인적사항", "수업 기록",
@@ -362,18 +369,51 @@ export default function ClientDetail({ client }: { client: Client }) {
           {filteredExerciseHistory.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-8">해당 부위 기록이 없어요</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {filteredExerciseHistory.map(({ name, points }) => {
-                const delta = Math.round((points[points.length - 1].weight - points[0].weight) * 10) / 10;
-                const unit = points[points.length - 1].unit;
-                return (
-                  <div key={name} className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <TrendingUp size={14} className="text-indigo-500" />
-                        <p className="text-sm font-semibold text-gray-900">{name}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
+            <>
+              {activeExercise && (
+                <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp size={16} className="text-indigo-500" />
+                      <p className="text-base font-semibold text-gray-900">{activeExercise.name}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {(() => {
+                        const { delta, unit } = exerciseDelta(activeExercise.points);
+                        return (
+                          <span
+                            className={cn("text-xs font-semibold px-1.5 py-0.5 rounded-full", {
+                              "bg-emerald-50 text-emerald-600": delta > 0,
+                              "bg-rose-50 text-rose-500": delta < 0,
+                              "bg-gray-50 text-gray-400": delta === 0,
+                            })}
+                          >
+                            {delta > 0 ? "+" : ""}{delta}{unit}
+                          </span>
+                        );
+                      })()}
+                      <span className="text-xs text-gray-400">{activeExercise.points.length}회 기록</span>
+                    </div>
+                  </div>
+                  <ProgressTrendChart points={activeExercise.points} />
+                </div>
+              )}
+
+              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
+                {filteredExerciseHistory.map(({ name, points }) => {
+                  const { delta, unit } = exerciseDelta(points);
+                  const active = name === activeExercise?.name;
+                  return (
+                    <button
+                      key={name}
+                      onClick={() => setSelectedExercise(name)}
+                      className={cn(
+                        "w-full flex items-center justify-between gap-2 px-4 py-3 text-left transition-colors",
+                        active ? "bg-indigo-50" : "hover:bg-gray-50"
+                      )}
+                    >
+                      <span className={cn("text-sm font-medium truncate", active ? "text-indigo-700" : "text-gray-700")}>{name}</span>
+                      <div className="flex items-center gap-2 shrink-0">
                         <span
                           className={cn("text-xs font-semibold px-1.5 py-0.5 rounded-full", {
                             "bg-emerald-50 text-emerald-600": delta > 0,
@@ -383,14 +423,13 @@ export default function ClientDetail({ client }: { client: Client }) {
                         >
                           {delta > 0 ? "+" : ""}{delta}{unit}
                         </span>
-                        <span className="text-xs text-gray-400">{points.length}회 기록</span>
+                        <span className="text-xs text-gray-400">{points.length}회</span>
                       </div>
-                    </div>
-                    <ExerciseTrendChart points={points} />
-                  </div>
-                );
-              })}
-            </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       )}
