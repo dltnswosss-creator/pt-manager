@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, AlertTriangle, Info, ChevronDown, ChevronUp, Maximize2 } from "lucide-react";
-import type { Feedback, GoalSuggestion } from "@/lib/monthlyReport";
+import { ChevronDown, ChevronUp, Maximize2 } from "lucide-react";
+import type { MonthlyFeedback, GoalSuggestion } from "@/lib/monthlyReport";
 import MonthlyGoalForm from "@/components/MonthlyGoalForm";
 import ExerciseSummaryChart from "@/components/ExerciseSummaryChart";
+import ExerciseFeedbackSection from "@/components/ExerciseFeedbackSection";
 
 type ExerciseSummary = { name: string; totalSets: number; maxWeight: number | null; maxReps: number | null; unit: string };
 type BodyPartVolume = { part: string; label: string; totalSets: number };
@@ -37,13 +38,13 @@ export default function MonthlyReportCard({
   avgSetsPerSession: number;
   exerciseSummary: ExerciseSummary[];
   bodyPartVolume: BodyPartVolume[];
-  feedback: Feedback[];
+  feedback: MonthlyFeedback;
   suggestion: GoalSuggestion;
   savedGoal: SavedGoal;
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  const warningCount = feedback.filter((f) => f.type === "warning").length;
+  const warningCount = feedback.stagnant.length + feedback.notice.filter((f) => f.type === "warning").length;
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
@@ -89,16 +90,7 @@ export default function MonthlyReportCard({
       {expanded && (
         <div className="border-t border-gray-100 px-5 py-4 space-y-4">
           {/* 피드백 */}
-          <div className="space-y-1.5">
-            {feedback.map((f, i) => (
-              <div key={i} className="flex items-start gap-2 text-sm">
-                {f.type === "positive" && <CheckCircle2 size={15} className="text-emerald-500 shrink-0 mt-0.5" />}
-                {f.type === "warning" && <AlertTriangle size={15} className="text-amber-500 shrink-0 mt-0.5" />}
-                {f.type === "info" && <Info size={15} className="text-gray-400 shrink-0 mt-0.5" />}
-                <span className="text-gray-700">{f.text}</span>
-              </div>
-            ))}
-          </div>
+          <ExerciseFeedbackSection feedback={feedback} />
 
           {/* 운동별 요약 */}
           {exerciseSummary.length > 0 && (

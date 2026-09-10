@@ -49,6 +49,18 @@ export type MonthStats = {
 
 export type Feedback = { type: "positive" | "warning" | "info"; text: string };
 
+export type ExerciseFeedback = {
+  name: string;
+  stat: string;
+  checklist: string[];
+};
+
+export type MonthlyFeedback = {
+  notice: Feedback[];
+  improved: ExerciseFeedback[];
+  stagnant: ExerciseFeedback[];
+};
+
 export type GoalSuggestion = {
   targetFrequency: number;
   targetSets: number;
@@ -134,62 +146,105 @@ export function getMonthStats(sessions: SessionEntry[], yearMonth: string): Mont
   };
 }
 
-export function generateFeedback(current: MonthStats, previous: MonthStats | null): Feedback[] {
-  const feedback: Feedback[] = [];
+// 특정 메인 운동이 정체됐을 때 함께 추천할 보조 운동 (키워드 매칭, 구체적인 것부터 순서대로 검사)
+const ACCESSORY_SUGGESTIONS: { keywords: string[]; accessories: string[] }[] = [
+  { keywords: ["루마니안 데드리프트", "RDL"], accessories: ["싱글레그 데드리프트", "파머스 캐리"] },
+  { keywords: ["데드리프트"], accessories: ["힙 쓰러스트", "굿모닝"] },
+  { keywords: ["스쿼트"], accessories: ["레그프레스", "불가리안 스플릿 스쿼트"] },
+  { keywords: ["벤치프레스"], accessories: ["덤벨 벤치프레스", "딥스"] },
+  { keywords: ["숄더프레스", "오버헤드프레스", "밀리터리프레스"], accessories: ["레터럴 레이즈", "페이스풀"] },
+  { keywords: ["풀업", "친업", "랫풀다운"], accessories: ["시티드 로우", "스트레이트암 풀다운"] },
+  { keywords: ["로우"], accessories: ["원암 덤벨로우", "시티드 로우"] },
+  { keywords: ["힙 쓰러스트", "힙쓰러스트"], accessories: ["글루트 브릿지", "케이블 킥백"] },
+];
+
+function findAccessories(exerciseName: string): string[] | null {
+  for (const { keywords, accessories } of ACCESSORY_SUGGESTIONS) {
+    if (keywords.some((k) => exerciseName.includes(k))) return accessories;
+  }
+  return null;
+}
+
+type RankedExercise = { name: string; stat: ExerciseStat; prevStat: ExerciseStat; weightDiff: number; repsDiff: number; score: number };
+
+function toExerciseFeedback(r: RankedExercise, kind: "improved" | "stagnant"): ExerciseFeedback {
+  const { name, stat, prevStat, weightDiff, repsDiff } = r;
+  const unit = stat.unit;
+
+  let statLine: string;
+  if (weightDiff !== 0) {
+    statLine = `${prevStat.maxWeight}${unit} → ${stat.maxWeight}${unit} (${weightDiff > 0 ? "+" : ""}${weightDiff}${unit})`;
+  } else if (repsDiff !== 0) {
+    statLine = `${stat.maxWeight}${unit} 유지 · ${prevStat.maxReps}회 → ${stat.maxReps}회`;
+  } else {
+    statLine = `${stat.maxWeight}${unit} 유지`;
+  }
+
+  const checklist: string[] = [];
+  if (kind === "improved") {
+    checklist.push("현재 페이스를 유지하며 다음 달에도 점진적으로 중량을 늘려보세요");
+    if (weightDiff > 0) checklist.push("중량이 오른 만큼 자세가 무너지지 않는지 다시 체크해보세요");
+  } else {
+    if (repsDiff <= 0) checklist.push("반복 횟수를 더 높이고 중량은 유지해보세요");
+    checklist.push("세트 수를 1세트 늘려보세요");
+    const accessories = findAccessories(name);
+    if (accessories) checklist.push(`보조 운동으로 ${accessories.join(", ")} 등을 추가해보세요`);
+  }
+
+  return { name, stat: statLine, checklist };
+}
+
+export function generateFeedback(current: MonthStats, previous: MonthStats | null): MonthlyFeedback {
+  const notice: Feedback[] = [];
 
   if (current.sessionCount === 0) {
-    feedback.push({ type: "warning", text: "이번 달 등록된 수업 기록이 없습니다." });
-    return feedback;
+    notice.push({ type: "warning", text: "이번 달 등록된 수업 기록이 없습니다." });
+    return { notice, improved: [], stagnant: [] };
   }
 
   if (current.exercises.size === 0) {
-    feedback.push({
+    notice.push({
       type: "info",
       text: "이번 달은 '메인' 표시된 종목이 없어 세트·중량·반복수 비교를 할 수 없습니다. 비교가 필요한 종목에 메인 표시를 확인해주세요.",
     });
-    return feedback;
+    return { notice, improved: [], stagnant: [] };
   }
 
-  const avgSets = Math.round(current.avgSetsPerSession * 10) / 10;
-  if (avgSets >= 2) {
-    feedback.push({ type: "positive", text: `메인 운동 기준 세션당 평균 ${avgSets}세트 — ACSM 권장 세트 수(2~3세트)를 충족합니다.` });
-  } else if (avgSets > 0) {
-    feedback.push({ type: "warning", text: `메인 운동 기준 세션당 평균 ${avgSets}세트로 다소 부족합니다. 세션당 2~3세트를 목표로 하세요.` });
+  if (!previous) {
+    notice.push({ type: "info", text: "비교할 지난달 기록이 없어 이번 달은 종목별 변화 추이를 보여줄 수 없습니다." });
+    return { notice, improved: [], stagnant: [] };
   }
 
-  if (previous) {
-    let weightUp = 0;
-    let repsUpOnly = 0;
-    let compared = 0;
-    for (const [name, stat] of current.exercises) {
-      if (stat.maxWeight == null) continue;
-      const prevStat = previous.exercises.get(name);
-      if (!prevStat || prevStat.maxWeight == null) continue;
-      compared += 1;
-      if (stat.maxWeight > prevStat.maxWeight) {
-        weightUp += 1;
-      } else if (stat.maxReps != null && prevStat.maxReps != null && stat.maxReps > prevStat.maxReps) {
-        repsUpOnly += 1;
-      }
-    }
-    const progressed = weightUp + repsUpOnly;
-    if (compared > 0) {
-      const detail = repsUpOnly > 0 ? ` (중량 증가 ${weightUp}개, 동일 중량에서 반복수 증가 ${repsUpOnly}개)` : "";
-      if (progressed / compared >= 0.5) {
-        feedback.push({
-          type: "positive",
-          text: `메인 운동 ${compared}개 종목 중 ${progressed}개에서 중량 또는 반복수가 늘었습니다${detail} — 점진적 과부하가 잘 적용되고 있습니다.`,
-        });
-      } else {
-        feedback.push({
-          type: "warning",
-          text: `메인 운동 ${compared}개 종목 중 ${progressed}개만 중량·반복수가 늘었습니다${detail}. 나머지 종목은 중량·세트·반복수 중 하나를 소폭 높여보세요.`,
-        });
-      }
-    }
+  const ranked: RankedExercise[] = [];
+  for (const [name, stat] of current.exercises) {
+    if (stat.maxWeight == null) continue;
+    const prevStat = previous.exercises.get(name);
+    if (!prevStat || prevStat.maxWeight == null) continue;
+    const weightDiff = stat.maxWeight - prevStat.maxWeight;
+    const repsDiff = (stat.maxReps ?? 0) - (prevStat.maxReps ?? 0);
+    // 중량 변화를 우선 기준으로 삼고, 중량이 같을 때만 반복수 변화로 순위를 매긴다
+    const score = weightDiff !== 0 ? weightDiff * 10 : repsDiff;
+    ranked.push({ name, stat, prevStat, weightDiff, repsDiff, score });
   }
 
-  return feedback;
+  if (ranked.length === 0) {
+    notice.push({ type: "info", text: "지난달과 비교할 수 있는 메인 종목이 없습니다." });
+    return { notice, improved: [], stagnant: [] };
+  }
+
+  const improved = [...ranked]
+    .filter((r) => r.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map((r) => toExerciseFeedback(r, "improved"));
+
+  const stagnant = [...ranked]
+    .filter((r) => r.score <= 0)
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 3)
+    .map((r) => toExerciseFeedback(r, "stagnant"));
+
+  return { notice, improved, stagnant };
 }
 
 export type PainAreaLite = { area: string; intensity: "caution" | "watch" | "avoid" };

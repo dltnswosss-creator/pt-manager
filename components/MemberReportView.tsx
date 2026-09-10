@@ -3,13 +3,14 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, AlertTriangle, Info,
+  ArrowLeft, ChevronLeft, ChevronRight,
   ImageIcon, Download, Copy, Check, Loader2, X,
 } from "lucide-react";
-import { formatYearMonth, shiftYearMonth, type Feedback, type GoalSuggestion } from "@/lib/monthlyReport";
+import { formatYearMonth, shiftYearMonth, type MonthlyFeedback, type GoalSuggestion } from "@/lib/monthlyReport";
 import MonthlyGoalForm from "@/components/MonthlyGoalForm";
 import BodyMap from "@/components/BodyMap";
 import ExerciseSummaryChart from "@/components/ExerciseSummaryChart";
+import ExerciseFeedbackSection from "@/components/ExerciseFeedbackSection";
 
 type ExerciseSummary = { name: string; totalSets: number; maxWeight: number | null; maxReps: number | null; unit: string };
 type BodyPartVolume = { part: string; label: string; totalSets: number };
@@ -41,7 +42,7 @@ export default function MemberReportView({
   avgSetsPerSession: number;
   exerciseSummary: ExerciseSummary[];
   bodyPartVolume: BodyPartVolume[];
-  feedback: Feedback[];
+  feedback: MonthlyFeedback;
   suggestion: GoalSuggestion;
   savedGoal: SavedGoal;
 }) {
@@ -91,16 +92,7 @@ export default function MemberReportView({
         </div>
 
         {/* 피드백 */}
-        <div className="space-y-2">
-          {feedback.map((f, i) => (
-            <div key={i} className="flex items-start gap-2 text-sm">
-              {f.type === "positive" && <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />}
-              {f.type === "warning" && <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />}
-              {f.type === "info" && <Info size={16} className="text-gray-400 shrink-0 mt-0.5" />}
-              <span className="text-gray-700">{f.text}</span>
-            </div>
-          ))}
-        </div>
+        <ExerciseFeedbackSection feedback={feedback} />
 
         {/* 부위별 볼륨 */}
         {bodyPartVolume.length > 0 && (
