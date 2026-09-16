@@ -6,9 +6,10 @@ import Link from "next/link";
 import { COMMON_EXERCISES, BODY_PART_ORDER, BODY_PART_LABELS, type BodyPart } from "@/lib/types";
 import { cn, uploadWithProgress } from "@/lib/utils";
 import { maybeCompressVideo } from "@/lib/video";
+import { parseQuickInputWithFeedback } from "@/lib/quickInput";
 import {
   Plus, Trash2, Video, CheckCircle, Loader2, X,
-  Copy, ExternalLink, Check, ChevronUp, ChevronDown, History,
+  Copy, ExternalLink, Check, ChevronUp, ChevronDown, History, ClipboardPaste,
 } from "lucide-react";
 
 type ExerciseRow = {
@@ -48,6 +49,9 @@ export default function SessionForm({
   const [copied, setCopied] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
   const [loadingPrev, setLoadingPrev] = useState(false);
+  const [quickInputOpen, setQuickInputOpen] = useState(false);
+  const [quickInputText, setQuickInputText] = useState("");
+  const [quickInputFeedback, setQuickInputFeedback] = useState<string | null>(null);
   const videoInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const draftLoadedRef = useRef(false);
 
@@ -153,6 +157,51 @@ export default function SessionForm({
       alert("이전 수업 기록을 불러오지 못했습니다.");
     } finally {
       setLoadingPrev(false);
+    }
+  };
+
+  // 파싱된 운동은 기존 카드 목록 뒤에 이어붙이고, 피드백은 특이사항 메모에 반영한다 (성공 시 true)
+  const applyQuickInputText = (text: string) => {
+    const parsed = parseQuickInputWithFeedback(text, COMMON_EXERCISES);
+    if (parsed.exercises.length === 0 && !parsed.feedback) return false;
+
+    if (parsed.exercises.length > 0) {
+      const newRows: ExerciseRow[] = parsed.exercises.map((p) => ({ ...emptyExercise(), ...p }));
+      setExercises((prev) => {
+        const kept = prev.filter((e) =>
+          e.name.trim() || e.sets || e.reps || e.weight || e.memo.trim() || e.videoUrls.length > 0
+        );
+        return [...kept, ...newRows];
+      });
+    }
+
+    if (parsed.feedback) {
+      setMemo((prev) => (prev.trim() ? `${prev.trim()}\n\n${parsed.feedback}` : parsed.feedback));
+    }
+
+    setQuickInputText("");
+    setQuickInputOpen(false);
+    const parts: string[] = [];
+    if (parsed.exercises.length > 0) parts.push(`${parsed.exercises.length}개 운동`);
+    if (parsed.feedback) parts.push("피드백");
+    setQuickInputFeedback(`${parts.join(" + ")}을 추가했어요`);
+    setTimeout(() => setQuickInputFeedback(null), 2500);
+    return true;
+  };
+
+  const applyQuickInput = () => {
+    if (!applyQuickInputText(quickInputText)) {
+      alert("인식된 내용이 없어요. 형식을 확인해주세요.\n예) 스쿼트 / 10kg / 10reps");
+    }
+  };
+
+  // 붙여넣는 즉시 자동으로 운동 목록에 반영 (적용 버튼 클릭 불필요)
+  const handleQuickInputPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const text = e.clipboardData.getData("text");
+    if (!text.trim()) return;
+    e.preventDefault();
+    if (!applyQuickInputText(text)) {
+      setQuickInputText(text);
     }
   };
 
@@ -360,9 +409,19 @@ export default function SessionForm({
 
       {/* 운동 목록 */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-y-2">
           <h3 className="text-sm font-semibold text-gray-700">운동 목록</h3>
           <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setQuickInputOpen((v) => !v)}
+              className={cn(
+                "flex items-center gap-1.5 text-xs font-medium py-1.5 px-3 rounded-lg transition-colors",
+                quickInputOpen ? "text-indigo-600 bg-indigo-50" : "text-gray-500 hover:bg-gray-100 active:bg-gray-200"
+              )}
+            >
+              <ClipboardPaste size={14} /> 빠른 입력
+            </button>
             <button
               type="button"
               onClick={loadPreviousSession}
@@ -381,6 +440,44 @@ export default function SessionForm({
             </button>
           </div>
         </div>
+
+        {quickInputFeedback && (
+          <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+            <CheckCircle size={12} /> {quickInputFeedback}
+          </p>
+        )}
+
+        {quickInputOpen && (
+          <div className="bg-indigo-50/60 border border-indigo-100 rounded-xl p-3 space-y-2">
+            <p className="text-xs text-indigo-600">운동과 피드백까지 전체를 복사해서 붙여넣으면 바로 전부 반영돼요.</p>
+            <textarea
+              value={quickInputText}
+              onChange={(e) => setQuickInputText(e.target.value)}
+              onPaste={handleQuickInputPaste}
+              className="w-full h-40 px-3 py-2.5 border border-indigo-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white resize-none"
+              placeholder={
+                "스쿼트 / 10kg / 10reps\n데드리프트 / 15kg / 10reps\n\n✅운동 피드백\n오늘 컨디션 좋아서 중량 조금 올림\n\n✅영양&생활습관 피드백\n수면 시간 늘리기로 함"
+              }
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => { setQuickInputOpen(false); setQuickInputText(""); }}
+                className="text-xs text-gray-500 font-medium py-2 px-3 rounded-lg hover:bg-white transition-colors"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={applyQuickInput}
+                disabled={!quickInputText.trim()}
+                className="text-xs text-white font-medium py-2 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+              >
+                운동 목록에 적용
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-3">
           {exercises.map((ex, i) => (
