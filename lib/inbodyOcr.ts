@@ -13,10 +13,11 @@ export type InBodyOcrResult = {
 };
 
 // OCR 노이즈(한글 자모 사이 공백, 줄바꿈)를 감안해 글자 사이에 공백이 섞여도 매칭되도록 \s*를 끼워 넣음
-const WEIGHT_RE = /체\s*중(?!\s*조\s*절)|weight/i; // "체중조절" 항목은 실제 체중이 아니므로 제외
+// "체"가 "치"로 오인식되는 경우가 흔해서 첫 글자도 느슨하게 허용
+const WEIGHT_RE = /[체치]\s*중(?!\s*조\s*절)|weight/i; // "체중조절" 항목은 실제 체중이 아니므로 제외
 const SMM_RE = /골\s*격\s*근\s*량|skeletal\s*muscle|smm/i;
-const BFM_RE = /체\s*지\s*방\s*[량랑]|body\s*fat\s*mass|bfm/i; // "량"이 "랑"으로 오인식되는 경우가 흔함
-const PBF_RE = /체\s*지\s*방\s*[률율]|percent\s*body\s*fat|pbf/i;
+const BFM_RE = /[체치]\s*지\s*방\s*[량랑]|body\s*fat\s*mass|bfm/i; // "량"이 "랑"으로 오인식되는 경우가 흔함
+const PBF_RE = /[체치]\s*지\s*방\s*[률율륭]|percent\s*body\s*fat|pbf/i; // "률"이 "률/율/륭"으로 오인식되는 경우가 흔함
 const BMR_RE = /기\s*초\s*대\s*사\s*량|bmr/i;
 
 // kg는 "ke"(OCR 오인식), kcal은 "gcal"/"geal"(OCR 오인식)까지 느슨하게 허용
