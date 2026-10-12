@@ -7,9 +7,10 @@ import { COMMON_EXERCISES, BODY_PART_ORDER, BODY_PART_LABELS, type BodyPart } fr
 import { cn, uploadWithProgress } from "@/lib/utils";
 import { maybeCompressVideo } from "@/lib/video";
 import { parseQuickInputWithFeedback } from "@/lib/quickInput";
+import NumberStepper from "@/components/NumberStepper";
 import {
   Plus, Trash2, Video, CheckCircle, Loader2, X,
-  Copy, ExternalLink, Check, ChevronUp, ChevronDown, History, ClipboardPaste,
+  Copy, ExternalLink, Check, ChevronUp, ChevronDown, ClipboardPaste,
 } from "lucide-react";
 
 type ExerciseRow = {
@@ -20,13 +21,20 @@ type ExerciseRow = {
   videoUploading: boolean;
   videoProgress: number;
   videoStage: "compressing" | "uploading";
+  expanded: boolean;
 };
 type Client = { id: number; name: string };
+type ClientHistoryEntry = { name: string; sets: string; reps: string; weight: string; unit: string; bodyParts: string[] };
+type SuggestionItem = { name: string; fromHistory: boolean } & Partial<Omit<ClientHistoryEntry, "name">>;
+
+const hasSecondaryData = (e: { bodyParts: string[]; memo: string; videoUrls: string[] }) =>
+  e.bodyParts.length > 0 || e.memo.trim() !== "" || e.videoUrls.length > 0;
 
 const emptyExercise = (): ExerciseRow => ({
   name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", isMain: true,
   bodyParts: [],
   videoUrls: [], videoUploading: false, videoProgress: 0, videoStage: "uploading",
+  expanded: false,
 });
 
 export default function SessionForm({
@@ -43,12 +51,12 @@ export default function SessionForm({
   const [duration, setDuration] = useState("60");
   const [memo, setMemo] = useState("");
   const [exercises, setExercises] = useState<ExerciseRow[]>([emptyExercise()]);
-  const [suggestion, setSuggestion] = useState<{ idx: number; results: string[] } | null>(null);
+  const [suggestion, setSuggestion] = useState<{ idx: number; results: SuggestionItem[] } | null>(null);
+  const [clientHistory, setClientHistory] = useState<Map<string, ClientHistoryEntry>>(new Map());
   const [saved, setSaved] = useState(false);
   const [notionUrl, setNotionUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
-  const [loadingPrev, setLoadingPrev] = useState(false);
   const [quickInputOpen, setQuickInputOpen] = useState(false);
   const [quickInputText, setQuickInputText] = useState("");
   const [quickInputFeedback, setQuickInputFeedback] = useState<string | null>(null);
@@ -68,13 +76,16 @@ export default function SessionForm({
         if (draft.duration !== undefined) setDuration(draft.duration);
         if (draft.memo !== undefined) setMemo(draft.memo);
         if (Array.isArray(draft.exercises) && draft.exercises.length) {
-          setExercises(draft.exercises.map((e: Partial<ExerciseRow> & { videoUrl?: string | null }) => ({
-            ...emptyExercise(), ...e,
-            videoUrls: Array.isArray(e.videoUrls) ? e.videoUrls : (e.videoUrl ? [e.videoUrl] : []),
-            videoUploading: false,
-            videoProgress: 0,
-            videoStage: "uploading",
-          })));
+          setExercises(draft.exercises.map((e: Partial<ExerciseRow> & { videoUrl?: string | null }) => {
+            const merged = {
+              ...emptyExercise(), ...e,
+              videoUrls: Array.isArray(e.videoUrls) ? e.videoUrls : (e.videoUrl ? [e.videoUrl] : []),
+              videoUploading: false,
+              videoProgress: 0,
+              videoStage: "uploading" as const,
+            };
+            return { ...merged, expanded: hasSecondaryData(merged) };
+          }));
         }
         setDraftRestored(true);
       }
@@ -124,40 +135,54 @@ export default function SessionForm({
     });
   };
 
-  const loadPreviousSession = async () => {
-    if (!clientId) return;
-    const hasData = exercises.some((e) => e.name.trim() || e.sets || e.reps || e.weight || e.memo.trim());
-    if (hasData && !confirm("작성 중인 운동 목록을 이전 수업 내용으로 덮어쓸까요?")) return;
-    setLoadingPrev(true);
-    try {
-      const res = await fetch(`/api/clients/${clientId}`);
-      const data = await res.json();
-      const last = data.sessions?.[0];
-      if (!last || !last.exercises?.length) {
-        alert("불러올 이전 수업 기록이 없습니다.");
+  // 회원별 운동 히스토리: 운동명 자동완성에 "예전에 한 운동"을 띄워주기 위해 수집
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!clientId) {
+        if (!cancelled) setClientHistory(new Map());
         return;
       }
-      setExercises(
-        last.exercises.map((e: { name: string; sets: number | null; reps: string | null; weight: number | null; unit: string; isMain?: boolean; bodyParts?: string[] }) => ({
-          name: e.name,
-          sets: e.sets != null ? String(e.sets) : "",
-          reps: e.reps ?? "",
-          weight: e.weight != null ? String(e.weight) : "",
-          unit: e.unit ?? "kg",
-          memo: "",
-          isMain: e.isMain ?? true,
-          bodyParts: e.bodyParts ?? [],
-          videoUrls: [],
-          videoUploading: false,
-          videoProgress: 0,
-          videoStage: "uploading" as const,
-        }))
-      );
-    } catch {
-      alert("이전 수업 기록을 불러오지 못했습니다.");
-    } finally {
-      setLoadingPrev(false);
-    }
+      try {
+        const res = await fetch(`/api/clients/${clientId}`);
+        const data = await res.json();
+        if (cancelled) return;
+        const map = new Map<string, ClientHistoryEntry>();
+        const sessions = Array.isArray(data.sessions) ? data.sessions : [];
+        for (const s of sessions) {
+          for (const e of s.exercises ?? []) {
+            if (map.has(e.name)) continue;
+            map.set(e.name, {
+              name: e.name,
+              sets: e.sets != null ? String(e.sets) : "",
+              reps: e.reps ?? "",
+              weight: e.weight != null ? String(e.weight) : "",
+              unit: e.unit ?? "kg",
+              bodyParts: e.bodyParts ?? [],
+            });
+          }
+        }
+        setClientHistory(map);
+      } catch {
+        if (!cancelled) setClientHistory(new Map());
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [clientId]);
+
+  const buildSuggestions = (query: string): SuggestionItem[] => {
+    const q = query.toLowerCase();
+    const historyNames = Array.from(clientHistory.keys());
+    const historyMatches = (q ? historyNames.filter((n) => n.toLowerCase().includes(q)) : historyNames).slice(0, 6);
+    const historySet = new Set(historyMatches);
+    const commonMatches = q
+      ? COMMON_EXERCISES.filter((ex) => ex.toLowerCase().includes(q) && !historySet.has(ex)).slice(0, 5)
+      : [];
+    const results: SuggestionItem[] = [
+      ...historyMatches.map((n) => ({ name: n, fromHistory: true, ...clientHistory.get(n) })),
+      ...commonMatches.map((n) => ({ name: n, fromHistory: false })),
+    ];
+    return results.slice(0, 8);
   };
 
   // 파싱된 운동은 기존 카드 목록 뒤에 이어붙이고, 피드백은 특이사항 메모에 반영한다 (성공 시 true)
@@ -166,7 +191,10 @@ export default function SessionForm({
     if (parsed.exercises.length === 0 && !parsed.feedback) return false;
 
     if (parsed.exercises.length > 0) {
-      const newRows: ExerciseRow[] = parsed.exercises.map((p) => ({ ...emptyExercise(), ...p }));
+      const newRows: ExerciseRow[] = parsed.exercises.map((p) => {
+        const merged = { ...emptyExercise(), ...p };
+        return { ...merged, expanded: hasSecondaryData(merged) };
+      });
       setExercises((prev) => {
         const kept = prev.filter((e) =>
           e.name.trim() || e.sets || e.reps || e.weight || e.memo.trim() || e.videoUrls.length > 0
@@ -208,10 +236,32 @@ export default function SessionForm({
   const setEx = (i: number, k: keyof ExerciseRow, v: string) => {
     setExercises((prev) => prev.map((e, idx) => (idx === i ? { ...e, [k]: v } : e)));
     if (k === "name") {
-      const q = v.toLowerCase();
-      const results = q ? COMMON_EXERCISES.filter((ex) => ex.toLowerCase().includes(q)).slice(0, 5) : [];
+      const results = buildSuggestions(v);
       setSuggestion(results.length ? { idx: i, results } : null);
     }
+  };
+
+  const focusNameSuggestions = (i: number, currentName: string) => {
+    const results = buildSuggestions(currentName);
+    if (results.length) setSuggestion({ idx: i, results });
+  };
+
+  const applySuggestion = (i: number, item: SuggestionItem) => {
+    setExercises((prev) => prev.map((e, idx) => {
+      if (idx !== i) return e;
+      if (!item.fromHistory) return { ...e, name: item.name };
+      const next = {
+        ...e,
+        name: item.name,
+        sets: item.sets ?? e.sets,
+        reps: item.reps ?? e.reps,
+        weight: item.weight ?? e.weight,
+        unit: item.unit ?? e.unit,
+        bodyParts: item.bodyParts ?? e.bodyParts,
+      };
+      return { ...next, expanded: next.expanded || hasSecondaryData(next) };
+    }));
+    setSuggestion(null);
   };
 
   const handleVideoSelect = async (i: number, file: File) => {
@@ -254,6 +304,10 @@ export default function SessionForm({
 
   const toggleMain = (i: number) => {
     setExercises((prev) => prev.map((e, idx) => (idx === i ? { ...e, isMain: !e.isMain } : e)));
+  };
+
+  const toggleExpanded = (i: number) => {
+    setExercises((prev) => prev.map((e, idx) => (idx === i ? { ...e, expanded: !e.expanded } : e)));
   };
 
   const toggleBodyPart = (i: number, part: BodyPart) => {
@@ -424,15 +478,6 @@ export default function SessionForm({
             </button>
             <button
               type="button"
-              onClick={loadPreviousSession}
-              disabled={!clientId || loadingPrev}
-              className="flex items-center gap-1.5 text-xs text-gray-500 font-medium py-1.5 px-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 disabled:opacity-40 disabled:pointer-events-none transition-colors"
-            >
-              {loadingPrev ? <Loader2 size={14} className="animate-spin" /> : <History size={14} />}
-              이전 수업 불러오기
-            </button>
-            <button
-              type="button"
               onClick={() => setExercises((p) => [...p, emptyExercise()])}
               className="flex items-center gap-1.5 text-xs text-indigo-600 font-medium py-1.5 px-3 rounded-lg hover:bg-indigo-50 active:bg-indigo-100 transition-colors"
             >
@@ -488,20 +533,26 @@ export default function SessionForm({
                   <input
                     value={ex.name}
                     onChange={(e) => setEx(i, "name", e.target.value)}
+                    onFocus={() => focusNameSuggestions(i, ex.name)}
                     onBlur={() => setTimeout(() => setSuggestion(null), 150)}
                     className={inputCls()}
                     placeholder="운동명 (예: 스쿼트)"
                   />
                   {suggestion?.idx === i && (
-                    <div className="absolute top-full left-0 right-0 z-10 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 overflow-hidden">
+                    <div className="absolute top-full left-0 right-0 z-10 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 overflow-hidden max-h-64 overflow-y-auto">
                       {suggestion.results.map((r) => (
                         <button
-                          key={r}
+                          key={`${r.fromHistory ? "h" : "c"}-${r.name}`}
                           type="button"
-                          onClick={() => { setEx(i, "name", r); setSuggestion(null); }}
-                          className="w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 transition-colors"
+                          onClick={() => applySuggestion(i, r)}
+                          className="w-full flex items-center justify-between gap-2 text-left px-4 py-3 text-sm hover:bg-indigo-50 transition-colors"
                         >
-                          {r}
+                          <span>{r.name}</span>
+                          {r.fromHistory && (
+                            <span className="text-xs text-indigo-400 shrink-0">
+                              최근 · {r.weight ? `${r.weight}${r.unit}` : ""}{r.reps ? ` · ${r.reps}회` : ""}{r.sets ? ` · ${r.sets}세트` : ""}
+                            </span>
+                          )}
                         </button>
                       ))}
                     </div>
@@ -536,24 +587,18 @@ export default function SessionForm({
 
               {/* 세트 / 횟수 / 중량 / 단위 */}
               <div className="grid grid-cols-4 gap-2">
-                {[
-                  { label: "세트", key: "sets" as const, type: "number", placeholder: "3" },
-                  { label: "횟수", key: "reps" as const, type: "text", placeholder: "12" },
-                  { label: "중량", key: "weight" as const, type: "number", placeholder: "60" },
-                ].map(({ label, key, type, placeholder }) => (
-                  <div key={key} className="space-y-1">
-                    <p className="text-[10px] font-medium text-gray-400 text-center">{label}</p>
-                    <input
-                      type={type}
-                      value={ex[key]}
-                      onChange={(e) => setEx(i, key, e.target.value)}
-                      className={cn(inputCls(), "text-center px-1")}
-                      placeholder={placeholder}
-                      min={type === "number" ? 0 : undefined}
-                      step={key === "weight" ? 0.5 : undefined}
-                    />
-                  </div>
-                ))}
+                <div className="space-y-1">
+                  <p className="text-[10px] font-medium text-gray-400 text-center">세트</p>
+                  <NumberStepper value={ex.sets} onChange={(v) => setEx(i, "sets", v)} step={1} placeholder="3" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-medium text-gray-400 text-center">횟수</p>
+                  <NumberStepper value={ex.reps} onChange={(v) => setEx(i, "reps", v)} step={1} placeholder="12" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-medium text-gray-400 text-center">중량</p>
+                  <NumberStepper value={ex.weight} onChange={(v) => setEx(i, "weight", v)} step={0.5} placeholder="60" />
+                </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-medium text-gray-400 text-center">단위</p>
                   <select
@@ -567,55 +612,76 @@ export default function SessionForm({
                 </div>
               </div>
 
-              {/* 부위 태그 */}
-              <div className="flex flex-wrap gap-1.5">
-                {BODY_PART_ORDER.map((part) => (
-                  <button
-                    key={part}
-                    type="button"
-                    onClick={() => toggleBodyPart(i, part)}
-                    className={cn(
-                      "px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors",
-                      ex.bodyParts.includes(part)
-                        ? "bg-indigo-600 text-white border-indigo-600"
-                        : "bg-white text-gray-500 border-gray-200 hover:bg-gray-100"
-                    )}
-                  >
-                    {BODY_PART_LABELS[part]}
-                  </button>
-                ))}
-              </div>
+              {/* 더보기 토글 */}
+              <button
+                type="button"
+                onClick={() => toggleExpanded(i)}
+                className="w-full flex items-center justify-between gap-2 text-xs text-gray-400 hover:text-indigo-600 transition-colors"
+              >
+                <span className="flex flex-wrap gap-1.5 flex-1 text-left">
+                  {!ex.expanded && ex.bodyParts.map((p) => (
+                    <span key={p} className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-500">{BODY_PART_LABELS[p as BodyPart] ?? p}</span>
+                  ))}
+                  {!ex.expanded && ex.memo.trim() && <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">메모 있음</span>}
+                  {!ex.expanded && ex.videoUrls.length > 0 && <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">영상 {ex.videoUrls.length}개</span>}
+                </span>
+                <span className="flex items-center gap-1 shrink-0 font-medium">
+                  {ex.expanded ? "간략히" : "더보기"}
+                  {ex.expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                </span>
+              </button>
 
-              {/* 메인 운동 여부 */}
-              <label className="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer w-fit">
-                <input
-                  type="checkbox"
-                  checked={ex.isMain}
-                  onChange={() => toggleMain(i)}
-                  className="accent-indigo-600"
-                />
-                메인 운동 (월간 리포트에서 중량·세트·반복수 추적)
-              </label>
+              {ex.expanded && (
+                <>
+                  {/* 부위 태그 */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {BODY_PART_ORDER.map((part) => (
+                      <button
+                        key={part}
+                        type="button"
+                        onClick={() => toggleBodyPart(i, part)}
+                        className={cn(
+                          "px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors",
+                          ex.bodyParts.includes(part)
+                            ? "bg-indigo-600 text-white border-indigo-600"
+                            : "bg-white text-gray-500 border-gray-200 hover:bg-gray-100"
+                        )}
+                      >
+                        {BODY_PART_LABELS[part]}
+                      </button>
+                    ))}
+                  </div>
 
-              {/* 메모 */}
-              <input
-                value={ex.memo}
-                onChange={(e) => setEx(i, "memo", e.target.value)}
-                className={inputCls()}
-                placeholder="메모 (선택)"
-              />
+                  {/* 메인 운동 여부 */}
+                  <label className="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer w-fit">
+                    <input
+                      type="checkbox"
+                      checked={ex.isMain}
+                      onChange={() => toggleMain(i)}
+                      className="accent-indigo-600"
+                    />
+                    메인 운동 (월간 리포트에서 중량·세트·반복수 추적)
+                  </label>
 
-              {/* 영상 업로드 */}
-              <div className="space-y-1.5">
-                <input
-                  ref={(el) => { videoInputRefs.current[i] = el; }}
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleVideoSelect(i, f); }}
-                />
-                {ex.videoUrls.map((url, vi) => (
-                  <div key={url} className="flex items-center gap-2 py-1">
+                  {/* 메모 */}
+                  <input
+                    value={ex.memo}
+                    onChange={(e) => setEx(i, "memo", e.target.value)}
+                    className={inputCls()}
+                    placeholder="메모 (선택)"
+                  />
+
+                  {/* 영상 업로드 */}
+                  <div className="space-y-1.5">
+                    <input
+                      ref={(el) => { videoInputRefs.current[i] = el; }}
+                      type="file"
+                      accept="video/*"
+                      className="hidden"
+                      onChange={(e) => { const f = e.target.files?.[0]; if (f) handleVideoSelect(i, f); }}
+                    />
+                    {ex.videoUrls.map((url, vi) => (
+                      <div key={url} className="flex items-center gap-2 py-1">
                     <CheckCircle size={15} className="text-emerald-500 shrink-0" />
                     <span className="text-xs text-emerald-600 font-medium flex-1 truncate">영상 {vi + 1} 등록됨</span>
                     <button type="button" onClick={() => removeVideo(i, vi)} className="p-1 text-gray-300 hover:text-red-400 transition-colors">
@@ -640,7 +706,9 @@ export default function SessionForm({
                     {ex.videoUrls.length > 0 ? "영상 추가 첨부" : "영상 첨부 (카메라롤 또는 파일, 50MB 이하)"}
                   </button>
                 )}
-              </div>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>

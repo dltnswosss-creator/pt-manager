@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, TrendingUp } from "lucide-react";
+import { Camera, Loader2, Trash2, TrendingUp } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
+import { downscaleImage } from "@/lib/imageDownscale";
+import { parseInBodyOcrText } from "@/lib/inbodyOcr";
 import ExerciseTrendChart from "@/components/ExerciseTrendChart";
 
 type InBodyRecord = {
@@ -33,6 +35,38 @@ export default function InBodyPanel({ clientId, records }: { clientId: number; r
     weight: "", skeletalMuscleMass: "", bodyFatMass: "", bodyFatPercent: "", bmr: "",
   });
   const [saving, setSaving] = useState(false);
+  const [ocrStatus, setOcrStatus] = useState<"idle" | "processing" | "done" | "error">("idle");
+  const [ocrRawText, setOcrRawText] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handlePhotoSelect = async (file: File) => {
+    setOcrStatus("processing");
+    setOcrRawText(null);
+    try {
+      const downscaled = await downscaleImage(file);
+      const { createWorker } = await import("tesseract.js");
+      const worker = await createWorker("kor+eng");
+      try {
+        const { data: { text } } = await worker.recognize(downscaled);
+        const parsed = parseInBodyOcrText(text);
+        setForm((f) => ({
+          ...f,
+          weight: parsed.weight ?? f.weight,
+          skeletalMuscleMass: parsed.skeletalMuscleMass ?? f.skeletalMuscleMass,
+          bodyFatMass: parsed.bodyFatMass ?? f.bodyFatMass,
+          bodyFatPercent: parsed.bodyFatPercent ?? f.bodyFatPercent,
+          bmr: parsed.bmr ?? f.bmr,
+        }));
+        setOcrRawText(text);
+        setOcrStatus("done");
+      } finally {
+        await worker.terminate();
+      }
+    } catch {
+      setOcrStatus("error");
+    }
+    if (photoInputRef.current) photoInputRef.current.value = "";
+  };
 
   const save = async () => {
     setSaving(true);
@@ -63,7 +97,45 @@ export default function InBodyPanel({ clientId, records }: { clientId: number; r
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
-        <h3 className="text-sm font-semibold text-gray-700">인바디 기록 입력</h3>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-gray-700">인바디 기록 입력</h3>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePhotoSelect(f); }}
+          />
+          <button
+            type="button"
+            onClick={() => photoInputRef.current?.click()}
+            disabled={ocrStatus === "processing"}
+            className="flex items-center gap-1.5 text-xs text-indigo-600 font-medium py-1.5 px-3 rounded-lg hover:bg-indigo-50 active:bg-indigo-100 disabled:opacity-50 transition-colors"
+          >
+            {ocrStatus === "processing" ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+            사진에서 불러오기
+          </button>
+        </div>
+
+        {ocrStatus === "processing" && (
+          <p className="text-xs text-gray-400">사진을 분석하고 있어요...</p>
+        )}
+        {ocrStatus === "done" && (
+          <div className="text-xs text-emerald-600 space-y-1">
+            <p>사진에서 인식됐어요 — 값을 확인하고 저장하세요.</p>
+            {ocrRawText && (
+              <details className="text-gray-400">
+                <summary className="cursor-pointer text-gray-500">인식된 원본 텍스트 보기</summary>
+                <pre className="whitespace-pre-wrap text-[11px] mt-1 bg-gray-50 rounded-lg p-2">{ocrRawText}</pre>
+              </details>
+            )}
+          </div>
+        )}
+        {ocrStatus === "error" && (
+          <p className="text-xs text-rose-500">이미지를 인식하지 못했어요. 직접 입력해주세요.</p>
+        )}
+
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-gray-500">측정일</label>
