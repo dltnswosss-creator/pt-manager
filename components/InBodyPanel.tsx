@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Camera, Loader2, Trash2, TrendingUp } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
 import { downscaleImage } from "@/lib/imageDownscale";
-import { parseInBodyOcrText } from "@/lib/inbodyOcr";
 import ExerciseTrendChart from "@/components/ExerciseTrendChart";
 
 type InBodyRecord = {
@@ -36,32 +35,37 @@ export default function InBodyPanel({ clientId, records }: { clientId: number; r
   });
   const [saving, setSaving] = useState(false);
   const [ocrStatus, setOcrStatus] = useState<"idle" | "processing" | "done" | "error">("idle");
-  const [ocrRawText, setOcrRawText] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
+
+  const blobToDataUrl = (blob: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
 
   const handlePhotoSelect = async (file: File) => {
     setOcrStatus("processing");
-    setOcrRawText(null);
     try {
       const downscaled = await downscaleImage(file);
-      const { createWorker } = await import("tesseract.js");
-      const worker = await createWorker("kor+eng");
-      try {
-        const { data: { text } } = await worker.recognize(downscaled);
-        const parsed = parseInBodyOcrText(text);
-        setForm((f) => ({
-          ...f,
-          weight: parsed.weight ?? f.weight,
-          skeletalMuscleMass: parsed.skeletalMuscleMass ?? f.skeletalMuscleMass,
-          bodyFatMass: parsed.bodyFatMass ?? f.bodyFatMass,
-          bodyFatPercent: parsed.bodyFatPercent ?? f.bodyFatPercent,
-          bmr: parsed.bmr ?? f.bmr,
-        }));
-        setOcrRawText(text);
-        setOcrStatus("done");
-      } finally {
-        await worker.terminate();
-      }
+      const dataUrl = await blobToDataUrl(downscaled);
+      const res = await fetch("/api/inbody/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataUrl }),
+      });
+      if (!res.ok) throw new Error("analyze failed");
+      const parsed = await res.json();
+      setForm((f) => ({
+        ...f,
+        weight: parsed.weight != null ? String(parsed.weight) : f.weight,
+        skeletalMuscleMass: parsed.skeletalMuscleMass != null ? String(parsed.skeletalMuscleMass) : f.skeletalMuscleMass,
+        bodyFatMass: parsed.bodyFatMass != null ? String(parsed.bodyFatMass) : f.bodyFatMass,
+        bodyFatPercent: parsed.bodyFatPercent != null ? String(parsed.bodyFatPercent) : f.bodyFatPercent,
+        bmr: parsed.bmr != null ? String(parsed.bmr) : f.bmr,
+      }));
+      setOcrStatus("done");
     } catch {
       setOcrStatus("error");
     }
@@ -122,15 +126,7 @@ export default function InBodyPanel({ clientId, records }: { clientId: number; r
           <p className="text-xs text-gray-400">사진을 분석하고 있어요...</p>
         )}
         {ocrStatus === "done" && (
-          <div className="text-xs text-emerald-600 space-y-1">
-            <p>사진에서 인식됐어요 — 값을 확인하고 저장하세요.</p>
-            {ocrRawText && (
-              <details className="text-gray-400">
-                <summary className="cursor-pointer text-gray-500">인식된 원본 텍스트 보기</summary>
-                <pre className="whitespace-pre-wrap text-[11px] mt-1 bg-gray-50 rounded-lg p-2">{ocrRawText}</pre>
-              </details>
-            )}
-          </div>
+          <p className="text-xs text-emerald-600">사진에서 인식됐어요 — 값을 확인하고 저장하세요.</p>
         )}
         {ocrStatus === "error" && (
           <p className="text-xs text-rose-500">이미지를 인식하지 못했어요. 직접 입력해주세요.</p>
