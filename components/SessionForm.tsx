@@ -24,11 +24,16 @@ type ExerciseRow = {
   expanded: boolean;
 };
 type Client = { id: number; name: string };
-type ClientHistoryEntry = { name: string; sets: string; reps: string; weight: string; unit: string; bodyParts: string[] };
+type ClientHistoryEntry = { name: string; sets: string; reps: string; weight: string; unit: string; bodyParts: string[]; lastDate: string };
 type SuggestionItem = { name: string; fromHistory: boolean } & Partial<Omit<ClientHistoryEntry, "name">>;
 
 const hasSecondaryData = (e: { bodyParts: string[]; memo: string; videoUrls: string[] }) =>
   e.bodyParts.length > 0 || e.memo.trim() !== "" || e.videoUrls.length > 0;
+
+const formatShortMD = (dateStr: string) => {
+  const d = new Date(dateStr);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+};
 
 const emptyExercise = (): ExerciseRow => ({
   name: "", sets: "", reps: "", weight: "", unit: "kg", memo: "", isMain: true,
@@ -159,6 +164,7 @@ export default function SessionForm({
               weight: e.weight != null ? String(e.weight) : "",
               unit: e.unit ?? "kg",
               bodyParts: e.bodyParts ?? [],
+              lastDate: s.date,
             });
           }
         }
@@ -549,8 +555,9 @@ export default function SessionForm({
                         >
                           <span>{r.name}</span>
                           {r.fromHistory && (
-                            <span className="text-xs text-indigo-400 shrink-0">
-                              최근 · {r.weight ? `${r.weight}${r.unit}` : ""}{r.reps ? ` · ${r.reps}회` : ""}{r.sets ? ` · ${r.sets}세트` : ""}
+                            <span className="flex flex-col items-end text-xs text-indigo-400 shrink-0 leading-tight">
+                              {r.lastDate && <span>{formatShortMD(r.lastDate)} 기록</span>}
+                              <span>{r.weight ? `${r.weight}${r.unit}` : ""}{r.reps ? ` · ${r.reps}회` : ""}{r.sets ? ` · ${r.sets}세트` : ""}</span>
                             </span>
                           )}
                         </button>
