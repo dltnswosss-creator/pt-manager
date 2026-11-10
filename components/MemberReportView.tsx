@@ -54,11 +54,11 @@ export default function MemberReportView({
     <div className="p-6 max-w-3xl mx-auto space-y-4">
       {/* 상단 바 */}
       <div className="flex items-center justify-between gap-3">
-        <Link href="/monthly-report" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors">
+        <Link href="/monthly-report" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors whitespace-nowrap shrink-0">
           <ArrowLeft size={16} />
           전체 회원
         </Link>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           <div className="flex items-center gap-0.5 bg-white border border-gray-100 rounded-lg px-1 py-1">
             <Link href={`/monthly-report/${clientId}?ym=${shiftYearMonth(yearMonth, -1)}`} className="p-1.5 rounded-md hover:bg-gray-50 text-gray-500">
               <ChevronLeft size={16} />
@@ -70,10 +70,11 @@ export default function MemberReportView({
           </div>
           <button
             onClick={() => setShowExport(true)}
-            className="flex items-center gap-1.5 text-sm text-gray-500 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            title="이미지로 저장"
+            className="flex items-center gap-1.5 text-sm text-gray-500 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
           >
             <ImageIcon size={15} />
-            이미지로 저장
+            <span className="hidden sm:inline">이미지로 저장</span>
           </button>
         </div>
       </div>

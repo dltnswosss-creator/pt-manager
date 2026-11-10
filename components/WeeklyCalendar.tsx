@@ -269,8 +269,8 @@ export default function WeeklyCalendar({
   return (
     <div className="flex flex-col h-full bg-white" style={{ userSelect: drag ? "none" : undefined }}>
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-100 shrink-0 gap-2">
-        <div className="flex items-center gap-1 min-w-0">
+      <div className="flex flex-wrap items-center justify-between px-3 py-2.5 border-b border-gray-100 shrink-0 gap-x-2 gap-y-1.5">
+        <div className="flex items-center gap-1">
           <button onClick={() => onWeekChange(addDays(weekStart, -7))} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors shrink-0">
             <ChevronLeft size={18} />
           </button>
@@ -284,7 +284,7 @@ export default function WeeklyCalendar({
             오늘
           </button>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0 ml-auto">
           <button
             onClick={() => setShowExport(true)}
             className="flex items-center gap-1 text-xs text-gray-500 px-2 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"

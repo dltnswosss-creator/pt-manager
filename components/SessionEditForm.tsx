@@ -157,7 +157,7 @@ export default function SessionEditForm({ session }: { session: Session }) {
     >
       <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-4">
         <h3 className="text-sm font-semibold text-gray-700">기본 정보</h3>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-gray-500">수업 날짜 *</label>
             <input type="date" required value={date} onChange={(e) => setDate(e.target.value)} className={inputCls()} />

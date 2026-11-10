@@ -125,8 +125,8 @@ export default function ScheduleForm({ initial, mode }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5 max-w-lg">
       {/* 날짜 + 시간 */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="col-span-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="col-span-2 sm:col-span-3">
           <label className="block text-xs font-medium text-gray-600 mb-1">날짜</label>
           <input
             type="date"
@@ -155,7 +155,7 @@ export default function ScheduleForm({ initial, mode }: Props) {
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
           />
         </div>
-        <div>
+        <div className="col-span-2 sm:col-span-1">
           <label className="block text-xs font-medium text-gray-600 mb-1">수업 유형</label>
           <select
             value={form.type}

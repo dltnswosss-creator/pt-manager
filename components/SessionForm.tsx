@@ -592,8 +592,8 @@ export default function SessionForm({
                 </button>
               </div>
 
-              {/* 세트 / 횟수 / 중량 / 단위 */}
-              <div className="grid grid-cols-4 gap-2">
+              {/* 세트 / 횟수 / 중량 / 단위 — 모바일은 2x2, 넓은 화면은 1줄 */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div className="space-y-1">
                   <p className="text-[10px] font-medium text-gray-400 text-center">세트</p>
                   <NumberStepper value={ex.sets} onChange={(v) => setEx(i, "sets", v)} step={1} placeholder="3" />

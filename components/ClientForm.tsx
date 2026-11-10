@@ -68,7 +68,7 @@ export default function ClientForm({ defaultValues, clientId }: Props) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* 기본 정보 */}
       <Section title="기본 정보">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="이름 *">
             <input required value={form.name} onChange={(e) => set("name", e.target.value)} className={input()} placeholder="홍길동" />
           </Field>
