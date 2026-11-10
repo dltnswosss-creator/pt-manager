@@ -37,6 +37,15 @@ npx vercel --prod --yes
 | `OPENAI_API_KEY` | 기존 값 사용 | 인바디 사진 분석 + 녹음 내용 → 수업 기록 정리 |
 | `OPENAI_SESSION_MODEL` | 선택 | 기본값 `gpt-4o-mini` |
 
+**Soniox 관련 주소**
+
+| 용도 | 주소 |
+|---|---|
+| 콘솔 (API 키 발급, 사용량·결제) | https://console.soniox.com |
+| API 문서 | https://soniox.com/docs |
+| 임시 키 발급 API (서버 → Soniox) | `POST https://api.soniox.com/v1/auth/temporary-api-key` — [app/api/stt/token/route.ts](app/api/stt/token/route.ts) |
+| 실시간 음성 인식 WebSocket (브라우저 → Soniox) | `wss://stt-rt.soniox.com/transcribe-websocket` — `@soniox/client` SDK가 연결 ([components/SessionRecorder.tsx](components/SessionRecorder.tsx)) |
+
 - 환경변수는 추가만 해서는 반영되지 않으니 3번(재배포)까지 해야 합니다.
 - 빌드 중 `prisma migrate deploy`가 실행되어 운영 DB에 `Session.transcript` 컬럼(nullable)이 추가됩니다. 기존 데이터에는 영향 없습니다.
 - 배포 후 휴대폰에서 오른쪽 아래 파란 마이크 버튼 → 버튼을 누른 채로 말해서 문장이 쌓이면 정상입니다.
