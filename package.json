@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "prisma migrate deploy && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:up": "docker compose up -d --wait && prisma migrate deploy",
+    "db:down": "docker compose stop"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1076.0",
@@ -27,6 +29,7 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@next/env": "^16.4.6",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

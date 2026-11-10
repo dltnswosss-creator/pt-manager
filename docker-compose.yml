@@ -1,0 +1,22 @@
+# 로컬 개발용 Postgres (운영 DB와 분리)
+# 실행: npm run db:up  /  중지: npm run db:down
+services:
+  db:
+    image: postgres:17
+    container_name: pt-manager-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pt_manager
+    ports:
+      - "5432:5432"
+    volumes:
+      - pt-manager-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pt_manager"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  pt-manager-db:

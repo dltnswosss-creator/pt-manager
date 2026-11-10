@@ -5,9 +5,12 @@ import { PrismaClient } from "@/app/generated/prisma/client";
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 function createPrismaClient() {
+  const connectionString = process.env.DATABASE_URL;
+  // 로컬 개발 DB(docker)는 SSL을 지원하지 않음
+  const isLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(connectionString ?? "");
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    connectionString,
+    ssl: isLocal ? false : { rejectUnauthorized: false },
     max: 1, // serverless: 인스턴스당 커넥션 1개로 제한
   });
   const adapter = new PrismaPg(pool);
