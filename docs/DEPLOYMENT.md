@@ -88,6 +88,8 @@ $vars = [ordered]@{
   "SUPABASE_SERVICE_ROLE_KEY" = "eyJ..."
   "NOTION_API_KEY"            = "ntn_..."
   "NOTION_PARENT_PAGE_ID"     = "32자리ID"
+  "SONIOX_API_KEY"            = "..."   # 수업 녹음 STT (Temporary API keys 권한 필요)
+  "OPENAI_API_KEY"            = "sk-..." # 인바디 분석 + 녹음 → 수업 기록 정리
 }
 
 foreach ($k in $vars.Keys) {

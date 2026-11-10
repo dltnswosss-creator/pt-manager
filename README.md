@@ -6,6 +6,45 @@
 
 ---
 
+## 배포 대기 중인 변경 (2026-11-11)
+
+`master`에 아래 두 커밋이 올라가 있지만 **아직 운영에 배포되지 않았습니다.**
+이 프로젝트는 GitHub에 푸시해도 자동 배포되지 않으므로, Vercel 프로젝트(`pt-manager`) 권한이 있는 계정으로 직접 배포해야 합니다.
+
+- `6d2a7e6` 수업 녹음 → AI 수업 기록 작성 기능
+- `058b537` 토스 스타일 리디자인
+
+### 배포 순서
+
+```bash
+# 1. 최신 코드 받기
+git pull origin master
+npm install
+
+# 2. 환경변수 추가 (Production)
+npx vercel env add SONIOX_API_KEY production      # 필수: 새로 추가
+npx vercel env ls production                      # OPENAI_API_KEY가 있는지 확인 (없으면 추가)
+# 선택: 수업 기록 정리에 쓸 OpenAI 모델 (없으면 gpt-4o-mini)
+# npx vercel env add OPENAI_SESSION_MODEL production
+
+# 3. 배포
+npx vercel --prod --yes
+```
+
+| 환경변수 | 필요 | 설명 |
+|---|---|---|
+| `SONIOX_API_KEY` | **새로 추가 (필수)** | 수업 녹음 실시간 음성 인식. [console.soniox.com](https://console.soniox.com)에서 발급하며, **Temporary API keys 권한**이 있어야 함 |
+| `OPENAI_API_KEY` | 기존 값 사용 | 인바디 사진 분석 + 녹음 내용 → 수업 기록 정리 |
+| `OPENAI_SESSION_MODEL` | 선택 | 기본값 `gpt-4o-mini` |
+
+- 환경변수는 추가만 해서는 반영되지 않으니 3번(재배포)까지 해야 합니다.
+- 빌드 중 `prisma migrate deploy`가 실행되어 운영 DB에 `Session.transcript` 컬럼(nullable)이 추가됩니다. 기존 데이터에는 영향 없습니다.
+- 배포 후 휴대폰에서 오른쪽 아래 파란 마이크 버튼 → 버튼을 누른 채로 말해서 문장이 쌓이면 정상입니다.
+
+배포를 마치면 이 섹션은 지워 주세요.
+
+---
+
 ## 주요 기능
 
 ### 회원 관리
