@@ -201,7 +201,7 @@ export default function ClientForm({ defaultValues, clientId }: Props) {
       </Section>
 
       <div className="flex gap-3">
-        <button type="button" onClick={() => router.back()} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+        <button type="button" onClick={() => router.back()} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
           취소
         </button>
         <button type="submit" disabled={loading} className="flex-1 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors">
@@ -214,7 +214,7 @@ export default function ClientForm({ defaultValues, clientId }: Props) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-5 space-y-4">
+    <div className="bg-gray-50 rounded-2xl p-5 space-y-4">
       <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
       {children}
     </div>

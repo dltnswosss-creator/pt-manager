@@ -155,7 +155,7 @@ export default function SessionEditForm({ session }: { session: Session }) {
       }}
       className="space-y-4 p-4 max-w-2xl mx-auto lg:p-6"
     >
-      <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-4">
+      <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
         <h3 className="text-sm font-semibold text-gray-700">기본 정보</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1.5">
@@ -169,7 +169,7 @@ export default function SessionEditForm({ session }: { session: Session }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
+      <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-700">운동 목록</h3>
           <button
@@ -182,7 +182,7 @@ export default function SessionEditForm({ session }: { session: Session }) {
         </div>
         <div className="space-y-3">
           {exercises.map((ex, i) => (
-            <div key={i} className="bg-gray-50 rounded-xl p-3 space-y-3">
+            <div key={i} className="bg-white rounded-xl p-3 space-y-3">
               <div className="flex gap-2">
                 <div className="flex-1 relative">
                   <input value={ex.name} onChange={(e) => setEx(i, "name", e.target.value)}
@@ -311,7 +311,7 @@ export default function SessionEditForm({ session }: { session: Session }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-2">
+      <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
         <label className="text-sm font-semibold text-gray-700">특이사항 / 메모</label>
         <textarea value={memo} onChange={(e) => setMemo(e.target.value)}
           className={cn(inputCls(), "h-24 resize-none")}
@@ -320,7 +320,7 @@ export default function SessionEditForm({ session }: { session: Session }) {
 
       <div className="flex gap-3">
         <button type="button" onClick={() => router.back()}
-          className="flex-1 py-3.5 border border-gray-200 rounded-2xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+          className="flex-1 py-3.5 border border-gray-200 rounded-2xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors">
           취소
         </button>
         <button type="submit" disabled={loading}

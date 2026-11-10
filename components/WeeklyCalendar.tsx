@@ -269,49 +269,49 @@ export default function WeeklyCalendar({
   return (
     <div className="flex flex-col h-full bg-white" style={{ userSelect: drag ? "none" : undefined }}>
       {/* 헤더 */}
-      <div className="flex flex-wrap items-center justify-between px-3 py-2.5 border-b border-gray-100 shrink-0 gap-x-2 gap-y-1.5">
-        <div className="flex items-center gap-1">
-          <button onClick={() => onWeekChange(addDays(weekStart, -7))} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors shrink-0">
-            <ChevronLeft size={18} />
-          </button>
-          <span className="text-sm font-semibold text-gray-900 text-center whitespace-nowrap px-1">
-            {weekLabel(weekDays)}
-          </span>
-          <button onClick={() => onWeekChange(addDays(weekStart, 7))} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors shrink-0">
-            <ChevronRight size={18} />
-          </button>
-          <button onClick={() => onWeekChange(getMondayOf(new Date()))} className="text-xs text-indigo-600 font-medium px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors shrink-0">
-            오늘
-          </button>
+      <div className="px-5 pt-8 pb-3 shrink-0 space-y-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-[28px] leading-snug font-bold text-gray-900">일정</h1>
+          <div className="flex items-center -mr-2">
+            <button
+              onClick={() => setShowExport(true)}
+              aria-label="이미지로 저장"
+              title="이미지로 저장"
+              className="press w-11 h-11 flex items-center justify-center text-gray-700"
+            >
+              <ImageIcon size={22} strokeWidth={2} />
+            </button>
+            <Link href="/schedule/locations" aria-label="장소 관리" title="장소 관리" className="press w-11 h-11 flex items-center justify-center text-gray-700">
+              <MapPin size={22} strokeWidth={2} />
+            </Link>
+            <Link href="/schedule/new" aria-label="일정 추가" title="일정 추가" className="press w-11 h-11 flex items-center justify-center text-gray-900">
+              <Plus size={26} strokeWidth={2} />
+            </Link>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0 ml-auto">
-          <button
-            onClick={() => setShowExport(true)}
-            className="flex items-center gap-1 text-xs text-gray-500 px-2 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
-            title="이미지로 저장"
-          >
-            <ImageIcon size={13} />
-            <span className="hidden sm:inline">이미지 저장</span>
-          </button>
-          <Link href="/schedule/locations" className="flex items-center gap-1 text-xs text-gray-500 px-2 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap">
-            <MapPin size={13} />
-            <span className="hidden sm:inline">장소 관리</span>
-          </Link>
-          <Link href="/schedule/new" className="flex items-center gap-1 bg-indigo-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium hover:bg-indigo-700 transition-colors whitespace-nowrap">
-            <Plus size={14} />
-            일정 추가
-          </Link>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[17px] font-semibold text-gray-900 whitespace-nowrap">{weekLabel(weekDays)}</span>
+          <div className="flex items-center gap-1.5">
+            <button onClick={() => onWeekChange(getMondayOf(new Date()))} className="press h-9 px-3 rounded-full bg-gray-100 text-[13px] font-semibold text-gray-700">
+              오늘
+            </button>
+            <button onClick={() => onWeekChange(addDays(weekStart, -7))} aria-label="이전 주" className="press w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-700">
+              <ChevronLeft size={18} strokeWidth={2} />
+            </button>
+            <button onClick={() => onWeekChange(addDays(weekStart, 7))} aria-label="다음 주" className="press w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-700">
+              <ChevronRight size={18} strokeWidth={2} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* 색상 필터 */}
+      {/* 장소 필터 */}
       {scheduleColors.length > 0 && (
-        <div className="flex items-center gap-2 px-4 py-2 border-b border-gray-100 shrink-0 flex-wrap">
-          <span className="text-[11px] text-gray-400 font-medium">색상 필터</span>
+        <div className="flex items-center gap-2 px-5 pb-3 shrink-0 overflow-x-auto">
           <button
             onClick={() => setSelectedColor(null)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-              selectedColor === null ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+            className={`press h-9 px-3.5 rounded-full text-[13px] font-semibold whitespace-nowrap transition-colors ${
+              selectedColor === null ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700"
             }`}
           >
             전체
@@ -320,12 +320,9 @@ export default function WeeklyCalendar({
             <button
               key={color}
               onClick={() => setSelectedColor(selectedColor === color ? null : color)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all"
-              style={
-                selectedColor === color
-                  ? { backgroundColor: color, borderColor: color, color: "white" }
-                  : { backgroundColor: "white", borderColor: "#e5e7eb", color: "#374151" }
-              }
+              className={`press h-9 px-3.5 rounded-full text-[13px] font-semibold whitespace-nowrap flex items-center gap-1.5 transition-colors ${
+                selectedColor === color ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-700"
+              }`}
             >
               <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
               {name}
@@ -334,72 +331,75 @@ export default function WeeklyCalendar({
         </div>
       )}
 
-      {/* 모바일: 뷰 전환 토글 */}
-      <div className="flex gap-1 px-3 py-2 border-b border-gray-100 shrink-0 md:hidden">
-        <button
-          onClick={() => setMobileView("agenda")}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors ${mobileView === "agenda" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500"}`}
-        >
-          리스트
-        </button>
-        <button
-          onClick={() => setMobileView("grid")}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-colors ${mobileView === "grid" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500"}`}
-        >
-          캘린더
-        </button>
+      {/* 모바일: 뷰 전환 */}
+      <div className="px-5 pb-3 shrink-0 md:hidden">
+        <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-gray-100">
+          <button
+            onClick={() => setMobileView("agenda")}
+            className={`h-9 rounded-[10px] text-[15px] font-semibold transition-colors ${mobileView === "agenda" ? "bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)]" : "text-gray-500"}`}
+          >
+            리스트
+          </button>
+          <button
+            onClick={() => setMobileView("grid")}
+            className={`h-9 rounded-[10px] text-[15px] font-semibold transition-colors ${mobileView === "grid" ? "bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)]" : "text-gray-500"}`}
+          >
+            캘린더
+          </button>
+        </div>
       </div>
 
       {/* 모바일: 주간 아젠다 리스트 */}
-      {mobileView === "agenda" && <div className="flex-1 overflow-auto md:hidden">
-        <div className="divide-y divide-gray-100">
+      {mobileView === "agenda" && <div className="flex-1 overflow-auto md:hidden pb-28">
+        <div className="px-5">
           {weekDays.map((day, i) => {
             const dateStr = toDateStr(day);
             const daySchedules = byDate.get(dateStr) ?? [];
             const isToday = dateStr === todayStr;
             const isWeekend = i >= 5;
             return (
-              <div key={dateStr}>
-                <div className={`flex items-center gap-2 px-4 py-2.5 sticky top-0 z-10 border-b border-gray-100 ${isToday ? "bg-indigo-50" : "bg-gray-50"}`}>
-                  <span className={`text-xs font-semibold w-5 ${isToday ? "text-indigo-600" : isWeekend ? "text-rose-400" : "text-gray-500"}`}>
-                    {DAYS_KR[i]}
+              <section key={dateStr} className="pt-5">
+                <h2 className="flex items-baseline gap-1.5 pb-1">
+                  <span className={`text-[17px] font-bold ${isToday ? "text-indigo-600" : isWeekend ? "text-gray-500" : "text-gray-900"}`}>
+                    {day.getDate()}일 {DAYS_KR[i]}요일
                   </span>
-                  <span className={`text-sm font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? "bg-indigo-600 text-white" : isWeekend ? "text-rose-500" : "text-gray-700"}`}>
-                    {day.getDate()}
-                  </span>
-                  {daySchedules.length > 0 && (
-                    <span className="text-[10px] text-gray-400 ml-1">{daySchedules.length}건</span>
-                  )}
-                </div>
+                  {isToday && <span className="text-[13px] font-semibold text-indigo-600">오늘</span>}
+                </h2>
                 {daySchedules.length === 0 ? (
-                  <div className="px-4 py-3 text-xs text-gray-300 text-center">일정 없음</div>
+                  <p className="py-2 text-[15px] text-gray-400">일정 없음</p>
                 ) : (
-                  <div className="divide-y divide-gray-50">
+                  <div>
                     {daySchedules.map((s) => {
-                      const color = s.location?.color ?? "#6366f1";
+                      const color = s.location?.color ?? "#3182f6";
                       const isCancelled = s.status === "cancelled";
                       const isCompleted = s.status === "completed";
                       const isScheduled = s.status === "scheduled";
-                      const label = s.client?.name ?? "회원 미지정";
+                      const label = s.client?.name ? `${s.client.name} 님` : "회원 미지정";
                       return (
                         <div
                           key={s.id}
-                          className="flex items-center gap-3 px-4 py-3 active:bg-gray-50"
+                          className="press flex items-center gap-4 py-3 cursor-pointer"
                           onClick={() => router.push(`/schedule/${s.id}/edit`)}
                         >
-                          <div className="w-0.5 self-stretch rounded-full shrink-0" style={{ backgroundColor: isCancelled ? "#d1d5db" : color }} />
+                          <span className={`w-12 text-[17px] font-semibold shrink-0 ${isScheduled ? "text-gray-900" : "text-gray-400"}`}>
+                            {s.startTime}
+                          </span>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[11px] text-gray-400 leading-tight">{s.startTime}{s.endTime ? `–${s.endTime}` : ""}</p>
-                            <p className={`text-sm font-medium truncate leading-snug ${isCancelled ? "text-gray-400 line-through" : "text-gray-800"}`}>{label}</p>
-                            {s.location && <p className="text-[11px] text-gray-400 truncate">{s.location.name}</p>}
+                            <p className={`text-[17px] font-medium truncate ${isCancelled ? "text-gray-400 line-through" : isCompleted ? "text-gray-500" : "text-gray-900"}`}>{label}</p>
+                            {s.location && (
+                              <p className="flex items-center gap-1.5 text-[13px] text-gray-500 truncate">
+                                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: isCancelled ? "#d1d6db" : color }} />
+                                {s.location.name}
+                              </p>
+                            )}
                           </div>
-                          <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                            {isCompleted && <span className="text-[10px] text-emerald-600 font-semibold">완료</span>}
-                            {isCancelled && <span className="text-[10px] text-gray-400 font-semibold">취소</span>}
+                          <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                            {isCompleted && <span className="text-[13px] text-gray-500">완료</span>}
+                            {isCancelled && <span className="text-[13px] text-gray-400">취소</span>}
                             {isScheduled && (
                               <>
-                                <button className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600" onClick={() => onComplete(s.id)}><CheckCircle size={15} /></button>
-                                <button className="p-1.5 rounded-lg bg-red-50 text-red-400" onClick={() => onCancel(s.id)}><XCircle size={15} /></button>
+                                <button aria-label="완료" className="press w-9 h-9 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center" onClick={() => onComplete(s.id)}><Check size={18} strokeWidth={2.2} /></button>
+                                <button aria-label="취소" className="press w-9 h-9 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center" onClick={() => onCancel(s.id)}><X size={18} strokeWidth={2.2} /></button>
                               </>
                             )}
                           </div>
@@ -408,7 +408,7 @@ export default function WeeklyCalendar({
                     })}
                   </div>
                 )}
-              </div>
+              </section>
             );
           })}
         </div>
@@ -778,7 +778,7 @@ function QuickAddModal({ state, locations, clients, onClose, onSave, onDetail }:
           <button onClick={handleSave} disabled={saving} className="flex-1 bg-indigo-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-colors">
             {saving ? "저장 중..." : "저장"}
           </button>
-          <button onClick={() => onDetail(state.date, state.startTime, state.endTime)} className="px-3 py-2 border border-gray-200 text-gray-500 rounded-lg text-xs hover:bg-gray-50 transition-colors whitespace-nowrap">
+          <button onClick={() => onDetail(state.date, state.startTime, state.endTime)} className="px-3 py-2 border border-gray-200 text-gray-500 rounded-lg text-xs hover:bg-gray-100 transition-colors whitespace-nowrap">
             상세 설정
           </button>
         </div>
@@ -871,7 +871,7 @@ function ExportModal({ gridRef, weekLabel, onClose }: {
             {loadingCopy ? <Loader2 size={15} className="animate-spin" /> : copied ? <Check size={15} /> : <Copy size={15} />}
             {loadingCopy ? "처리 중..." : copied ? "복사됨!" : "클립보드 복사"}
           </button>
-          <button onClick={handleDownload} disabled={busy} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-60 transition-colors">
+          <button onClick={handleDownload} disabled={busy} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-60 transition-colors">
             {loadingDown ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
             {loadingDown ? "저장 중..." : "저장"}
           </button>

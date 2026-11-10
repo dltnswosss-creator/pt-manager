@@ -47,32 +47,32 @@ export default function MonthlyReportCard({
   const warningCount = feedback.stagnant.length + feedback.notice.filter((f) => f.type === "warning").length;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-      <div className="px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setExpanded(!expanded)}>
+    <div className="bg-gray-50 rounded-2xl overflow-hidden">
+      <div className="px-5 py-4 cursor-pointer hover:bg-gray-100 transition-colors" onClick={() => setExpanded(!expanded)}>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href={`/clients/${clientId}`}
               onClick={(e) => e.stopPropagation()}
-              className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-semibold text-sm shrink-0 hover:bg-indigo-200 transition-colors"
+              className="w-11 h-11 rounded-full bg-white flex items-center justify-center text-gray-700 font-semibold text-[17px] shrink-0"
             >
               {clientName[0]}
             </Link>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{clientName}</p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-[17px] font-semibold text-gray-900 truncate">{clientName}</p>
+              <p className="text-[13px] text-gray-500 mt-0.5">
                 이번 달 수업 {sessionCount}회 · 세션당 {Math.round(avgSetsPerSession * 10) / 10}세트
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {savedGoal?.achieved && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">목표 달성</span>
+              <span className="text-[13px] font-semibold text-emerald-600">목표 달성</span>
             )}
             {warningCount > 0 ? (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 font-medium">확인 필요 {warningCount}</span>
+              <span className="text-[13px] font-semibold text-gray-700">확인 필요 {warningCount}</span>
             ) : (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">양호</span>
+              <span className="text-[13px] font-semibold text-emerald-600">양호</span>
             )}
             <Link
               href={`/monthly-report/${clientId}?ym=${yearMonth}`}
@@ -88,7 +88,7 @@ export default function MonthlyReportCard({
       </div>
 
       {expanded && (
-        <div className="border-t border-gray-100 px-5 py-4 space-y-4">
+        <div className="px-5 pb-5 pt-1 space-y-4">
           {/* 피드백 */}
           <ExerciseFeedbackSection feedback={feedback} />
 

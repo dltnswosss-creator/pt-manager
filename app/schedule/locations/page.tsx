@@ -141,7 +141,7 @@ export default function LocationsPage() {
           ) : (
             <div
               key={loc.id}
-              className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-100"
+              className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl"
             >
               <div
                 className="w-4 h-4 rounded-full shrink-0"
@@ -256,7 +256,7 @@ function LocationFormCard({
         <button
           type="button"
           onClick={onCancel}
-          className="p-2 border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50 transition-colors"
+          className="p-2 border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
         >
           <X size={16} />
         </button>

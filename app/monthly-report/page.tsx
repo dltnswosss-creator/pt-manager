@@ -68,29 +68,44 @@ export default async function MonthlyReportPage({
   });
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">월간 리포트</h2>
-          <p className="text-sm text-gray-500 mt-0.5">ACSM 저항운동 가이드라인 기반 회원별 월간 피드백 &amp; 목표</p>
-        </div>
-        <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-lg px-1 py-1">
-          <Link href={`/monthly-report?ym=${shiftYearMonth(yearMonth, -1)}`} className="p-1.5 rounded-md hover:bg-gray-50 text-gray-500">
-            <ChevronLeft size={16} />
+    <div className="max-w-2xl mx-auto px-5 pt-8 pb-28 lg:pb-10 space-y-5">
+      <header className="space-y-3">
+        <h1 className="text-[28px] leading-snug font-bold text-gray-900">리포트</h1>
+        <div className="flex items-center gap-1 -ml-2">
+          <Link href={`/monthly-report?ym=${shiftYearMonth(yearMonth, -1)}`} aria-label="이전 달" className="press w-9 h-9 flex items-center justify-center text-gray-700">
+            <ChevronLeft size={20} strokeWidth={2} />
           </Link>
-          <span className="text-sm font-medium text-gray-900 px-2 w-24 text-center">{formatYearMonth(yearMonth)}</span>
-          <Link href={`/monthly-report?ym=${shiftYearMonth(yearMonth, 1)}`} className="p-1.5 rounded-md hover:bg-gray-50 text-gray-500">
-            <ChevronRight size={16} />
+          <span className="text-[17px] font-semibold text-gray-900">{formatYearMonth(yearMonth)}</span>
+          <Link href={`/monthly-report?ym=${shiftYearMonth(yearMonth, 1)}`} aria-label="다음 달" className="press w-9 h-9 flex items-center justify-center text-gray-700">
+            <ChevronRight size={20} strokeWidth={2} />
           </Link>
         </div>
-      </div>
+      </header>
+
+      {cards.length > 0 && (
+        <section className="rounded-[20px] bg-gray-50 p-5 grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <p className="text-[13px] text-gray-500">이번 달 수업</p>
+            <p className="text-[28px] font-bold text-indigo-600">
+              {cards.reduce((n, c) => n + c.sessionCount, 0)}
+              <span className="ml-0.5 text-[15px] font-medium text-gray-700">회</span>
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-[13px] text-gray-500">기록한 회원</p>
+            <p className="text-[28px] font-bold text-gray-900">
+              {cards.filter((c) => c.sessionCount > 0).length}
+              <span className="ml-0.5 text-[15px] font-medium text-gray-700">명</span>
+            </p>
+          </div>
+        </section>
+      )}
 
       {cards.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-100 p-16 text-center">
-          <p className="text-gray-400">등록된 회원이 없습니다.</p>
-        </div>
+        <p className="py-20 text-center text-[17px] text-gray-700">아직 등록한 회원이 없어요</p>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
+          <h2 className="pt-3 text-xl font-bold text-gray-900">회원별</h2>
           {cards.map((card) => (
             <MonthlyReportCard key={card.clientId} yearMonth={yearMonth} {...card} />
           ))}

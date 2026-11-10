@@ -177,7 +177,7 @@ export default function ScheduleForm({ initial, mode }: Props) {
             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
               form.locationId === null
                 ? "bg-gray-800 text-white border-gray-800"
-                : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                : "border-gray-200 text-gray-500 hover:bg-gray-100"
             }`}
           >
             미지정
@@ -190,7 +190,7 @@ export default function ScheduleForm({ initial, mode }: Props) {
               className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors flex items-center gap-1.5 ${
                 form.locationId === loc.id
                   ? "text-white border-transparent"
-                  : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                  : "border-gray-200 text-gray-600 hover:bg-gray-100"
               }`}
               style={
                 form.locationId === loc.id
@@ -281,7 +281,7 @@ export default function ScheduleForm({ initial, mode }: Props) {
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2.5 border border-gray-200 text-gray-500 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+              className="px-4 py-2.5 border border-gray-200 text-gray-500 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
             >
               취소
             </button>

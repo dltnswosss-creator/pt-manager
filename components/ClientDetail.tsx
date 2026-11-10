@@ -10,7 +10,7 @@ import {
 } from "@/lib/types";
 import { calcAge, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Edit, Trash2, Plus, ChevronDown, ChevronUp, Pencil, TrendingUp } from "lucide-react";
+import { ChevronLeft, Edit, Trash2, Plus, ChevronDown, ChevronUp, Pencil, TrendingUp, Mic, ClipboardList } from "lucide-react";
 import SessionExportButton from "@/components/SessionExportButton";
 import NotionShareButton from "@/components/NotionShareButton";
 import ExerciseVideoUpload from "@/components/ExerciseVideoUpload";
@@ -124,49 +124,69 @@ export default function ClientDetail({ client }: { client: Client }) {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-5">
-      <div className="flex items-center gap-2 sm:gap-4">
-        <Link href="/clients" className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0">
-          <ArrowLeft size={18} className="text-gray-500" />
+    <div className="max-w-4xl mx-auto px-5 pb-28 lg:pb-10 space-y-5">
+      {/* 상단 바 */}
+      <header className="sticky top-0 z-10 -mx-5 bg-white h-14 px-2 flex items-center justify-between">
+        <Link href="/clients" aria-label="회원 목록" className="w-11 h-11 flex items-center justify-center text-gray-900">
+          <ChevronLeft size={26} strokeWidth={2} />
         </Link>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-gray-900 truncate">{client.name}</h2>
-            {phase && (
-              <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${PHASE_COLORS[phase]}`}>
-                {PHASE_LABELS[phase]}
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-gray-500 mt-0.5 break-keep">
-            {client.gender === "female" ? "여성" : "남성"}
-            {client.birthDate && ` · ${calcAge(client.birthDate)}세`}
-            {client.job && ` · ${client.job}`}
-            {client.startDate && ` · PT 시작 ${formatDate(client.startDate)}`}
-          </p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <Link href={`/clients/${client.id}/edit`} title="수정" className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-            <Edit size={15} /> <span className="hidden sm:inline">수정</span>
+        <div className="flex items-center">
+          <Link href={`/clients/${client.id}/edit`} aria-label="회원 정보 수정" title="수정" className="press w-11 h-11 flex items-center justify-center text-gray-700">
+            <Edit size={21} strokeWidth={2} />
           </Link>
-          <button onClick={handleDelete} title="삭제" className="flex items-center gap-1.5 px-3 py-2 border border-red-100 rounded-lg text-sm text-red-500 hover:bg-red-50 transition-colors">
-            <Trash2 size={15} /> <span className="hidden sm:inline">삭제</span>
+          <button onClick={handleDelete} aria-label="회원 삭제" title="삭제" className="press w-11 h-11 flex items-center justify-center text-gray-500">
+            <Trash2 size={21} strokeWidth={2} />
           </button>
         </div>
+      </header>
+
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2">
+          <h1 className="text-[28px] leading-snug font-bold text-gray-900 truncate">{client.name} 님</h1>
+          {phase && (
+            <span className={`text-[13px] px-2.5 py-1 rounded-full font-medium shrink-0 ${PHASE_COLORS[phase]}`}>
+              {PHASE_LABELS[phase]}
+            </span>
+          )}
+        </div>
+        <p className="text-[15px] text-gray-500 break-keep">
+          {client.gender === "female" ? "여성" : "남성"}
+          {client.birthDate && ` · ${calcAge(client.birthDate)}세`}
+          {client.job && ` · ${client.job}`}
+          {client.startDate && ` · ${formatDate(client.startDate)}부터`}
+        </p>
+      </div>
+
+      {/* 바로가기 */}
+      <div className="grid grid-cols-3 gap-2">
+        <Link href={`/sessions/record?clientId=${client.id}`} className="press rounded-2xl bg-gray-50 py-3.5 flex flex-col items-center gap-2 text-[13px] font-medium text-gray-700">
+          <span className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600"><Mic size={20} strokeWidth={2} /></span>
+          수업 기록
+        </Link>
+        <button type="button" onClick={() => setTab("인바디")} className="press rounded-2xl bg-gray-50 py-3.5 flex flex-col items-center gap-2 text-[13px] font-medium text-gray-700">
+          <span className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-700"><ClipboardList size={20} strokeWidth={2} /></span>
+          인바디
+        </button>
+        <Link href={`/monthly-report/${client.id}`} className="press rounded-2xl bg-gray-50 py-3.5 flex flex-col items-center gap-2 text-[13px] font-medium text-gray-700">
+          <span className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-700"><TrendingUp size={20} strokeWidth={2} /></span>
+          리포트
+        </Link>
       </div>
 
       {/* 탭 */}
-      <div className="flex gap-1 border-b border-gray-100 overflow-x-auto">
+      <div role="tablist" className="flex gap-5 border-b border-gray-100 overflow-x-auto">
         {tabs.map((t) => (
           <button
             key={t}
+            role="tab"
+            aria-selected={tab === t}
             onClick={() => setTab(t)}
             className={cn(
-              "flex-1 sm:flex-none px-2 sm:px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 -mb-px transition-colors",
-              tab === t ? "border-indigo-600 text-indigo-600" : "border-transparent text-gray-500 hover:text-gray-800"
+              "py-2.5 text-[17px] whitespace-nowrap border-b-2 -mb-px transition-colors",
+              tab === t ? "border-gray-900 text-gray-900 font-bold" : "border-transparent text-gray-500 font-medium"
             )}
           >
-            {t}
+            {t === "인적사항" ? "정보" : t === "수업 기록" ? "수업" : t}
           </button>
         ))}
       </div>
@@ -236,15 +256,15 @@ export default function ClientDetail({ client }: { client: Client }) {
           </div>
 
           {client.sessions.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+            <div className="bg-gray-50 rounded-2xl p-12 text-center">
               <p className="text-gray-400">수업 기록이 없습니다.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {client.sessions.map((s) => (
-                <div key={s.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <div key={s.id} className="bg-gray-50 rounded-2xl overflow-hidden">
                   <div
-                    className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors"
                     onClick={() => setExpandedSession(expandedSession === s.id ? null : s.id)}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -332,7 +352,7 @@ export default function ClientDetail({ client }: { client: Client }) {
                         </div>
                       )}
                       {s.memo && (
-                        <div className="bg-gray-50 rounded-lg px-4 py-3">
+                        <div className="bg-white rounded-xl px-4 py-3">
                           <p className="text-xs font-medium text-gray-500 mb-1">특이사항</p>
                           <p className="text-sm text-gray-700 whitespace-pre-wrap">{s.memo}</p>
                         </div>
@@ -371,7 +391,7 @@ export default function ClientDetail({ client }: { client: Client }) {
           ) : (
             <>
               {activeExercise && (
-                <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-5 space-y-3">
+                <div className="bg-gray-50 rounded-2xl p-4 sm:p-5 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <TrendingUp size={16} className="text-indigo-500" />
@@ -399,7 +419,7 @@ export default function ClientDetail({ client }: { client: Client }) {
                 </div>
               )}
 
-              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
+              <div className="bg-gray-50 rounded-2xl overflow-hidden divide-y divide-gray-50">
                 {filteredExerciseHistory.map(({ name, points }) => {
                   const { delta, unit } = exerciseDelta(points);
                   const active = name === activeExercise?.name;
@@ -409,7 +429,7 @@ export default function ClientDetail({ client }: { client: Client }) {
                       onClick={() => setSelectedExercise(name)}
                       className={cn(
                         "w-full flex items-center justify-between gap-2 px-4 py-3 text-left transition-colors",
-                        active ? "bg-indigo-50" : "hover:bg-gray-50"
+                        active ? "bg-indigo-50" : "hover:bg-gray-100"
                       )}
                     >
                       <span className={cn("text-sm font-medium truncate", active ? "text-indigo-700" : "text-gray-700")}>{name}</span>
@@ -464,7 +484,7 @@ export default function ClientDetail({ client }: { client: Client }) {
             </div>
           )}
 
-          <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 p-5 space-y-4">
+          <div className="lg:col-span-2 bg-gray-50 rounded-2xl p-5 space-y-4">
             <h3 className="text-sm font-semibold text-gray-700">생리주기 설정</h3>
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-1.5">
@@ -514,7 +534,7 @@ export default function ClientDetail({ client }: { client: Client }) {
 
 function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-5 space-y-3">
+    <div className="bg-gray-50 rounded-2xl p-5 space-y-3">
       <h4 className="text-sm font-semibold text-gray-700">{title}</h4>
       {children}
     </div>

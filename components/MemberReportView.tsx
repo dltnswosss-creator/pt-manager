@@ -60,18 +60,18 @@ export default function MemberReportView({
         </Link>
         <div className="flex items-center gap-1.5 shrink-0">
           <div className="flex items-center gap-0.5 bg-white border border-gray-100 rounded-lg px-1 py-1">
-            <Link href={`/monthly-report/${clientId}?ym=${shiftYearMonth(yearMonth, -1)}`} className="p-1.5 rounded-md hover:bg-gray-50 text-gray-500">
+            <Link href={`/monthly-report/${clientId}?ym=${shiftYearMonth(yearMonth, -1)}`} className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500">
               <ChevronLeft size={16} />
             </Link>
             <span className="text-sm font-medium text-gray-900 px-2 w-24 text-center">{formatYearMonth(yearMonth)}</span>
-            <Link href={`/monthly-report/${clientId}?ym=${shiftYearMonth(yearMonth, 1)}`} className="p-1.5 rounded-md hover:bg-gray-50 text-gray-500">
+            <Link href={`/monthly-report/${clientId}?ym=${shiftYearMonth(yearMonth, 1)}`} className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500">
               <ChevronRight size={16} />
             </Link>
           </div>
           <button
             onClick={() => setShowExport(true)}
             title="이미지로 저장"
-            className="flex items-center gap-1.5 text-sm text-gray-500 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors whitespace-nowrap"
+            className="flex items-center gap-1.5 text-sm text-gray-500 px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors whitespace-nowrap"
           >
             <ImageIcon size={15} />
             <span className="hidden sm:inline">이미지로 저장</span>
@@ -80,7 +80,7 @@ export default function MemberReportView({
       </div>
 
       {/* 캡처 대상: 리포트 본문 */}
-      <div ref={reportRef} className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
+      <div ref={reportRef} className="bg-gray-50 rounded-2xl p-6 space-y-6">
         <div>
           <p className="text-xs text-gray-400">{formatYearMonth(yearMonth)} 월간 리포트</p>
           <h2 className="text-2xl font-bold text-gray-900 mt-0.5">{clientName}</h2>
@@ -151,7 +151,7 @@ export default function MemberReportView({
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-gray-50 rounded-xl p-3 text-center">
+    <div className="bg-white rounded-xl p-3 text-center">
       <p className="text-lg font-bold text-gray-900 leading-none">{value}</p>
       <p className="text-[11px] text-gray-500 mt-1 leading-tight">{label}</p>
     </div>
@@ -238,7 +238,7 @@ function ExportModal({ targetRef, fileName, title, description, onClose }: {
             {loadingCopy ? <Loader2 size={15} className="animate-spin" /> : copied ? <Check size={15} /> : <Copy size={15} />}
             {loadingCopy ? "처리 중..." : copied ? "복사됨!" : "클립보드 복사"}
           </button>
-          <button onClick={handleDownload} disabled={busy} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-60 transition-colors">
+          <button onClick={handleDownload} disabled={busy} className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-60 transition-colors">
             {loadingDown ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
             {loadingDown ? "저장 중..." : "저장"}
           </button>

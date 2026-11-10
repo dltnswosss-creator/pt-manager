@@ -170,7 +170,7 @@ export default function SessionExportButton({ session, clientName }: Props) {
               <button
                 onClick={handleDownload}
                 disabled={loadingCopy || loadingDown}
-                className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-60 transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-60 transition-colors"
               >
                 {loadingDown ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
                 {loadingDown ? "저장 중..." : "저장"}

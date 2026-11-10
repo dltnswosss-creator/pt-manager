@@ -1,18 +1,74 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * 토스 디자인 시스템(TDS) 컬러로 Tailwind 기본 팔레트를 덮어쓴다.
+ * 기존 화면이 쓰던 gray / indigo / emerald / red 클래스가 그대로 TDS 색으로 그려진다.
+ *   gray    → TDS grey
+ *   indigo  → TDS blue (액센트는 이 하나만. 600 = blue500 기본, 700 = blue600 눌림/hover)
+ *   emerald → TDS green
+ *   red     → TDS red
+ * 참고: https://tossmini-docs.toss.im/tds-mobile/foundation/colors/
+ */
+@theme {
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f2f4f6;
+  --color-gray-200: #e5e8eb;
+  --color-gray-300: #d1d6db;
+  --color-gray-400: #b0b8c1;
+  --color-gray-500: #8b95a1;
+  --color-gray-600: #6b7684;
+  --color-gray-700: #4e5968;
+  --color-gray-800: #333d4b;
+  --color-gray-900: #191f28;
+
+  --color-indigo-50: #e8f3ff;
+  --color-indigo-100: #c9e2ff;
+  --color-indigo-200: #90c2ff;
+  --color-indigo-300: #64a8ff;
+  --color-indigo-400: #4593fc;
+  --color-indigo-500: #3182f6;
+  --color-indigo-600: #3182f6;
+  --color-indigo-700: #2272eb;
+  --color-indigo-800: #1b64da;
+  --color-indigo-900: #194aa6;
+
+  --color-emerald-50: #f0faf6;
+  --color-emerald-100: #d6f3e6;
+  --color-emerald-200: #aeefd5;
+  --color-emerald-500: #03b26c;
+  --color-emerald-600: #03b26c;
+  --color-emerald-700: #028a54;
+
+  --color-red-50: #ffeeee;
+  --color-red-100: #ffd4d6;
+  --color-red-200: #feafb4;
+  --color-red-400: #f66570;
+  --color-red-500: #f04452;
+  --color-red-600: #e42939;
+  --color-red-700: #d22030;
+
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+:root {
+  --background: #ffffff;
+  --foreground: #191f28;
 }
 
 body {
-  background: #f9fafb;
+  background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 누르면 살짝 작아지는 반응 (토스 스타일 마이크로 인터랙션) */
+.press {
+  transition: transform 200ms ease-out, background-color 200ms ease-out;
+}
+.press:active {
+  transform: scale(0.97);
 }

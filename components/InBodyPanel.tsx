@@ -100,7 +100,7 @@ export default function InBodyPanel({ clientId, records }: { clientId: number; r
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
+      <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-sm font-semibold text-gray-700">인바디 기록 입력</h3>
           <input
@@ -168,7 +168,7 @@ export default function InBodyPanel({ clientId, records }: { clientId: number; r
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {METRICS.map((m) => (
             latest[m.key] != null && (
-              <div key={m.key} className="bg-white rounded-xl border border-gray-100 p-3 text-center">
+              <div key={m.key} className="bg-gray-50 rounded-2xl p-3 text-center">
                 <p className="text-xs text-gray-400">{m.label}</p>
                 <p className="text-lg font-bold text-gray-900">{latest[m.key]}{m.unit}</p>
               </div>
@@ -185,7 +185,7 @@ export default function InBodyPanel({ clientId, records }: { clientId: number; r
           if (points.length < 2) return null;
           const delta = Math.round((points[points.length - 1].weight - points[0].weight) * 10) / 10;
           return (
-            <div key={m.key} className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
+            <div key={m.key} className="bg-gray-50 rounded-2xl p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <TrendingUp size={14} className="text-indigo-500" />
@@ -208,7 +208,7 @@ export default function InBodyPanel({ clientId, records }: { clientId: number; r
       </div>
 
       {sorted.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-100 p-4 overflow-x-auto">
+        <div className="bg-gray-50 rounded-2xl p-4 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs text-gray-400 border-b border-gray-100">
