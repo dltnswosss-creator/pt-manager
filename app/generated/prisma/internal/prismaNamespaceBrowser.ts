@@ -112,6 +112,7 @@ export const SessionScalarFieldEnum = {
   memo: 'memo',
   notionPageId: 'notionPageId',
   notionUrl: 'notionUrl',
+  transcript: 'transcript',
   createdAt: 'createdAt'
 } as const
 

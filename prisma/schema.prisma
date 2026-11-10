@@ -55,6 +55,7 @@ model Session {
   memo         String?
   notionPageId String?
   notionUrl    String?
+  transcript   String?    // 수업 녹음 STT 전사본 (Soniox, 화자 구분 포함)
   exercises    Exercise[]
   createdAt    DateTime   @default(now())
 }

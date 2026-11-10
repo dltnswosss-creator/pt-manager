@@ -3,14 +3,15 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { COMMON_EXERCISES, BODY_PART_ORDER, BODY_PART_LABELS, type BodyPart } from "@/lib/types";
-import { cn, uploadWithProgress } from "@/lib/utils";
+import { COMMON_EXERCISES, BODY_PART_ORDER, BODY_PART_LABELS, type BodyPart, type SessionAnalysis } from "@/lib/types";
+import { cn, uploadWithProgress, todayLocal } from "@/lib/utils";
 import { maybeCompressVideo } from "@/lib/video";
 import { parseQuickInputWithFeedback } from "@/lib/quickInput";
 import NumberStepper from "@/components/NumberStepper";
+import { AI_HANDOFF_KEY, recordingKey } from "@/lib/sessionRecording";
 import {
   Plus, Trash2, Video, CheckCircle, Loader2, X,
-  Copy, ExternalLink, Check, ChevronUp, ChevronDown, ClipboardPaste,
+  Check, ChevronUp, ChevronDown, ChevronLeft, ClipboardPaste, Mic,
 } from "lucide-react";
 
 type ExerciseRow = {
@@ -42,6 +43,31 @@ const emptyExercise = (): ExerciseRow => ({
   expanded: false,
 });
 
+// 녹음 분석 결과(AI) → 운동 카드
+const rowsFromAnalysis = (result: SessionAnalysis): ExerciseRow[] =>
+  result.exercises.map((e) => {
+    const merged: ExerciseRow = {
+      ...emptyExercise(),
+      name: e.name,
+      sets: e.sets != null ? String(e.sets) : "",
+      reps: e.reps ?? "",
+      weight: e.weight != null ? String(e.weight) : "",
+      unit: e.unit,
+      memo: e.memo ?? "",
+      isMain: e.isMain,
+      bodyParts: e.bodyParts.filter((p): p is BodyPart => (BODY_PART_ORDER as string[]).includes(p)),
+    };
+    return { ...merged, expanded: hasSecondaryData(merged) };
+  });
+
+// 녹음 분석 결과(AI) → 특이사항 메모 (빠른 입력과 같은 형식)
+const memoFromAnalysis = (result: SessionAnalysis): string => {
+  const sections: string[] = [];
+  if (result.workoutFeedback?.trim()) sections.push(`💪 운동 피드백\n${result.workoutFeedback.trim()}`);
+  if (result.lifestyleFeedback?.trim()) sections.push(`🍎 영양&생활습관 피드백\n${result.lifestyleFeedback.trim()}`);
+  return sections.join("\n\n");
+};
+
 export default function SessionForm({
   clients,
   defaultClientId,
@@ -55,6 +81,9 @@ export default function SessionForm({
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [duration, setDuration] = useState("60");
   const [memo, setMemo] = useState("");
+  const [transcript, setTranscript] = useState("");
+  // 이 기록의 녹음 문장이 보관된 회원 (저장하면 그 녹음 문장을 지움). 녹음과 무관하면 undefined
+  const [recordingSource, setRecordingSource] = useState<number | "" | undefined>(undefined);
   const [exercises, setExercises] = useState<ExerciseRow[]>([emptyExercise()]);
   const [suggestion, setSuggestion] = useState<{ idx: number; results: SuggestionItem[] } | null>(null);
   const [clientHistory, setClientHistory] = useState<Map<string, ClientHistoryEntry>>(new Map());
@@ -62,6 +91,10 @@ export default function SessionForm({
   const [notionUrl, setNotionUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
+  const [aiFilled, setAiFilled] = useState(false);
+  // AI가 채운 기록은 먼저 요약("이렇게 기록할게요")으로 보여주고, 고칠 때만 전체 양식을 연다
+  const [editFull, setEditFull] = useState(false);
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [quickInputOpen, setQuickInputOpen] = useState(false);
   const [quickInputText, setQuickInputText] = useState("");
   const [quickInputFeedback, setQuickInputFeedback] = useState<string | null>(null);
@@ -70,16 +103,46 @@ export default function SessionForm({
 
   const draftKey = `pt-manager:session-draft:${defaultClientId ?? "general"}`;
 
-  // 임시 저장된 작성 중인 기록 복원
+  // 임시 저장된 작성 중인 기록 복원 (녹음 화면에서 AI가 작성해 넘긴 결과가 있으면 그걸 우선 적용)
   useEffect(() => {
+    // 개발 모드(StrictMode)에서 effect가 두 번 실행돼도 복원은 한 번만
+    // (두 번째 실행 때는 AI 결과가 이미 지워졌고, 임시 저장도 초기값으로 덮어써진 뒤라 결과가 사라짐)
+    if (draftLoadedRef.current) return;
+    // 서버(UTC)에서 렌더링한 초기 날짜를 브라우저 기준 오늘로 맞춘다 (임시 저장된 날짜가 있으면 아래에서 덮어씀)
+    setDate(todayLocal());
+    let handoff: { clientId: number | null; recordingClientId?: number | null; transcript: string; analysis: SessionAnalysis } | null = null;
+    try {
+      const rawHandoff = localStorage.getItem(AI_HANDOFF_KEY);
+      if (rawHandoff) {
+        localStorage.removeItem(AI_HANDOFF_KEY);
+        handoff = JSON.parse(rawHandoff);
+      }
+    } catch {}
+
     try {
       const raw = localStorage.getItem(draftKey);
-      if (raw) {
-        const draft = JSON.parse(raw);
+      const draft = raw ? JSON.parse(raw) : null;
+      const draftHasContent = !!draft && (
+        !!draft.memo?.trim() ||
+        (Array.isArray(draft.exercises) && draft.exercises.some((e: Partial<ExerciseRow>) => e.name?.trim()))
+      );
+
+      if (handoff && (!draftHasContent || confirm("작성 중이던 수업 기록이 있어요. 녹음으로 AI가 작성한 내용으로 바꿀까요?"))) {
+        if (handoff.clientId) setClientId(handoff.clientId);
+        else if (draft?.clientId !== undefined) setClientId(draft.clientId);
+        setTranscript(handoff.transcript);
+        setRecordingSource(handoff.recordingClientId ?? "");
+        const rows = rowsFromAnalysis(handoff.analysis);
+        setExercises(rows.length ? rows : [emptyExercise()]);
+        setMemo(memoFromAnalysis(handoff.analysis));
+        setAiFilled(true);
+      } else if (draft) {
         if (draft.clientId !== undefined) setClientId(draft.clientId);
         if (draft.date) setDate(draft.date);
         if (draft.duration !== undefined) setDuration(draft.duration);
         if (draft.memo !== undefined) setMemo(draft.memo);
+        if (typeof draft.transcript === "string") setTranscript(draft.transcript);
+        if (draft.recordingSource !== undefined) setRecordingSource(draft.recordingSource);
         if (Array.isArray(draft.exercises) && draft.exercises.length) {
           setExercises(draft.exercises.map((e: Partial<ExerciseRow> & { videoUrl?: string | null }) => {
             const merged = {
@@ -102,16 +165,17 @@ export default function SessionForm({
   // 작성 중인 내용을 자동 저장 (입력된 내용이 없으면 저장하지 않음)
   useEffect(() => {
     if (!draftLoadedRef.current || saved) return;
-    const isEmpty = !clientId && !memo.trim() &&
+    const isEmpty = !clientId && !memo.trim() && !transcript.trim() &&
       exercises.every((e) => !e.name.trim() && !e.sets && !e.reps && !e.weight && !e.memo.trim() && e.videoUrls.length === 0);
     try {
       if (isEmpty) {
         localStorage.removeItem(draftKey);
       } else {
-        localStorage.setItem(draftKey, JSON.stringify({ clientId, date, duration, memo, exercises }));
+        // 녹음 전사본도 함께 저장해 두어, 녹음 중 페이지가 새로고침되거나 브라우저가 꺼져도 복구할 수 있게 한다
+        localStorage.setItem(draftKey, JSON.stringify({ clientId, date, duration, memo, transcript, recordingSource, exercises }));
       }
     } catch {}
-  }, [draftKey, clientId, date, duration, memo, exercises, saved]);
+  }, [draftKey, clientId, date, duration, memo, transcript, recordingSource, exercises, saved]);
 
   // 저장 완료 시 임시 기록 삭제
   useEffect(() => {
@@ -123,11 +187,15 @@ export default function SessionForm({
   const discardDraft = () => {
     try { localStorage.removeItem(draftKey); } catch {}
     setClientId(defaultClientId ?? "");
-    setDate(new Date().toISOString().split("T")[0]);
+    setDate(todayLocal());
     setDuration("60");
     setMemo("");
+    setTranscript("");
+    setRecordingSource(undefined);
     setExercises([emptyExercise()]);
     setDraftRestored(false);
+    setAiFilled(false);
+    setEditFull(false);
   };
 
   const moveExercise = (i: number, dir: -1 | 1) => {
@@ -339,6 +407,7 @@ export default function SessionForm({
       sessionType: "individual",
       duration: duration ? Number(duration) : null,
       memo: memo || null,
+      transcript: transcript.trim() || null,
       exercises: exercises
         .filter((e) => e.name.trim())
         .map((e) => ({
@@ -362,6 +431,10 @@ export default function SessionForm({
       const data = await res.json();
       setNotionUrl(data.notionUrl ?? null);
       setSaved(true);
+      // 녹음 화면에 보관된 그 회원의 문장들도 이 기록으로 확정됐으므로 비운다
+      if (recordingSource !== undefined) {
+        try { localStorage.removeItem(recordingKey(recordingSource)); } catch {}
+      }
     }
     setLoading(false);
   };
@@ -373,47 +446,159 @@ export default function SessionForm({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const clientName = clients.find((c) => c.id === clientId)?.name;
+  const filledExercises = exercises.filter((e) => e.name.trim());
+
   // 저장 완료 화면
   if (saved) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 gap-8">
-        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center">
-          <CheckCircle className="text-emerald-600" size={40} />
+      <div className="max-w-2xl mx-auto min-h-full flex flex-col px-5">
+        <div className="flex-1 flex flex-col items-center justify-center gap-6 py-16 text-center">
+          <span className="w-20 h-20 rounded-full bg-indigo-50 flex items-center justify-center">
+            <Check size={36} strokeWidth={2.4} className="text-indigo-600" />
+          </span>
+          <div className="space-y-2">
+            <h1 className="text-[28px] leading-snug font-bold text-gray-900">기록을 저장했어요</h1>
+            <p className="text-[15px] text-gray-500">
+              {clientName ? `${clientName} 님 · ` : ""}운동 {filledExercises.length}개
+            </p>
+          </div>
+          {notionUrl && (
+            <div className="self-stretch mt-2 rounded-2xl bg-gray-50 px-5 py-4 flex items-center gap-3 text-left">
+              <a href={notionUrl} target="_blank" rel="noopener noreferrer" className="min-w-0 flex-1">
+                <p className="text-[15px] font-semibold text-gray-900">노션 일지</p>
+                <p className="text-[13px] text-gray-500 truncate">{date.slice(5).replace("-", "월 ")}일 {clientName ?? ""} 수업 일지</p>
+              </a>
+              <button
+                type="button"
+                onClick={copyNotion}
+                className="press h-9 px-3 rounded-[10px] bg-indigo-50 text-[13px] font-semibold text-indigo-600 shrink-0"
+              >
+                {copied ? "복사했어요" : "링크 복사"}
+              </button>
+            </div>
+          )}
         </div>
-        <div className="text-center space-y-1">
-          <h3 className="text-xl font-bold text-gray-900">수업 기록 완료!</h3>
-          <p className="text-sm text-gray-500">Notion 일지가 자동으로 생성됐습니다.</p>
+        <div className="pb-[calc(2rem+env(safe-area-inset-bottom))] space-y-1">
+          <Link href="/" className="press h-14 rounded-2xl bg-indigo-600 active:bg-indigo-700 text-white text-[17px] font-semibold flex items-center justify-center">
+            확인
+          </Link>
+          {clientId && (
+            <Link href={`/clients/${clientId}`} className="h-12 flex items-center justify-center text-[15px] font-medium text-gray-700">
+              회원 정보 보기
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // AI가 녹음으로 채운 기록: 요약으로 확인하고 바로 저장
+  if (aiFilled && !editFull) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <header className="sticky top-0 z-10 bg-white h-14 px-2 flex items-center justify-between">
+          <Link
+            href={clientId ? `/sessions/record?clientId=${clientId}` : "/sessions/record"}
+            aria-label="녹음으로 돌아가기"
+            className="w-11 h-11 flex items-center justify-center text-gray-900"
+          >
+            <ChevronLeft size={26} strokeWidth={2} />
+          </Link>
+          <button type="button" onClick={() => setEditFull(true)} className="press h-11 px-3 text-[17px] font-semibold text-gray-700">
+            수정
+          </button>
+        </header>
+
+        <div className="px-5 pt-2 space-y-2">
+          <h1 className="text-[28px] leading-snug font-bold text-gray-900">이렇게 기록할게요</h1>
+          <div className="flex items-center flex-wrap gap-2 text-[15px] text-gray-500">
+            <span>
+              {clientName ? `${clientName} 님 · ` : ""}
+              {Number(date.slice(5, 7))}월 {Number(date.slice(8, 10))}일
+              {duration ? ` · ${duration}분` : ""}
+            </span>
+            {!clientId && (
+              <span className="press relative h-8 px-2.5 rounded-lg bg-indigo-50 text-[13px] font-semibold text-indigo-600 flex items-center">
+                회원 선택
+                <select
+                  aria-label="회원 선택"
+                  value={clientId}
+                  onChange={(e) => setClientId(e.target.value ? Number(e.target.value) : "")}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                >
+                  <option value="">회원 선택</option>
+                  {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </span>
+            )}
+          </div>
         </div>
 
-        {notionUrl && (
-          <div className="w-full max-w-sm bg-white border border-gray-100 rounded-2xl p-4 space-y-3">
-            <p className="text-xs font-medium text-gray-500">Notion 수업 일지 링크</p>
-            <div className="flex gap-2">
-              <button
-                onClick={copyNotion}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 active:bg-indigo-800 transition-colors"
-              >
-                {copied ? <Check size={16} /> : <Copy size={16} />}
-                {copied ? "복사됨!" : "링크 복사"}
+        <section className="mx-5 mt-6 rounded-[20px] bg-gray-50 px-5 py-2">
+          {filledExercises.length === 0 && (
+            <p className="py-4 text-[15px] text-gray-500">녹음에서 운동을 찾지 못했어요</p>
+          )}
+          {filledExercises.map((e, i) => {
+            const sub = [
+              e.sets && `${e.sets}세트`,
+              e.reps && (/^\d+$/.test(e.reps) ? `${e.reps}회` : e.reps),
+              e.memo.trim(),
+            ].filter(Boolean).join(" · ");
+            return (
+              <button key={i} type="button" onClick={() => setEditFull(true)} className="press w-full flex items-center gap-3 py-3.5 text-left">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[17px] font-semibold text-gray-900">{e.name}</span>
+                  {sub && <span className="block text-[13px] text-gray-500 truncate">{sub}</span>}
+                </span>
+                {e.weight && (
+                  <span className="text-xl font-bold text-gray-900 shrink-0">
+                    {e.weight}<span className="ml-0.5 text-[13px] font-medium text-gray-700">{e.unit}</span>
+                  </span>
+                )}
               </button>
-              <a
-                href={notionUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center px-4 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors"
-              >
-                <ExternalLink size={16} />
-              </a>
-            </div>
-          </div>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => { setExercises((p) => [...p.filter((x) => x.name.trim()), emptyExercise()]); setEditFull(true); }}
+            className="press flex items-center gap-1.5 py-3.5 text-[15px] font-semibold text-indigo-600"
+          >
+            <Plus size={18} strokeWidth={2} /> 운동 추가
+          </button>
+        </section>
+
+        {memo.trim() && (
+          <section className="px-5 pt-8 space-y-2.5">
+            <h2 className="text-xl font-bold text-gray-900">피드백</h2>
+            <button type="button" onClick={() => setEditFull(true)} className="block w-full text-left space-y-1">
+              {/* 메모의 "💪 운동 피드백" 같은 구분 줄은 화면에서만 이모지 없이 작은 제목으로 보여준다 (저장 내용은 그대로) */}
+              {memo.trim().split("\n").map((line, i) => {
+                const heading = line.match(/^\s*(?:💪|🍎)\s*(.+피드백)\s*$/);
+                return heading ? (
+                  <span key={i} className={cn("block text-[13px] font-semibold text-gray-500", i > 0 && "pt-3")}>{heading[1]}</span>
+                ) : (
+                  <span key={i} className="block text-[17px] leading-relaxed text-gray-800 break-keep min-h-[1em]">{line}</span>
+                );
+              })}
+            </button>
+          </section>
         )}
 
-        <Link
-          href={`/clients/${clientId}`}
-          className="w-full max-w-sm py-3.5 border border-gray-200 rounded-2xl text-sm font-medium text-gray-600 text-center hover:bg-gray-50 transition-colors"
-        >
-          회원 페이지로 →
-        </Link>
+        <div className="h-32" />
+        <div className="fixed left-0 right-0 lg:left-60 bottom-0 z-20 bg-white px-5 pt-3 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+          <div className="max-w-2xl mx-auto">
+            <button
+              type="button"
+              onClick={(ev) => handleSubmit(ev as unknown as React.FormEvent)}
+              disabled={loading || !clientId}
+              className="press w-full h-14 rounded-2xl bg-indigo-600 active:bg-indigo-700 text-white text-[17px] font-semibold disabled:bg-gray-200 disabled:text-gray-400 flex items-center justify-center gap-2"
+            >
+              {loading && <Loader2 size={18} className="animate-spin" />}
+              {loading ? "저장하고 있어요" : !clientId ? "회원을 선택해 주세요" : "저장하기"}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -429,19 +614,33 @@ export default function SessionForm({
           e.preventDefault();
         }
       }}
-      className="space-y-4 p-4 max-w-2xl mx-auto lg:p-6"
+      className="space-y-4 px-5 pb-36 max-w-2xl mx-auto"
     >
-      {draftRestored && (
-        <div className="flex items-center justify-between gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 text-xs text-amber-700">
-          <span>이전에 작성하던 기록을 불러왔어요.</span>
-          <button type="button" onClick={discardDraft} className="font-medium underline shrink-0">
-            새로 작성
+      <header className="sticky top-0 z-10 -mx-5 bg-white h-14 px-2 flex items-center">
+        <button
+          type="button"
+          onClick={() => (aiFilled ? setEditFull(false) : router.back())}
+          aria-label="뒤로"
+          className="w-11 h-11 flex items-center justify-center text-gray-900"
+        >
+          <ChevronLeft size={26} strokeWidth={2} />
+        </button>
+      </header>
+      <h1 className="text-[28px] leading-snug font-bold text-gray-900 pt-1 pb-2">
+        {aiFilled ? "기록 수정" : "수업 기록"}
+      </h1>
+
+      {draftRestored && !aiFilled && (
+        <div className="flex items-center justify-between gap-3 bg-gray-50 rounded-2xl px-4 py-3.5 text-[13px] text-gray-700">
+          <span>작성하던 기록을 불러왔어요</span>
+          <button type="button" onClick={discardDraft} className="font-semibold text-indigo-600 shrink-0">
+            새로 쓰기
           </button>
         </div>
       )}
 
       {/* 기본 정보 */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-4">
+      <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
         <h3 className="text-sm font-semibold text-gray-700">기본 정보</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="space-y-1.5 sm:col-span-1">
@@ -468,7 +667,7 @@ export default function SessionForm({
       </div>
 
       {/* 운동 목록 */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
+      <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-y-2">
           <h3 className="text-sm font-semibold text-gray-700">운동 목록</h3>
           <div className="flex items-center gap-1">
@@ -532,7 +731,7 @@ export default function SessionForm({
 
         <div className="space-y-3">
           {exercises.map((ex, i) => (
-            <div key={i} className="bg-gray-50 rounded-xl p-3 space-y-3">
+            <div key={i} className="bg-white rounded-xl p-3 space-y-3">
               {/* 운동명 + 삭제 */}
               <div className="flex gap-2">
                 <div className="flex-1 relative">
@@ -722,7 +921,7 @@ export default function SessionForm({
       </div>
 
       {/* 메모 */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-2">
+      <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
         <label className="text-sm font-semibold text-gray-700">특이사항 / 메모</label>
         <textarea
           value={memo}
@@ -732,27 +931,38 @@ export default function SessionForm({
         />
       </div>
 
-      {/* 버튼 */}
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="flex-1 py-3.5 border border-gray-200 rounded-2xl text-sm font-medium text-gray-600 hover:bg-gray-50 active:bg-gray-100 transition-colors"
-        >
-          취소
-        </button>
-        <button
-          type="submit"
-          disabled={loading || !clientId}
-          className="flex-1 py-3.5 bg-indigo-600 text-white rounded-2xl text-sm font-semibold hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 transition-colors"
-        >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 size={16} className="animate-spin" />
-              저장 중...
-            </span>
-          ) : "수업 기록 저장"}
-        </button>
+      {/* 녹음 내용 (녹음 화면에서 넘어온 경우) */}
+      {transcript.trim() && (
+        <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setTranscriptOpen((v) => !v)}
+              className="flex items-center gap-1.5 text-sm font-semibold text-gray-700"
+            >
+              <Mic size={15} className="text-gray-500" /> 녹음 내용
+              {transcriptOpen ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+            </button>
+            <Link href={clientId ? `/sessions/record?clientId=${clientId}` : "/sessions/record"} className="text-xs text-indigo-600 font-medium">녹음 화면으로</Link>
+          </div>
+          {transcriptOpen && (
+            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap break-keep">{transcript}</p>
+          )}
+        </div>
+      )}
+
+      {/* 저장 버튼: 하단 고정 */}
+      <div className="fixed left-0 right-0 lg:left-60 bottom-0 z-20 bg-white px-5 pt-3 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+        <div className="max-w-2xl mx-auto">
+          <button
+            type="submit"
+            disabled={loading || !clientId}
+            className="press w-full h-14 rounded-2xl bg-indigo-600 active:bg-indigo-700 text-white text-[17px] font-semibold disabled:bg-gray-200 disabled:text-gray-400 flex items-center justify-center gap-2"
+          >
+            {loading && <Loader2 size={18} className="animate-spin" />}
+            {loading ? "저장하고 있어요" : !clientId ? "회원을 선택해 주세요" : "저장하기"}
+          </button>
+        </div>
       </div>
     </form>
   );

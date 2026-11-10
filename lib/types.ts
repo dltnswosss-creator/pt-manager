@@ -97,3 +97,19 @@ export const COMMON_EXERCISES = [
   "케이블로우", "랫풀다운", "페이스풀", "사이드레터럴레이즈", "버드독",
   "플랭크", "힙쓰러스트", "글루트브릿지", "케틀벨스윙", "트레드밀", "사이클",
 ];
+
+// 수업 녹음 전사본을 AI(/api/sessions/analyze)가 분석한 결과
+export type SessionAnalysis = {
+  exercises: {
+    name: string;
+    sets: number | null;
+    reps: string | null;
+    weight: number | null;
+    unit: "kg" | "lbs";
+    bodyParts: string[];
+    isMain: boolean;
+    memo: string | null;
+  }[];
+  workoutFeedback: string | null;
+  lifestyleFeedback: string | null;
+};

@@ -47,6 +47,7 @@ export type SessionMinAggregateOutputType = {
   memo: string | null
   notionPageId: string | null
   notionUrl: string | null
+  transcript: string | null
   createdAt: Date | null
 }
 
@@ -59,6 +60,7 @@ export type SessionMaxAggregateOutputType = {
   memo: string | null
   notionPageId: string | null
   notionUrl: string | null
+  transcript: string | null
   createdAt: Date | null
 }
 
@@ -71,6 +73,7 @@ export type SessionCountAggregateOutputType = {
   memo: number
   notionPageId: number
   notionUrl: number
+  transcript: number
   createdAt: number
   _all: number
 }
@@ -97,6 +100,7 @@ export type SessionMinAggregateInputType = {
   memo?: true
   notionPageId?: true
   notionUrl?: true
+  transcript?: true
   createdAt?: true
 }
 
@@ -109,6 +113,7 @@ export type SessionMaxAggregateInputType = {
   memo?: true
   notionPageId?: true
   notionUrl?: true
+  transcript?: true
   createdAt?: true
 }
 
@@ -121,6 +126,7 @@ export type SessionCountAggregateInputType = {
   memo?: true
   notionPageId?: true
   notionUrl?: true
+  transcript?: true
   createdAt?: true
   _all?: true
 }
@@ -220,6 +226,7 @@ export type SessionGroupByOutputType = {
   memo: string | null
   notionPageId: string | null
   notionUrl: string | null
+  transcript: string | null
   createdAt: Date
   _count: SessionCountAggregateOutputType | null
   _avg: SessionAvgAggregateOutputType | null
@@ -255,6 +262,7 @@ export type SessionWhereInput = {
   memo?: Prisma.StringNullableFilter<"Session"> | string | null
   notionPageId?: Prisma.StringNullableFilter<"Session"> | string | null
   notionUrl?: Prisma.StringNullableFilter<"Session"> | string | null
+  transcript?: Prisma.StringNullableFilter<"Session"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
   exercises?: Prisma.ExerciseListRelationFilter
@@ -269,6 +277,7 @@ export type SessionOrderByWithRelationInput = {
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
   notionPageId?: Prisma.SortOrderInput | Prisma.SortOrder
   notionUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  transcript?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   client?: Prisma.ClientOrderByWithRelationInput
   exercises?: Prisma.ExerciseOrderByRelationAggregateInput
@@ -286,6 +295,7 @@ export type SessionWhereUniqueInput = Prisma.AtLeast<{
   memo?: Prisma.StringNullableFilter<"Session"> | string | null
   notionPageId?: Prisma.StringNullableFilter<"Session"> | string | null
   notionUrl?: Prisma.StringNullableFilter<"Session"> | string | null
+  transcript?: Prisma.StringNullableFilter<"Session"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Session"> | Date | string
   client?: Prisma.XOR<Prisma.ClientScalarRelationFilter, Prisma.ClientWhereInput>
   exercises?: Prisma.ExerciseListRelationFilter
@@ -300,6 +310,7 @@ export type SessionOrderByWithAggregationInput = {
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
   notionPageId?: Prisma.SortOrderInput | Prisma.SortOrder
   notionUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  transcript?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.SessionCountOrderByAggregateInput
   _avg?: Prisma.SessionAvgOrderByAggregateInput
@@ -320,6 +331,7 @@ export type SessionScalarWhereWithAggregatesInput = {
   memo?: Prisma.StringNullableWithAggregatesFilter<"Session"> | string | null
   notionPageId?: Prisma.StringNullableWithAggregatesFilter<"Session"> | string | null
   notionUrl?: Prisma.StringNullableWithAggregatesFilter<"Session"> | string | null
+  transcript?: Prisma.StringNullableWithAggregatesFilter<"Session"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Session"> | Date | string
 }
 
@@ -330,6 +342,7 @@ export type SessionCreateInput = {
   memo?: string | null
   notionPageId?: string | null
   notionUrl?: string | null
+  transcript?: string | null
   createdAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutSessionsInput
   exercises?: Prisma.ExerciseCreateNestedManyWithoutSessionInput
@@ -344,6 +357,7 @@ export type SessionUncheckedCreateInput = {
   memo?: string | null
   notionPageId?: string | null
   notionUrl?: string | null
+  transcript?: string | null
   createdAt?: Date | string
   exercises?: Prisma.ExerciseUncheckedCreateNestedManyWithoutSessionInput
 }
@@ -355,6 +369,7 @@ export type SessionUpdateInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionPageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutSessionsNestedInput
   exercises?: Prisma.ExerciseUpdateManyWithoutSessionNestedInput
@@ -369,6 +384,7 @@ export type SessionUncheckedUpdateInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionPageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   exercises?: Prisma.ExerciseUncheckedUpdateManyWithoutSessionNestedInput
 }
@@ -382,6 +398,7 @@ export type SessionCreateManyInput = {
   memo?: string | null
   notionPageId?: string | null
   notionUrl?: string | null
+  transcript?: string | null
   createdAt?: Date | string
 }
 
@@ -392,6 +409,7 @@ export type SessionUpdateManyMutationInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionPageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -404,6 +422,7 @@ export type SessionUncheckedUpdateManyInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionPageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -426,6 +445,7 @@ export type SessionCountOrderByAggregateInput = {
   memo?: Prisma.SortOrder
   notionPageId?: Prisma.SortOrder
   notionUrl?: Prisma.SortOrder
+  transcript?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -444,6 +464,7 @@ export type SessionMaxOrderByAggregateInput = {
   memo?: Prisma.SortOrder
   notionPageId?: Prisma.SortOrder
   notionUrl?: Prisma.SortOrder
+  transcript?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -456,6 +477,7 @@ export type SessionMinOrderByAggregateInput = {
   memo?: Prisma.SortOrder
   notionPageId?: Prisma.SortOrder
   notionUrl?: Prisma.SortOrder
+  transcript?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -533,6 +555,7 @@ export type SessionCreateWithoutClientInput = {
   memo?: string | null
   notionPageId?: string | null
   notionUrl?: string | null
+  transcript?: string | null
   createdAt?: Date | string
   exercises?: Prisma.ExerciseCreateNestedManyWithoutSessionInput
 }
@@ -545,6 +568,7 @@ export type SessionUncheckedCreateWithoutClientInput = {
   memo?: string | null
   notionPageId?: string | null
   notionUrl?: string | null
+  transcript?: string | null
   createdAt?: Date | string
   exercises?: Prisma.ExerciseUncheckedCreateNestedManyWithoutSessionInput
 }
@@ -587,6 +611,7 @@ export type SessionScalarWhereInput = {
   memo?: Prisma.StringNullableFilter<"Session"> | string | null
   notionPageId?: Prisma.StringNullableFilter<"Session"> | string | null
   notionUrl?: Prisma.StringNullableFilter<"Session"> | string | null
+  transcript?: Prisma.StringNullableFilter<"Session"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Session"> | Date | string
 }
 
@@ -597,6 +622,7 @@ export type SessionCreateWithoutExercisesInput = {
   memo?: string | null
   notionPageId?: string | null
   notionUrl?: string | null
+  transcript?: string | null
   createdAt?: Date | string
   client: Prisma.ClientCreateNestedOneWithoutSessionsInput
 }
@@ -610,6 +636,7 @@ export type SessionUncheckedCreateWithoutExercisesInput = {
   memo?: string | null
   notionPageId?: string | null
   notionUrl?: string | null
+  transcript?: string | null
   createdAt?: Date | string
 }
 
@@ -636,6 +663,7 @@ export type SessionUpdateWithoutExercisesInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionPageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   client?: Prisma.ClientUpdateOneRequiredWithoutSessionsNestedInput
 }
@@ -649,6 +677,7 @@ export type SessionUncheckedUpdateWithoutExercisesInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionPageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -660,6 +689,7 @@ export type SessionCreateManyClientInput = {
   memo?: string | null
   notionPageId?: string | null
   notionUrl?: string | null
+  transcript?: string | null
   createdAt?: Date | string
 }
 
@@ -670,6 +700,7 @@ export type SessionUpdateWithoutClientInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionPageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   exercises?: Prisma.ExerciseUpdateManyWithoutSessionNestedInput
 }
@@ -682,6 +713,7 @@ export type SessionUncheckedUpdateWithoutClientInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionPageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   exercises?: Prisma.ExerciseUncheckedUpdateManyWithoutSessionNestedInput
 }
@@ -694,6 +726,7 @@ export type SessionUncheckedUpdateManyWithoutClientInput = {
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionPageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notionUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  transcript?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -737,6 +770,7 @@ export type SessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   memo?: boolean
   notionPageId?: boolean
   notionUrl?: boolean
+  transcript?: boolean
   createdAt?: boolean
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   exercises?: boolean | Prisma.Session$exercisesArgs<ExtArgs>
@@ -752,6 +786,7 @@ export type SessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   memo?: boolean
   notionPageId?: boolean
   notionUrl?: boolean
+  transcript?: boolean
   createdAt?: boolean
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["session"]>
@@ -765,6 +800,7 @@ export type SessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   memo?: boolean
   notionPageId?: boolean
   notionUrl?: boolean
+  transcript?: boolean
   createdAt?: boolean
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["session"]>
@@ -778,10 +814,11 @@ export type SessionSelectScalar = {
   memo?: boolean
   notionPageId?: boolean
   notionUrl?: boolean
+  transcript?: boolean
   createdAt?: boolean
 }
 
-export type SessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "date" | "sessionType" | "duration" | "memo" | "notionPageId" | "notionUrl" | "createdAt", ExtArgs["result"]["session"]>
+export type SessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "date" | "sessionType" | "duration" | "memo" | "notionPageId" | "notionUrl" | "transcript" | "createdAt", ExtArgs["result"]["session"]>
 export type SessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   client?: boolean | Prisma.ClientDefaultArgs<ExtArgs>
   exercises?: boolean | Prisma.Session$exercisesArgs<ExtArgs>
@@ -809,6 +846,7 @@ export type $SessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     memo: string | null
     notionPageId: string | null
     notionUrl: string | null
+    transcript: string | null
     createdAt: Date
   }, ExtArgs["result"]["session"]>
   composites: {}
@@ -1243,6 +1281,7 @@ export interface SessionFieldRefs {
   readonly memo: Prisma.FieldRef<"Session", 'String'>
   readonly notionPageId: Prisma.FieldRef<"Session", 'String'>
   readonly notionUrl: Prisma.FieldRef<"Session", 'String'>
+  readonly transcript: Prisma.FieldRef<"Session", 'String'>
   readonly createdAt: Prisma.FieldRef<"Session", 'DateTime'>
 }
     

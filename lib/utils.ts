@@ -51,3 +51,33 @@ export function calcAge(birthDate: string) {
   if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
   return age;
 }
+
+// 브라우저 기준 오늘 날짜 "YYYY-MM-DD" (toISOString은 UTC라 한국 시간 0~9시에는 전날이 됨)
+export function todayLocal(d: Date = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// 서버(Vercel, UTC)에서도 한국 시간 기준 "오늘"과 현재 시각(분)을 구한다
+export function seoulNow(d: Date = new Date()) {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+    }).formatToParts(d).map((p) => [p.type, p.value])
+  );
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    minutes: Number(parts.hour) * 60 + Number(parts.minute),
+  };
+}
+
+// "오늘" / "어제" / "11월 8일"
+export function relativeDayLabel(dateStr: string, today: string) {
+  if (dateStr === today) return "오늘";
+  const t = new Date(`${today}T00:00:00`);
+  const d = new Date(`${dateStr}T00:00:00`);
+  const diff = Math.round((t.getTime() - d.getTime()) / 86_400_000);
+  if (diff === 1) return "어제";
+  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+}
